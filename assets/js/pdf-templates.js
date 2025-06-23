@@ -1,5 +1,5 @@
 /**
- * PDF Templates
+ * PDF Templatey
  * Form-specific PDF layouts
  */
 
@@ -98,7 +98,7 @@ export const PDF_TEMPLATES = {
         table: {
           widths: ['*'],
           body: [[{
-            text: `  ${message}`,
+            text: `ï¿½ ${message}`,
             color: 'white',
             bold: true,
             fontSize: 12,
