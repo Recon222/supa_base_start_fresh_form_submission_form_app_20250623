@@ -355,45 +355,8 @@ export class UploadFormHandler extends FormHandler {
       });
     }
     
-    // City change
-    const cityField = this.form.querySelector('#city');
-    if (cityField) {
-      cityField.addEventListener('change', (e) => {
-        const otherGroup = document.getElementById('cityOtherGroup');
-        const otherField = document.getElementById('cityOther');
-        const showOther = e.target.value === 'Other';
-        
-        toggleElement(otherGroup, showOther);
-        if (showOther) {
-          otherField.setAttribute('required', 'required');
-        } else {
-          otherField.removeAttribute('required');
-          otherField.value = '';
-          this.showFieldValidation(otherField, null);
-        }
-      });
-    }
-    
-    // Time sync radio buttons
-    const timeSyncRadios = this.form.querySelectorAll('[name="isTimeDateCorrect"]');
-    timeSyncRadios.forEach(radio => {
-      radio.addEventListener('change', (e) => {
-        const warningEl = document.getElementById('timeSyncWarning');
-        const offsetGroup = document.getElementById('timeOffsetGroup');
-        const offsetField = document.getElementById('timeOffset');
-        
-        if (e.target.value === 'Yes') {
-          toggleElement(warningEl, true);
-          toggleElement(offsetGroup, false);
-          offsetField.removeAttribute('required');
-          offsetField.value = '';
-        } else {
-          toggleElement(warningEl, false);
-          toggleElement(offsetGroup, true);
-          offsetField.setAttribute('required', 'required');
-        }
-      });
-    });
+    // Setup listeners for the first location-video group
+    this.setupLocationVideoListeners(0);
     
     // DVR retention calculation
     const dvrDateField = this.form.querySelector('#dvrEarliestDate');
@@ -403,7 +366,7 @@ export class UploadFormHandler extends FormHandler {
         if (e.target.value) {
           const retention = calculateRetentionDays(e.target.value);
           retentionEl.textContent = retention.message;
-          retentionEl.className = retention.isUrgent ? 'text-danger mt-2' : 'text-info mt-2';
+          retentionEl.className = 'text-info mt-2';
         } else {
           retentionEl.textContent = '';
         }
@@ -413,7 +376,7 @@ export class UploadFormHandler extends FormHandler {
     // Add location button
     const addLocationBtn = document.getElementById('addLocationBtn');
     if (addLocationBtn) {
-      addLocationBtn.addEventListener('click', () => this.addLocation());
+      addLocationBtn.addEventListener('click', () => this.addLocationVideo());
     }
     
     // Set incident date to today (hidden field)
@@ -461,29 +424,52 @@ export class UploadFormHandler extends FormHandler {
   
   createLocationField(baseName, index, label, required) {
     const fieldName = index === 0 ? baseName : `${baseName}_${index}`;
-    const fieldId = `${baseName}_${index}`;
+    const fieldId = index === 0 ? baseName : `${baseName}_${index}`;
     
-    return createElement('div', { className: 'form-group' }, [
-      createElement('label', {
-        htmlFor: fieldId,
-        className: 'form-label'
-      }, label + (required ? ' *' : '')),
-      createElement('input', {
-        type: 'text',
-        className: 'form-control',
-        id: fieldId,
-        name: fieldName,
-        required: required ? 'required' : null
-      }),
-      createElement('div', { className: 'invalid-feedback' })
-    ]);
+    const group = createElement('div', { className: 'form-group' });
+    
+    const labelEl = createElement('label', {
+      htmlFor: fieldId,
+      className: 'form-label'
+    });
+    labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
+    
+    const input = createElement('input', {
+      type: 'text',
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName,
+      placeholder: baseName === 'businessName' ? 'Leave blank if none' : 'Full address',
+      required: required ? 'required' : null
+    });
+    
+    group.appendChild(labelEl);
+    group.appendChild(input);
+    
+    if (baseName === 'businessName') {
+      const small = createElement('small', { className: 'form-text' }, 'Name of the business where video was collected');
+      group.appendChild(small);
+    }
+    
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+    
+    return group;
   }
   
   createCityField(index) {
     const fieldName = index === 0 ? 'city' : `city_${index}`;
-    const fieldId = `city_${index}`;
+    const fieldId = index === 0 ? 'city' : `city_${index}`;
     const otherFieldName = index === 0 ? 'cityOther' : `cityOther_${index}`;
-    const otherFieldId = `cityOther_${index}`;
+    const otherFieldId = index === 0 ? 'cityOther' : `cityOther_${index}`;
+    const otherGroupId = index === 0 ? 'cityOtherGroup' : `cityOtherGroup_${index}`;
+    
+    const cityGroup = createElement('div', { className: 'form-group' });
+    
+    const label = createElement('label', {
+      htmlFor: fieldId,
+      className: 'form-label'
+    });
+    label.innerHTML = 'City <span class="required">*</span>';
     
     const citySelect = createElement('select', {
       className: 'form-control',
@@ -498,47 +484,34 @@ export class UploadFormHandler extends FormHandler {
       }, option.text));
     });
     
-    const cityGroup = createElement('div', { className: 'form-group' }, [
-      createElement('label', {
-        htmlFor: fieldId,
-        className: 'form-label'
-      }, 'City *'),
-      citySelect,
-      createElement('div', { className: 'invalid-feedback' })
-    ]);
+    cityGroup.appendChild(label);
+    cityGroup.appendChild(citySelect);
+    cityGroup.appendChild(createElement('div', { className: 'invalid-feedback' }));
     
     // Other city field
     const otherGroup = createElement('div', {
       className: 'form-group d-none',
-      id: `cityOtherGroup_${index}`
-    }, [
-      createElement('label', {
-        htmlFor: otherFieldId,
-        className: 'form-label'
-      }, 'Specify City *'),
-      createElement('input', {
-        type: 'text',
-        className: 'form-control',
-        id: otherFieldId,
-        name: otherFieldName,
-        placeholder: 'Enter city name'
-      }),
-      createElement('small', { className: 'form-text' }, 'Please enter the city name'),
-      createElement('div', { className: 'invalid-feedback' })
-    ]);
-    
-    // City change handler
-    citySelect.addEventListener('change', (e) => {
-      const showOther = e.target.value === 'Other';
-      toggleElement(otherGroup, showOther);
-      const otherField = otherGroup.querySelector('input');
-      if (showOther) {
-        otherField.setAttribute('required', 'required');
-      } else {
-        otherField.removeAttribute('required');
-        otherField.value = '';
-      }
+      id: otherGroupId
     });
+    
+    const otherLabel = createElement('label', {
+      htmlFor: otherFieldId,
+      className: 'form-label'
+    });
+    otherLabel.innerHTML = 'Specify City <span class="required">*</span>';
+    
+    const otherInput = createElement('input', {
+      type: 'text',
+      className: 'form-control',
+      id: otherFieldId,
+      name: otherFieldName,
+      placeholder: 'Enter city name'
+    });
+    
+    otherGroup.appendChild(otherLabel);
+    otherGroup.appendChild(otherInput);
+    otherGroup.appendChild(createElement('small', { className: 'form-text' }, 'Please enter the city name'));
+    otherGroup.appendChild(createElement('div', { className: 'invalid-feedback' }));
     
     const wrapper = createElement('div');
     wrapper.appendChild(cityGroup);
@@ -557,14 +530,317 @@ export class UploadFormHandler extends FormHandler {
     }, 300);
   }
   
+  setupLocationVideoListeners(index) {
+    // City change handler
+    const cityId = index === 0 ? 'city' : `city_${index}`;
+    const cityField = this.form.querySelector(`#${cityId}`);
+    if (cityField) {
+      cityField.addEventListener('change', (e) => {
+        const otherGroupId = index === 0 ? 'cityOtherGroup' : `cityOtherGroup_${index}`;
+        const otherFieldId = index === 0 ? 'cityOther' : `cityOther_${index}`;
+        const otherGroup = document.getElementById(otherGroupId);
+        const otherField = document.getElementById(otherFieldId);
+        const showOther = e.target.value === 'Other';
+        
+        toggleElement(otherGroup, showOther);
+        if (showOther) {
+          otherField.setAttribute('required', 'required');
+        } else {
+          otherField.removeAttribute('required');
+          otherField.value = '';
+          this.showFieldValidation(otherField, null);
+        }
+      });
+    }
+    
+    // Time sync radio buttons
+    const timeCorrectName = index === 0 ? 'isTimeDateCorrect' : `isTimeDateCorrect_${index}`;
+    const timeSyncRadios = this.form.querySelectorAll(`[name="${timeCorrectName}"]`);
+    timeSyncRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const warningId = index === 0 ? 'timeSyncWarning' : `timeSyncWarning_${index}`;
+        const offsetGroupId = index === 0 ? 'timeOffsetGroup' : `timeOffsetGroup_${index}`;
+        const offsetFieldId = index === 0 ? 'timeOffset' : `timeOffset_${index}`;
+        
+        const warningEl = document.getElementById(warningId);
+        const offsetGroup = document.getElementById(offsetGroupId);
+        const offsetField = document.getElementById(offsetFieldId);
+        
+        if (e.target.value === 'Yes') {
+          toggleElement(warningEl, true);
+          toggleElement(offsetGroup, false);
+          offsetField.removeAttribute('required');
+          offsetField.value = '';
+        } else {
+          toggleElement(warningEl, false);
+          toggleElement(offsetGroup, true);
+          offsetField.setAttribute('required', 'required');
+        }
+      });
+    });
+  }
+  
+  addLocationVideo() {
+    const container = document.getElementById('location-video-container');
+    const index = container.children.length;
+    
+    const locationVideoGroup = createElement('div', {
+      className: 'location-video-group',
+      dataset: { groupIndex: index },
+      style: 'background: var(--glass-bg); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; border: 1px solid var(--border-color); opacity: 0;'
+    });
+    
+    // Create location section
+    const locationSection = createElement('section', { className: 'form-section' });
+    locationSection.innerHTML = `
+      <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Location Information</h2>
+    `;
+    
+    // Location fields
+    const businessNameGroup = this.createLocationField('businessName', index, 'Business Name', false);
+    const addressGroup = this.createLocationField('locationAddress', index, 'Location Address', true);
+    const cityGroup = this.createCityField(index);
+    
+    locationSection.appendChild(businessNameGroup);
+    locationSection.appendChild(addressGroup);
+    locationSection.appendChild(cityGroup);
+    
+    // Create video timeframe section
+    const videoSection = createElement('section', { className: 'form-section' });
+    videoSection.innerHTML = `
+      <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Video Timeframe</h2>
+    `;
+    
+    // Video timeframe fields
+    const startTimeGroup = this.createTimeField('videoStartTime', index, 'Video Start Time', true);
+    const endTimeGroup = this.createTimeField('videoEndTime', index, 'Video End Time', true);
+    const timeSyncGroup = this.createTimeSyncField(index);
+    const dvrDateGroup = this.createDvrDateField(index);
+    
+    videoSection.appendChild(startTimeGroup);
+    videoSection.appendChild(endTimeGroup);
+    videoSection.appendChild(timeSyncGroup);
+    videoSection.appendChild(dvrDateGroup);
+    
+    // Remove button
+    const removeBtn = createElement('button', {
+      type: 'button',
+      className: 'btn btn-danger',
+      style: 'margin-top: 1rem; width: 100%;',
+      onclick: () => this.removeLocationVideo(locationVideoGroup)
+    }, '× Remove This Location');
+    
+    locationVideoGroup.appendChild(locationSection);
+    locationVideoGroup.appendChild(videoSection);
+    locationVideoGroup.appendChild(removeBtn);
+    
+    container.appendChild(locationVideoGroup);
+    
+    // Setup listeners for the new group
+    this.setupLocationVideoListeners(index);
+    
+    // Animate in
+    requestAnimationFrame(() => {
+      locationVideoGroup.style.transition = 'all 0.3s ease';
+      locationVideoGroup.style.opacity = '1';
+    });
+    
+    // Scroll to new section
+    setTimeout(() => scrollToElement(locationVideoGroup), 300);
+    
+    // Update progress
+    this.updateProgress();
+  }
+  
+  removeLocationVideo(locationVideoGroup) {
+    locationVideoGroup.style.transition = 'all 0.3s ease';
+    locationVideoGroup.style.opacity = '0';
+    locationVideoGroup.style.transform = 'scale(0.95)';
+    
+    setTimeout(() => {
+      locationVideoGroup.remove();
+      this.updateProgress();
+    }, 300);
+  }
+  
+  createTimeField(baseName, index, label, required) {
+    const fieldName = index === 0 ? baseName : `${baseName}_${index}`;
+    const fieldId = index === 0 ? baseName : `${baseName}_${index}`;
+    
+    const group = createElement('div', { className: 'form-group' });
+    
+    const labelEl = createElement('label', {
+      htmlFor: fieldId,
+      className: 'form-label'
+    });
+    labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
+    
+    const input = createElement('input', {
+      type: 'datetime-local',
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName,
+      required: required ? 'required' : null
+    });
+    
+    const small = createElement('small', { className: 'form-text' }, 
+      baseName.includes('Start') ? 'When the relevant video begins' : 'When the relevant video ends'
+    );
+    
+    group.appendChild(labelEl);
+    group.appendChild(input);
+    group.appendChild(small);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+    
+    return group;
+  }
+  
+  createTimeSyncField(index) {
+    const fieldName = index === 0 ? 'isTimeDateCorrect' : `isTimeDateCorrect_${index}`;
+    const yesId = index === 0 ? 'timeCorrectYes' : `timeCorrectYes_${index}`;
+    const noId = index === 0 ? 'timeCorrectNo' : `timeCorrectNo_${index}`;
+    const warningId = index === 0 ? 'timeSyncWarning' : `timeSyncWarning_${index}`;
+    const offsetGroupId = index === 0 ? 'timeOffsetGroup' : `timeOffsetGroup_${index}`;
+    const offsetFieldId = index === 0 ? 'timeOffset' : `timeOffset_${index}`;
+    const offsetFieldName = index === 0 ? 'timeOffset' : `timeOffset_${index}`;
+    
+    const container = createElement('div');
+    
+    // Radio group
+    const group = createElement('div', { className: 'form-group' });
+    const label = createElement('label', { className: 'form-label' });
+    label.innerHTML = 'Is the Time & Date correct? <span class="required">*</span>';
+    const small = createElement('small', { className: 'form-text mb-2 d-block' }, 'Is the DVR time synchronized with actual time?');
+    
+    const yesDiv = createElement('div', { className: 'form-check' });
+    const yesInput = createElement('input', {
+      className: 'form-check-input',
+      type: 'radio',
+      name: fieldName,
+      id: yesId,
+      value: 'Yes',
+      required: 'required'
+    });
+    const yesLabel = createElement('label', {
+      className: 'form-check-label',
+      htmlFor: yesId
+    }, 'Yes');
+    yesDiv.appendChild(yesInput);
+    yesDiv.appendChild(yesLabel);
+    
+    const noDiv = createElement('div', { className: 'form-check' });
+    const noInput = createElement('input', {
+      className: 'form-check-input',
+      type: 'radio',
+      name: fieldName,
+      id: noId,
+      value: 'No',
+      required: 'required'
+    });
+    const noLabel = createElement('label', {
+      className: 'form-check-label',
+      htmlFor: noId
+    }, 'No');
+    noDiv.appendChild(noInput);
+    noDiv.appendChild(noLabel);
+    
+    group.appendChild(label);
+    group.appendChild(small);
+    group.appendChild(yesDiv);
+    group.appendChild(noDiv);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+    
+    // Warning message
+    const warning = createElement('div', {
+      className: 'alert alert-warning d-none',
+      id: warningId,
+      style: 'margin-top: 1rem;'
+    });
+    warning.innerHTML = '<strong>Important:</strong> Your confirmation of correct timestamp becomes part of the evidence. If the timestamp conflicts with other evidence or DVR timestamps, this could affect the evidence validity.';
+    
+    // Time offset field
+    const offsetGroup = createElement('div', {
+      className: 'form-group d-none',
+      id: offsetGroupId
+    });
+    const offsetLabel = createElement('label', {
+      htmlFor: offsetFieldId,
+      className: 'form-label'
+    });
+    offsetLabel.innerHTML = 'Time Offset <span class="required">*</span>';
+    const offsetInput = createElement('input', {
+      type: 'text',
+      className: 'form-control',
+      id: offsetFieldId,
+      name: offsetFieldName,
+      placeholder: 'e.g., DVR is 1hr 5min 30sec AHEAD of real time'
+    });
+    const offsetSmall = createElement('small', { className: 'form-text' }, 'Describe how the DVR time differs from actual time');
+    
+    offsetGroup.appendChild(offsetLabel);
+    offsetGroup.appendChild(offsetInput);
+    offsetGroup.appendChild(offsetSmall);
+    offsetGroup.appendChild(createElement('div', { className: 'invalid-feedback' }));
+    
+    container.appendChild(group);
+    container.appendChild(warning);
+    container.appendChild(offsetGroup);
+    
+    return container;
+  }
+  
+  createDvrDateField(index) {
+    const fieldName = index === 0 ? 'dvrEarliestDate' : `dvrEarliestDate_${index}`;
+    const fieldId = index === 0 ? 'dvrEarliestDate' : `dvrEarliestDate_${index}`;
+    const retentionId = index === 0 ? 'retentionCalculation' : `retentionCalculation_${index}`;
+    
+    const group = createElement('div', { className: 'form-group' });
+    
+    const label = createElement('label', {
+      htmlFor: fieldId,
+      className: 'form-label'
+    }, 'Earliest Recorded Date on DVR');
+    
+    const input = createElement('input', {
+      type: 'date',
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName
+    });
+    
+    const small = createElement('small', { className: 'form-text' }, 'The earliest date available on the DVR system');
+    const retentionDiv = createElement('div', {
+      id: retentionId,
+      className: 'text-info mt-2'
+    });
+    
+    // Add change listener for retention calculation
+    input.addEventListener('change', (e) => {
+      if (e.target.value) {
+        const retention = calculateRetentionDays(e.target.value);
+        retentionDiv.textContent = retention.message;
+        retentionDiv.className = 'text-info mt-2';
+      } else {
+        retentionDiv.textContent = '';
+      }
+    });
+    
+    group.appendChild(label);
+    group.appendChild(input);
+    group.appendChild(small);
+    group.appendChild(retentionDiv);
+    
+    return group;
+  }
+  
   collectFormData() {
     const data = super.collectFormData();
     
-    // Collect multiple locations
-    const locationGroups = this.form.querySelectorAll('.location-group');
+    // Collect multiple location-video groups
+    const locationVideoGroups = this.form.querySelectorAll('.location-video-group');
     data.locations = [];
     
-    locationGroups.forEach((group, index) => {
+    locationVideoGroups.forEach((group, index) => {
       const location = {
         businessName: group.querySelector(`[name^="businessName"]`).value,
         locationAddress: group.querySelector(`[name^="locationAddress"]`).value,
@@ -574,6 +850,17 @@ export class UploadFormHandler extends FormHandler {
       if (location.city === 'Other') {
         location.cityOther = group.querySelector(`[name^="cityOther"]`).value;
       }
+      
+      // Add video timeframe data
+      location.videoStartTime = group.querySelector(`[name^="videoStartTime"]`).value;
+      location.videoEndTime = group.querySelector(`[name^="videoEndTime"]`).value;
+      location.isTimeDateCorrect = group.querySelector(`[name^="isTimeDateCorrect"]:checked`)?.value || '';
+      
+      if (location.isTimeDateCorrect === 'No') {
+        location.timeOffset = group.querySelector(`[name^="timeOffset"]`).value;
+      }
+      
+      location.dvrEarliestDate = group.querySelector(`[name^="dvrEarliestDate"]`).value;
       
       data.locations.push(location);
     });
@@ -598,24 +885,25 @@ export class UploadFormHandler extends FormHandler {
   validateForm() {
     const result = super.validateForm();
     
-    // Additional validation for date range
-    const startTime = this.form.querySelector('#videoStartTime').value;
-    const endTime = this.form.querySelector('#videoEndTime').value;
-    
-    const dateError = validateDateRange(startTime, endTime);
-    if (dateError) {
-      result.errors.videoEndTime = dateError;
-      result.isValid = false;
-      
-      const endField = this.form.querySelector('#videoEndTime');
-      this.showFieldValidation(endField, dateError);
-    }
-    
-    // Validate locations
-    const locationGroups = this.form.querySelectorAll('.location-group');
+    // Validate all location-video groups
+    const locationVideoGroups = this.form.querySelectorAll('.location-video-group');
     const locations = [];
     
-    locationGroups.forEach(group => {
+    locationVideoGroups.forEach((group, index) => {
+      // Validate date range for each group
+      const startTimeField = group.querySelector('[name^="videoStartTime"]');
+      const endTimeField = group.querySelector('[name^="videoEndTime"]');
+      
+      if (startTimeField && endTimeField) {
+        const dateError = validateDateRange(startTimeField.value, endTimeField.value);
+        if (dateError) {
+          result.errors[`videoEndTime_${index}`] = dateError;
+          result.isValid = false;
+          this.showFieldValidation(endTimeField, dateError);
+        }
+      }
+      
+      // Collect location data for validation
       locations.push({
         locationAddress: group.querySelector('[name^="locationAddress"]').value,
         city: group.querySelector('[name^="city"]').value,
@@ -623,13 +911,14 @@ export class UploadFormHandler extends FormHandler {
       });
     });
     
+    // Validate locations
     const locationErrors = validateLocations(locations);
     if (Object.keys(locationErrors).length > 0) {
       result.isValid = false;
       
       // Show location errors
       Object.entries(locationErrors).forEach(([index, errors]) => {
-        const group = locationGroups[index];
+        const group = locationVideoGroups[index];
         Object.entries(errors).forEach(([fieldName, error]) => {
           const field = group.querySelector(`[name^="${fieldName}"]`);
           if (field) {

@@ -60,37 +60,44 @@ function generateCalculations(formData, formType) {
   const calculations = {};
   
   if (formType === 'upload') {
-    // DVR retention calculation
-    if (formData.dvrEarliestDate) {
-      const retention = calculateRetentionDays(formData.dvrEarliestDate);
-      calculations.retentionDays = retention.days;
-      calculations.retentionStatus = retention.message;
-      calculations.isUrgent = retention.isUrgent;
-    }
-    
-    // Video duration
-    if (formData.videoStartTime && formData.videoEndTime) {
-      const duration = calculateVideoDuration(formData.videoStartTime, formData.videoEndTime);
-      calculations.videoDuration = {
-        totalMinutes: duration.totalMinutes,
-        formatted: duration.formatted
-      };
-    }
-    
-    // Time offset
-    if (formData.isTimeDateCorrect === 'No' && formData.timeOffset) {
-      const offset = parseTimeOffset(formData.timeOffset);
-      calculations.timeOffset = {
-        hours: offset.hours,
-        minutes: offset.minutes,
-        seconds: offset.seconds,
-        direction: offset.direction,
-        formatted: offset.formatted
-      };
-    }
-    
-    // Multiple locations count
-    if (formData.locations && formData.locations.length > 1) {
+    // Process each location
+    if (formData.locations) {
+      calculations.locations = formData.locations.map((location, index) => {
+        const locCalc = {
+          index: index + 1
+        };
+        
+        // DVR retention calculation
+        if (location.dvrEarliestDate) {
+          const retention = calculateRetentionDays(location.dvrEarliestDate);
+          locCalc.retentionDays = retention.days;
+          locCalc.retentionStatus = retention.message;
+        }
+        
+        // Video duration
+        if (location.videoStartTime && location.videoEndTime) {
+          const duration = calculateVideoDuration(location.videoStartTime, location.videoEndTime);
+          locCalc.videoDuration = {
+            totalMinutes: duration.totalMinutes,
+            formatted: duration.formatted
+          };
+        }
+        
+        // Time offset
+        if (location.isTimeDateCorrect === 'No' && location.timeOffset) {
+          const offset = parseTimeOffset(location.timeOffset);
+          locCalc.timeOffset = {
+            hours: offset.hours,
+            minutes: offset.minutes,
+            seconds: offset.seconds,
+            direction: offset.direction,
+            formatted: offset.formatted
+          };
+        }
+        
+        return locCalc;
+      });
+      
       calculations.locationCount = formData.locations.length;
     }
   }

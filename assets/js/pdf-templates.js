@@ -17,20 +17,9 @@ export const PDF_TEMPLATES = {
      * @returns {Array} PDF content definition
      */
     buildContent(data) {
-      // Calculate retention status
-      const retention = data.dvrEarliestDate 
-        ? calculateRetentionDays(data.dvrEarliestDate)
-        : null;
-      
-      // Calculate video duration
-      const duration = calculateVideoDuration(data.videoStartTime, data.videoEndTime);
-      
       return [
         // Header
         this.buildHeader('Video Evidence Upload Request'),
-        
-        // Urgent banner if needed
-        retention?.isUrgent ? this.buildUrgentBanner(retention.message) : {},
         
         // Evidence Information
         this.buildSection('Evidence Information', [
@@ -48,24 +37,8 @@ export const PDF_TEMPLATES = {
           ['Email', data.requestingEmail]
         ]),
         
-        // Location Information
-        ...this.buildLocationSections(data.locations),
-        
-        // Video Timeframe
-        this.buildSection('Video Timeframe', [
-          ['Start Time', formatDateTime(data.videoStartTime)],
-          ['End Time', formatDateTime(data.videoEndTime)],
-          ['Duration', duration.formatted],
-          ['Time Synchronized', data.isTimeDateCorrect]
-        ]),
-        
-        // Time offset if applicable
-        data.isTimeDateCorrect === 'No' && data.timeOffset 
-          ? this.buildTimeOffsetSection(data.timeOffset)
-          : {},
-        
-        // DVR Retention
-        retention ? this.buildRetentionSection(retention) : {},
+        // Location & Video Information
+        ...this.buildLocationVideoSections(data.locations),
         
         // Additional Information
         data.otherInfo ? this.buildNotesSection(data.otherInfo) : {},
@@ -131,21 +104,52 @@ export const PDF_TEMPLATES = {
       };
     },
     
-    buildLocationSections(locations) {
+    buildLocationVideoSections(locations) {
       return locations.map((location, index) => {
         const city = location.city === 'Other' 
           ? location.cityOther 
           : location.city;
         
-        return this.buildSection(
-          locations.length > 1 ? `Location ${index + 1}` : 'Location Information',
-          [
-            ['Business Name', location.businessName || 'N/A'],
-            ['Address', location.locationAddress],
-            ['City', city]
-          ]
-        );
-      });
+        const sections = [];
+        
+        // Location header for multiple locations
+        if (locations.length > 1) {
+          sections.push({
+            text: `Location ${index + 1}`,
+            style: 'sectionHeader',
+            margin: [0, 20, 0, 10]
+          });
+        }
+        
+        // Location Information
+        sections.push(this.buildSection('Location Information', [
+          ['Business Name', location.businessName || 'N/A'],
+          ['Address', location.locationAddress],
+          ['City', city]
+        ]));
+        
+        // Video Timeframe
+        const duration = calculateVideoDuration(location.videoStartTime, location.videoEndTime);
+        sections.push(this.buildSection('Video Timeframe', [
+          ['Start Time', formatDateTime(location.videoStartTime)],
+          ['End Time', formatDateTime(location.videoEndTime)],
+          ['Duration', duration.formatted],
+          ['Time Synchronized', location.isTimeDateCorrect]
+        ]));
+        
+        // Time offset if applicable
+        if (location.isTimeDateCorrect === 'No' && location.timeOffset) {
+          sections.push(this.buildTimeOffsetSection(location.timeOffset));
+        }
+        
+        // DVR Retention for this location
+        if (location.dvrEarliestDate) {
+          const retention = calculateRetentionDays(location.dvrEarliestDate);
+          sections.push(this.buildRetentionSection(retention));
+        }
+        
+        return sections;
+      }).flat();
     },
     
     buildTimeOffsetSection(timeOffset) {
@@ -174,7 +178,7 @@ export const PDF_TEMPLATES = {
           { text: 'DVR Retention Status', style: 'subheader' },
           {
             text: retention.message,
-            color: retention.isUrgent ? '#dc3545' : '#17a2b8',
+            color: '#17a2b8',
             fontSize: 11,
             margin: [0, 5, 0, 0]
           }

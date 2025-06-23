@@ -36,16 +36,10 @@ export function calculateRetentionDays(earliestDate) {
     message = 'Invalid date: Earliest date cannot be in the future';
     isUrgent = false;
   } else if (diffDays === 0) {
-    message = 'DVR retention: Less than 1 day (CRITICAL - Video may be overwritten today)';
-    isUrgent = true;
+    message = 'DVR retention: Less than 1 day';
+    isUrgent = false;
   } else if (diffDays === 1) {
-    message = 'DVR retention: 1 day (URGENT - Video will be overwritten tomorrow)';
-    isUrgent = true;
-  } else if (diffDays <= 3) {
-    message = `DVR retention: ${diffDays} days (URGENT - Video will be overwritten soon)`;
-    isUrgent = true;
-  } else if (diffDays <= 7) {
-    message = `DVR retention: ${diffDays} days (Video should be recovered within a week)`;
+    message = 'DVR retention: 1 day';
     isUrgent = false;
   } else {
     message = `DVR retention: ${diffDays} days`;
@@ -202,10 +196,15 @@ export function generateFieldSummaries(formData) {
     const mediaType = formData.mediaType === 'Other' ? formData.mediaTypeOther : formData.mediaType;
     fileDetailsParts.push(`Media Type: ${mediaType}`);
   }
-  if (formData.businessName) {
-    fileDetailsParts.push(`Location: ${formData.businessName}`);
-  } else if (formData.locationAddress) {
-    fileDetailsParts.push(`Location: ${formData.locationAddress}`);
+  
+  // Include first location info for file details
+  if (formData.locations && formData.locations.length > 0) {
+    const firstLocation = formData.locations[0];
+    if (firstLocation.businessName) {
+      fileDetailsParts.push(`Location: ${firstLocation.businessName}`);
+    } else if (firstLocation.locationAddress) {
+      fileDetailsParts.push(`Location: ${firstLocation.locationAddress}`);
+    }
   }
   
   summaries.fileDetails = fileDetailsParts.join(' | ') || 'Video upload request';
@@ -216,36 +215,57 @@ export function generateFieldSummaries(formData) {
   // Basic info
   detailsParts.push(`Upload Request - ${formData.occNumber || 'No occurrence number'}`);
   
-  // Time info
-  if (formData.videoStartTime && formData.videoEndTime) {
-    const duration = calculateVideoDuration(formData.videoStartTime, formData.videoEndTime);
-    detailsParts.push(`Video Period: ${formatDateTimeForSummary(formData.videoStartTime)} to ${formatDateTimeForSummary(formData.videoEndTime)} (${duration.formatted})`);
-  }
-  
-  // Time sync info
-  if (formData.isTimeDateCorrect === 'No' && formData.timeOffset) {
-    const offset = parseTimeOffset(formData.timeOffset);
-    detailsParts.push(`Time Offset: ${offset.formatted}`);
-  }
-  
-  // Retention info
-  if (formData.dvrEarliestDate) {
-    const retention = calculateRetentionDays(formData.dvrEarliestDate);
-    if (retention.isUrgent) {
-      detailsParts.push(`URGENT: ${retention.message}`);
-    } else {
-      detailsParts.push(retention.message);
-    }
+  // Process each location
+  if (formData.locations) {
+    formData.locations.forEach((location, index) => {
+      if (formData.locations.length > 1) {
+        detailsParts.push(`\nLocation ${index + 1}:`);
+      }
+      
+      // Location info
+      const locParts = [];
+      if (location.businessName) {
+        locParts.push(location.businessName);
+      }
+      if (location.locationAddress) {
+        locParts.push(location.locationAddress);
+      }
+      const city = location.city === 'Other' ? location.cityOther : location.city;
+      if (city) {
+        locParts.push(city);
+      }
+      if (locParts.length > 0) {
+        detailsParts.push(`Address: ${locParts.join(', ')}`);
+      }
+      
+      // Time info
+      if (location.videoStartTime && location.videoEndTime) {
+        const duration = calculateVideoDuration(location.videoStartTime, location.videoEndTime);
+        detailsParts.push(`Video Period: ${formatDateTimeForSummary(location.videoStartTime)} to ${formatDateTimeForSummary(location.videoEndTime)} (${duration.formatted})`);
+      }
+      
+      // Time sync info
+      if (location.isTimeDateCorrect === 'No' && location.timeOffset) {
+        const offset = parseTimeOffset(location.timeOffset);
+        detailsParts.push(`Time Offset: ${offset.formatted}`);
+      }
+      
+      // Retention info
+      if (location.dvrEarliestDate) {
+        const retention = calculateRetentionDays(location.dvrEarliestDate);
+        detailsParts.push(retention.message);
+      }
+    });
   }
   
   // Additional info
   if (formData.otherInfo) {
-    detailsParts.push(`Additional Info: ${formData.otherInfo}`);
+    detailsParts.push(`\nAdditional Info: ${formData.otherInfo}`);
   }
   
-  // Multiple locations
+  // Multiple locations summary
   if (formData.locations && formData.locations.length > 1) {
-    detailsParts.push(`Multiple Locations: ${formData.locations.length} locations on single media`);
+    detailsParts.push(`\nTotal Locations: ${formData.locations.length} locations on single media`);
   }
   
   summaries.rfsDetails = detailsParts.join('\n');

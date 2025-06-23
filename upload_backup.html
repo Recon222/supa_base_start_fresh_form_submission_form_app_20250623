@@ -9,38 +9,42 @@
   <meta name="description" content="Upload Request Form - Forensic Video Unit">
   <title>Upload Request - Forensic Video Unit</title>
   
-  <!-- CSS Files -->
+  <!-- Main CSS -->
   <link rel="stylesheet" href="assets/css/forms.css">
-  
-  <!-- Libraries -->
-  <script src="lib/pdfmake.min.js"></script>
-  <script src="lib/vfs_fonts.js"></script>
 </head>
-<body data-theme="dark">
-  <!-- Background Elements -->
-  <div class="grid-background"></div>
-  <div class="floating-shapes">
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-    <div class="shape shape-3"></div>
+<body>
+  <!-- Animated Background -->
+  <div class="background-animation">
+    <div class="grid-overlay"></div>
+    <div class="floating-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
   </div>
 
   <!-- Header -->
-  <header class="glass-header">
+  <header class="main-header">
     <div class="container">
-      <h1 class="text-center" style="margin: 0; font-size: 2rem; font-weight: 600;">
-        <span style="color: var(--color-primary);">Forensic Video Unit</span>
-        <br>
-        <span style="font-size: 1.5rem; font-weight: 400;">Upload Request Form</span>
-      </h1>
-      <p class="text-center" style="margin: 0.5rem 0 0 0; opacity: 0.8;">
-        Submit video evidence collected from external sources
-      </p>
-      
-      <div class="header-actions">
+      <div class="header-content">
+        <!-- Logo Section -->
+        <div class="logo-section">
+          <div class="logo-icon">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/>
+              <path d="M18 24L22 28L30 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="24" cy="24" r="8" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <h1>Upload Request Form</h1>
+            <p>Submit video evidence from external sources</p>
+          </div>
+        </div>
+        
         <!-- Back Button & Theme Toggle -->
         <div class="d-flex" style="gap: 1rem; align-items: center;">
-          <a href="index.html" class="btn btn-secondary">← Back</a>
+          <a href="index.html" class="btn btn-secondary">� Back</a>
           <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
             <svg class="sun-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <circle cx="12" cy="12" r="5" stroke-width="2"/>
@@ -175,14 +179,13 @@
         </div>
       </section>
 
-      <!-- Location & Video Information Container -->
-      <div id="location-video-container">
-        <!-- First location-video group (always present) -->
-        <div class="location-video-group" data-group-index="0" style="background: var(--glass-bg); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; border: 1px solid var(--border-color);">
-          <!-- Location Information Section -->
-          <section class="form-section">
-            <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Location Information</h2>
-            
+      <!-- Location Information Section -->
+      <section class="form-section">
+        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Location Information</h2>
+        
+        <div id="locations-container">
+          <!-- First location (always present) -->
+          <div class="location-group" data-location-index="0">
             <div class="form-group">
               <label for="businessName" class="form-label">Business Name</label>
               <input type="text" 
@@ -233,103 +236,101 @@
               <small class="form-text">Please enter the city name</small>
               <div class="invalid-feedback"></div>
             </div>
-          </section>
-
-          <!-- Video Timeframe Section -->
-          <section class="form-section">
-            <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Video Timeframe</h2>
-            
-            <div class="form-group">
-              <label for="videoStartTime" class="form-label">
-                Video Start Time <span class="required">*</span>
-              </label>
-              <input type="datetime-local" 
-                     class="form-control" 
-                     id="videoStartTime" 
-                     name="videoStartTime" 
-                     required>
-              <small class="form-text">When the relevant video begins</small>
-              <div class="invalid-feedback"></div>
-            </div>
-
-            <div class="form-group">
-              <label for="videoEndTime" class="form-label">
-                Video End Time <span class="required">*</span>
-              </label>
-              <input type="datetime-local" 
-                     class="form-control" 
-                     id="videoEndTime" 
-                     name="videoEndTime" 
-                     required>
-              <small class="form-text">When the relevant video ends</small>
-              <div class="invalid-feedback"></div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">
-                Is the Time & Date correct? <span class="required">*</span>
-              </label>
-              <small class="form-text mb-2 d-block">Is the DVR time synchronized with actual time?</small>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectYes" value="Yes" required>
-                <label class="form-check-label" for="timeCorrectYes">
-                  Yes
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectNo" value="No" required>
-                <label class="form-check-label" for="timeCorrectNo">
-                  No
-                </label>
-              </div>
-              <div class="invalid-feedback"></div>
-            </div>
-
-            <!-- Time sync warning (conditional) -->
-            <div class="alert alert-warning d-none" id="timeSyncWarning" style="margin-top: 1rem;">
-              <strong>Important:</strong> Your confirmation of correct timestamp becomes part of the evidence. 
-              If the timestamp conflicts with other evidence or DVR timestamps, this could affect the evidence validity.
-            </div>
-
-            <!-- Time offset field (conditional) -->
-            <div class="form-group d-none" id="timeOffsetGroup">
-              <label for="timeOffset" class="form-label">
-                Time Offset <span class="required">*</span>
-              </label>
-              <input type="text" 
-                     class="form-control" 
-                     id="timeOffset" 
-                     name="timeOffset" 
-                     placeholder="e.g., DVR is 1hr 5min 30sec AHEAD of real time">
-              <small class="form-text">Describe how the DVR time differs from actual time</small>
-              <div class="invalid-feedback"></div>
-            </div>
-
-            <div class="form-group">
-              <label for="dvrEarliestDate" class="form-label">Earliest Recorded Date on DVR</label>
-              <input type="date" 
-                     class="form-control" 
-                     id="dvrEarliestDate" 
-                     name="dvrEarliestDate">
-              <small class="form-text">The earliest date available on the DVR system</small>
-              <div id="retentionCalculation" class="text-info mt-2"></div>
-            </div>
-          </section>
+          </div>
         </div>
-      </div>
 
-      <!-- Add Location & Video Button -->
-      <div style="text-align: center; margin: 2rem 0;">
-        <button type="button" class="btn btn-secondary" id="addLocationBtn" style="min-width: 200px;">
-          + Add Another Location
+        <!-- Add Location Button -->
+        <button type="button" class="btn btn-secondary" id="addLocationBtn" style="margin-top: 1rem;">
+          + Add Location
         </button>
         <small class="form-text d-block mt-2">
-          Add if the USB contains video from multiple locations with different timeframes
+          Check if the USB contains video from multiple locations
         </small>
-      </div>
+      </section>
 
-      <!-- Hidden field for incident date (required by third-party) -->
-      <input type="hidden" id="occDate" name="occDate">
+      <!-- Video Timeframe Section -->
+      <section class="form-section">
+        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Video Timeframe</h2>
+        
+        <div class="form-group">
+          <label for="videoStartTime" class="form-label">
+            Video Start Time <span class="required">*</span>
+          </label>
+          <input type="datetime-local" 
+                 class="form-control" 
+                 id="videoStartTime" 
+                 name="videoStartTime" 
+                 required>
+          <small class="form-text">When the relevant video begins</small>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="videoEndTime" class="form-label">
+            Video End Time <span class="required">*</span>
+          </label>
+          <input type="datetime-local" 
+                 class="form-control" 
+                 id="videoEndTime" 
+                 name="videoEndTime" 
+                 required>
+          <small class="form-text">When the relevant video ends</small>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            Is the Time & Date correct? <span class="required">*</span>
+          </label>
+          <small class="form-text mb-2 d-block">Is the DVR time synchronized with actual time?</small>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectYes" value="Yes" required>
+            <label class="form-check-label" for="timeCorrectYes">
+              Yes
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectNo" value="No" required>
+            <label class="form-check-label" for="timeCorrectNo">
+              No
+            </label>
+          </div>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <!-- Time sync warning (conditional) -->
+        <div class="alert alert-warning d-none" id="timeSyncWarning" style="margin-top: 1rem;">
+          <strong>� Important:</strong> Your confirmation of correct timestamp becomes part of the evidence. 
+          If the timestamp conflicts with other evidence or DVR timestamps, this could affect the evidence validity.
+        </div>
+
+        <!-- Time offset field (conditional) -->
+        <div class="form-group d-none" id="timeOffsetGroup">
+          <label for="timeOffset" class="form-label">
+            Time Offset <span class="required">*</span>
+          </label>
+          <input type="text" 
+                 class="form-control" 
+                 id="timeOffset" 
+                 name="timeOffset" 
+                 placeholder="e.g., DVR is 1hr 5min 30sec AHEAD of real time">
+          <small class="form-text">Describe how the DVR time differs from actual time</small>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="dvrEarliestDate" class="form-label">Earliest Recorded Date on DVR</label>
+          <input type="date" 
+                 class="form-control" 
+                 id="dvrEarliestDate" 
+                 name="dvrEarliestDate">
+          <small class="form-text">The earliest date available on the DVR system</small>
+          <div id="retentionCalculation" class="text-info mt-2"></div>
+        </div>
+
+        <!-- Hidden field for incident date (required by third-party) -->
+        <input type="hidden" id="occDate" name="occDate">
+      </section>
 
       <!-- Additional Information Section -->
       <section class="form-section">
