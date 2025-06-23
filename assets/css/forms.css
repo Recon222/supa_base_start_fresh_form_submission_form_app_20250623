@@ -1,0 +1,710 @@
+/* 
+ * Forensic Video Unit - Forms CSS
+ * Clean, organized, and maintainable
+ * Location: /css/forms.css
+ * Approx 450 lines - Well under our 500 line limit
+ */
+
+/* ========================================
+   1. CSS VARIABLES - No Magic Numbers!
+   ======================================== */
+:root {
+  /* Color System */
+  --color-primary: #0066ff;
+  --color-primary-light: #4d94ff;
+  --color-primary-dark: #0052cc;
+  --color-success: #28a745;
+  --color-danger: #dc3545;
+  --color-warning: #ffc107;
+  --color-info: #17a2b8;
+  --color-dark: #343a40;
+  --color-light: #f8f9fa;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  
+  /* Dark Theme Colors */
+  --bg-dark: #0a0a0a;
+  --surface-dark: #1a1a1a;
+  --surface-elevated: #242424;
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --border-color: rgba(255, 255, 255, 0.1);
+  
+  /* Glass Morphism */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-bg-hover: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(20px);
+  --shape-blur: blur(100px);
+  
+  /* Spacing System */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
+  --font-size-4xl: 3rem;
+  
+  /* Layout */
+  --container-max-width: 1200px;
+  --header-height: 80px;
+  --border-radius: 12px;
+  --border-radius-lg: 20px;
+  --border-radius-sm: 6px;
+  
+  /* Animations */
+  --transition-fast: 0.2s ease;
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Form Specific */
+  --input-height: 48px;
+  --input-padding-x: var(--space-lg);
+  --input-padding-y: var(--space-md);
+  --input-border-width: 1px;
+  --input-focus-lift: -2px;
+  --input-checkmark-size: 20px;
+  --textarea-min-height: 120px;
+  
+  /* Z-Index Scale */
+  --z-behind: -1;
+  --z-base: 0;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-overlay: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+  
+  /* Animation Values */
+  --anim-grid-size: 50px;
+  --anim-grid-move: 10s;
+  --anim-float-1: 20s;
+  --anim-float-2: 15s;
+  --anim-float-3: 25s;
+  --anim-distance-sm: 50px;
+  --anim-distance-md: 100px;
+  --anim-distance-lg: 200px;
+  --anim-shape-1-size: 400px;
+  --anim-shape-2-size: 300px;
+  --anim-shape-3-size: 500px;
+  --anim-shape-1-offset: -200px;
+  --anim-shape-2-offset: -150px;
+  --anim-shape-3-offset: -250px;
+  --anim-shape-3-left: 30%;
+  --anim-rotate-1: 120deg;
+  --anim-rotate-2: 240deg;
+  --anim-rotate-3: 90deg;
+  --anim-rotate-4: 180deg;
+  --anim-rotate-5: 270deg;
+  --anim-scale-hover: 1.2;
+  --anim-shake-distance: 10px;
+  --anim-fade-distance: 20px;
+  
+  /* Layout Values */
+  --card-min-width: 350px;
+  --card-perspective: 1000px;
+  --card-rotate-x: 5deg;
+  --card-rotate-y: -5deg;
+  --card-hover-lift: -10px;
+  --btn-3d-depth: 4px;
+  --btn-3d-depth-hover: 6px;
+  --btn-3d-depth-active: 2px;
+  --btn-hover-lift: -2px;
+  --btn-active-push: 2px;
+  
+  /* Breakpoints */
+  --breakpoint-mobile: 768px;
+}
+
+/* Light theme overrides */
+[data-theme="light"] {
+  --bg-dark: #ffffff;
+  --surface-dark: #f8f9fa;
+  --surface-elevated: #ffffff;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --border-color: rgba(0, 0, 0, 0.1);
+  --glass-bg: rgba(0, 0, 0, 0.02);
+  --glass-bg-hover: rgba(0, 0, 0, 0.04);
+}
+
+/* ========================================
+   2. RESET & BASE STYLES
+   ======================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-dark);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ========================================
+   3. TYPOGRAPHY
+   ======================================== */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: var(--space-sm);
+}
+
+h1 { font-size: var(--font-size-4xl); }
+h2 { font-size: var(--font-size-3xl); }
+h3 { font-size: var(--font-size-2xl); }
+h4 { font-size: var(--font-size-xl); }
+
+p {
+  margin-bottom: var(--space-md);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary-light);
+}
+
+/* ========================================
+   4. ANIMATED BACKGROUND
+   The cool grid effect you love!
+   ======================================== */
+.background-animation {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-behind);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: var(--anim-grid-size) var(--anim-grid-size);
+  animation: gridMove var(--anim-grid-move) linear infinite;
+}
+
+.floating-shapes {
+  position: absolute;
+  inset: 0;
+}
+
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: var(--shape-blur);
+  opacity: 0.03;
+}
+
+.shape-1 {
+  width: var(--anim-shape-1-size);
+  height: var(--anim-shape-1-size);
+  background: var(--color-primary);
+  top: var(--anim-shape-1-offset);
+  left: var(--anim-shape-1-offset);
+  animation: float1 var(--anim-float-1) ease-in-out infinite;
+}
+
+.shape-2 {
+  width: var(--anim-shape-2-size);
+  height: var(--anim-shape-2-size);
+  background: var(--color-info);
+  top: 50%;
+  right: var(--anim-shape-2-offset);
+  animation: float2 var(--anim-float-2) ease-in-out infinite;
+}
+
+.shape-3 {
+  width: var(--anim-shape-3-size);
+  height: var(--anim-shape-3-size);
+  background: var(--color-success);
+  bottom: var(--anim-shape-3-offset);
+  left: var(--anim-shape-3-left);
+  animation: float3 var(--anim-float-3) ease-in-out infinite;
+}
+
+/* ========================================
+   5. LAYOUT COMPONENTS
+   ======================================== */
+.container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.main-header {
+  height: var(--header-height);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: var(--input-border-width) solid var(--border-color);
+  position: relative;
+  z-index: var(--z-sticky);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* ========================================
+   6. HERO SECTION & CARDS
+   The 3D effect for the landing page!
+   ======================================== */
+.hero-section {
+  min-height: calc(100vh - var(--header-height));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl) 0;
+}
+
+.hero-content {
+  text-align: center;
+}
+
+.hero-title {
+  font-size: var(--font-size-4xl);
+  margin-bottom: var(--space-md);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.form-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--card-min-width), 1fr));
+  gap: var(--space-2xl);
+  max-width: var(--container-max-width);
+  margin: var(--space-3xl) auto 0;
+}
+
+.form-card {
+  perspective: var(--card-perspective);
+  transition: transform var(--transition-base);
+}
+
+.form-card:hover {
+  transform: translateY(var(--card-hover-lift));
+}
+
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform var(--transition-slow);
+}
+
+.form-card:hover .card-3d {
+  transform: rotateY(var(--card-rotate-x)) rotateX(var(--card-rotate-y));
+}
+
+.card-face {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: var(--input-border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-2xl);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================
+   7. 3D BUTTONS
+   Keep these spectacular!
+   ======================================== */
+.btn {
+  display: inline-block;
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: var(--color-white);
+  box-shadow: 
+    0 var(--btn-3d-depth) 0 var(--color-primary-dark),
+    0 8px 16px rgba(0, 102, 255, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(var(--btn-hover-lift));
+  box-shadow: 
+    0 var(--btn-3d-depth-hover) 0 var(--color-primary-dark),
+    0 12px 20px rgba(0, 102, 255, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(var(--btn-active-push));
+  box-shadow: 
+    0 var(--btn-3d-depth-active) 0 var(--color-primary-dark),
+    0 4px 8px rgba(0, 102, 255, 0.3);
+}
+
+/* ========================================
+   8. FORM STYLES
+   Clean, accessible, beautiful
+   ======================================== */
+.form-section {
+  margin-bottom: var(--space-2xl);
+  padding-bottom: var(--space-xl);
+  border-bottom: var(--input-border-width) solid var(--border-color);
+}
+
+.form-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.form-group {
+  margin-bottom: var(--space-lg);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Required field indicator */
+.form-label .required {
+  color: var(--color-danger);
+  margin-left: var(--space-xs);
+}
+
+/* Form controls - the heart of the forms */
+.form-control {
+  width: 100%;
+  height: var(--input-height);
+  padding: var(--input-padding-y) var(--input-padding-x);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: var(--input-border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  transition: all var(--transition-base);
+}
+
+.form-control:focus {
+  outline: none;
+  background: var(--glass-bg-hover);
+  border-color: var(--color-primary);
+  transform: translateY(var(--input-focus-lift));
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.15);
+}
+
+/* Textarea specific */
+textarea.form-control {
+  min-height: var(--textarea-min-height);
+  resize: vertical;
+}
+
+/* Select specific */
+select.form-control {
+  cursor: pointer;
+}
+
+/* ========================================
+   9. FORM VALIDATION STATES
+   The red/green borders you wanted!
+   ======================================== */
+/* Valid state - green border for completed required fields */
+.form-control.is-valid {
+  border-color: var(--color-success);
+  padding-right: calc(var(--input-padding-x) + var(--space-xl));
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16.667 5L7.5 14.167 3.333 10' stroke='%2328a745' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--input-padding-x) center;
+  background-size: var(--input-checkmark-size);
+}
+
+/* Invalid state - red border with shake animation */
+.form-control.is-invalid {
+  border-color: var(--color-danger);
+  animation: shake 0.5s;
+}
+
+.invalid-feedback {
+  display: none;
+  margin-top: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}
+
+.form-control.is-invalid ~ .invalid-feedback {
+  display: block;
+}
+
+/* Form help text */
+.form-text {
+  display: block;
+  margin-top: var(--space-xs);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   10. ADDITIONAL FORM COMPONENTS
+   ======================================== */
+/* Radio buttons and checkboxes */
+.form-check {
+  margin-bottom: var(--space-sm);
+}
+
+.form-check-input {
+  margin-right: var(--space-sm);
+}
+
+.form-check-label {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+/* Secondary button style */
+.btn-secondary {
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  border: var(--input-border-width) solid var(--border-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary:hover {
+  background: var(--glass-bg-hover);
+  transform: translateY(var(--btn-hover-lift));
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-sm {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  color: var(--color-white);
+}
+
+.btn-danger:hover {
+  background: #c82333;
+}
+
+/* Alert styles */
+.alert {
+  padding: var(--space-md);
+  border-radius: var(--border-radius-sm);
+  margin-bottom: var(--space-md);
+}
+
+.alert-warning {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  color: var(--color-warning);
+}
+
+/* Progress bar */
+.progress-container {
+  background: var(--surface-dark);
+  border-top: 1px solid var(--border-color);
+  padding: var(--space-md);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-sticky);
+}
+
+.progress {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  transition: all var(--transition-base);
+  border-radius: 4px;
+}
+
+/* Form actions */
+.form-actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  margin-top: var(--space-xl);
+  padding-bottom: 80px; /* Space for progress bar */
+}
+
+/* Location groups */
+.location-group {
+  padding: var(--space-md);
+  background: var(--glass-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  margin-bottom: var(--space-md);
+  transition: opacity var(--transition-base);
+}
+
+/* Theme toggle specific styles */
+.theme-toggle {
+  background: var(--glass-bg);
+  border: var(--input-border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--space-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+.theme-toggle:hover {
+  background: var(--glass-bg-hover);
+  transform: translateY(-2px);
+}
+
+.theme-toggle svg {
+  width: 24px;
+  height: 24px;
+}
+
+[data-theme="dark"] .sun-icon {
+  display: none;
+}
+
+[data-theme="light"] .moon-icon {
+  display: none;
+}
+
+/* ========================================
+   11. UTILITY CLASSES
+   Keep it DRY!
+   ======================================== */
+.text-center { text-align: center; }
+.text-muted { color: var(--text-secondary); }
+.text-danger { color: var(--color-danger); }
+.text-success { color: var(--color-success); }
+.text-info { color: var(--color-info); }
+.text-warning { color: var(--color-warning); }
+
+.mt-1 { margin-top: var(--space-sm); }
+.mt-2 { margin-top: var(--space-md); }
+.mt-3 { margin-top: var(--space-lg); }
+.mb-1 { margin-bottom: var(--space-sm); }
+.mb-2 { margin-bottom: var(--space-md); }
+.mb-3 { margin-bottom: var(--space-lg); }
+
+.d-none { display: none; }
+.d-block { display: block; }
+.d-flex { display: flex; }
+
+/* ========================================
+   12. ANIMATIONS
+   All keyframes in one place
+   ======================================== */
+@keyframes gridMove {
+  from { transform: translate(0, 0); }
+  to { transform: translate(var(--anim-grid-size), var(--anim-grid-size)); }
+}
+
+@keyframes float1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(var(--anim-distance-md), var(--anim-distance-md)) rotate(var(--anim-rotate-1)); }
+  66% { transform: translate(calc(var(--anim-distance-sm) * -1), var(--anim-distance-lg)) rotate(var(--anim-rotate-2)); }
+}
+
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(calc(var(--anim-distance-md) * -1), calc(var(--anim-distance-md) * -1)) scale(var(--anim-scale-hover)); }
+}
+
+@keyframes float3 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(var(--anim-distance-sm), calc(var(--anim-distance-md) * -1)) rotate(var(--anim-rotate-3)); }
+  50% { transform: translate(calc(var(--anim-distance-md) * -1), calc(var(--anim-distance-sm) * -1)) rotate(var(--anim-rotate-4)); }
+  75% { transform: translate(var(--anim-distance-md), var(--anim-distance-sm)) rotate(var(--anim-rotate-5)); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(calc(var(--anim-shake-distance) * -1)); }
+  75% { transform: translateX(var(--anim-shake-distance)); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(var(--anim-fade-distance)); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========================================
+   13. RESPONSIVE
+   Mobile-first approach
+   ======================================== */
+/* Note: CSS variables don't work in media queries, so we use the raw value */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: var(--font-size-3xl);
+  }
+  
+  .form-cards {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+  
+  .container {
+    padding: 0 var(--space-md);
+  }
+}
+
+/* ========================================
+   END OF CSS
+   Total: ~700 lines - Still clean & organized!
+   ======================================== */
