@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Analysis Request Form - Forensic Video Unit">
+  <title>Analysis Request - Forensic Video Unit</title>
+  
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="assets/css/forms.css">
+  
+  <!-- Libraries -->
+  <script src="lib/pdfmake.min.js"></script>
+  <script src="lib/vfs_fonts.js"></script>
+</head>
+<body data-theme="dark">
+  <!-- Background Elements -->
+  <div class="grid-background"></div>
+  <div class="floating-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="glass-header">
+    <div class="container">
+      <h1 class="text-center" style="margin: 0; font-size: 2rem; font-weight: 600;">
+        <span style="color: var(--color-primary);">Forensic Video Unit</span>
+        <br>
+        <span style="font-size: 1.5rem; font-weight: 400;">Analysis Request Form</span>
+      </h1>
+      <p class="text-center" style="margin: 0.5rem 0 0 0; opacity: 0.8;">
+        Request in-office analysis of video evidence
+      </p>
+      
+      <div class="header-actions">
+        <!-- Back Button & Theme Toggle -->
+        <div class="d-flex" style="gap: 1rem; align-items: center;">
+          <a href="index.html" class="btn btn-secondary">ê Back</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <svg class="sun-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="5" stroke-width="2"/>
+              <path d="M12 1v2M12 21v2M21 12h2M1 12h2M18.4 5.6l1.4-1.4M4.2 19.8l1.4-1.4M18.4 18.4l1.4 1.4M4.2 4.2l1.4 1.4" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <svg class="moon-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Form Content -->
+  <main class="container" style="padding: 2rem 1rem; max-width: 800px;">
+    <form id="analysis-form" novalidate>
+      <!-- Hidden session field for PHP -->
+      <!-- <input type="hidden" name="session_verify" value="<?php echo session_id(); ?>"> -->
+      
+      <!-- Case Information Section -->
+      <section class="form-section">
+        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Case Information</h2>
+        
+        <!-- Row 1: Occurrence Number + Type of Offence -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="occNumber" class="form-label">
+              Occurrence Number <span class="required">*</span>
+            </label>
+            <input type="text" 
+                   class="form-control" 
+                   id="occNumber" 
+                   name="occNumber" 
+                   placeholder="e.g., PR240368708"
+                   required>
+            <small class="form-text">Format: PR followed by numbers</small>
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="offenceType" class="form-label">
+              Type of Offence <span class="required">*</span>
+            </label>
+            <select class="form-control" id="offenceType" name="offenceType" required>
+              <option value="">Select...</option>
+              <option value="Homicide">Homicide</option>
+              <option value="Missing Person">Missing Person</option>
+              <option value="Other">Other</option>
+            </select>
+            <div class="invalid-feedback"></div>
+          </div>
+        </div>
+
+        <!-- Conditional field for Other offence type -->
+        <div class="form-group d-none" id="offenceTypeOtherGroup">
+          <label for="offenceTypeOther" class="form-label">
+            Specify Offence Type <span class="required">*</span>
+          </label>
+          <input type="text" 
+                 class="form-control" 
+                 id="offenceTypeOther" 
+                 name="offenceTypeOther" 
+                 placeholder="Please specify the offence type">
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <!-- Location of Video - full width -->
+        <div class="form-group">
+          <label for="videoLocation" class="form-label">
+            Location of Video <span class="required">*</span>
+          </label>
+          <select class="form-control" id="videoLocation" name="videoLocation" required>
+            <option value="">Select...</option>
+            <option value="NAS Storage">NAS Storage</option>
+            <option value="Evidence.com Locker">Evidence.com Locker</option>
+            <option value="USB">USB</option>
+            <option value="Hard Drive">Hard Drive</option>
+            <option value="SD Card">SD Card</option>
+            <option value="CD/DVD">CD/DVD</option>
+            <option value="Other">Other</option>
+          </select>
+          <small class="form-text">Storage medium where the video evidence is located</small>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <!-- Conditional field for Other video location -->
+        <div class="form-group d-none" id="videoLocationOtherGroup">
+          <label for="videoLocationOther" class="form-label">
+            Specify Storage Location <span class="required">*</span>
+          </label>
+          <input type="text" 
+                 class="form-control" 
+                 id="videoLocationOther" 
+                 name="videoLocationOther" 
+                 placeholder="Please specify the storage location">
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <!-- Row 2: Bag Number + Locker Number -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="bagNumber" class="form-label">Bag Number</label>
+            <input type="text" 
+                   class="form-control" 
+                   id="bagNumber" 
+                   name="bagNumber" 
+                   placeholder="Evidence bag identification">
+          </div>
+
+          <div class="form-group">
+            <label for="lockerNumber" class="form-label">Locker Number</label>
+            <input type="number" 
+                   class="form-control" 
+                   id="lockerNumber" 
+                   name="lockerNumber" 
+                   min="1" 
+                   max="15" 
+                   placeholder="1-15">
+            <small class="form-text">Evidence locker number (1-15)</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- Submitting Investigator Information Section -->
+      <section class="form-section">
+        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Submitting Investigator Information</h2>
+        
+        <!-- Row 1: Investigator Name + Badge -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rName" class="form-label">
+              Submitting Investigator <span class="required">*</span>
+            </label>
+            <input type="text" 
+                   class="form-control" 
+                   id="rName" 
+                   name="rName" 
+                   placeholder="Last name or full name"
+                   required>
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="badge" class="form-label">
+              Badge Number <span class="required">*</span>
+            </label>
+            <input type="text" 
+                   class="form-control" 
+                   id="badge" 
+                   name="badge" 
+                   placeholder="Investigator badge number"
+                   required>
+            <div class="invalid-feedback"></div>
+          </div>
+        </div>
+
+        <!-- Row 2: Phone + Email -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="requestingPhone" class="form-label">
+              Contact Number <span class="required">*</span>
+            </label>
+            <input type="tel" 
+                   class="form-control" 
+                   id="requestingPhone" 
+                   name="requestingPhone" 
+                   placeholder="XXX-XXX-XXXX"
+                   required>
+            <small class="form-text">10 digits required (dashes optional)</small>
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="requestingEmail" class="form-label">
+              Email Address <span class="required">*</span>
+            </label>
+            <input type="email" 
+                   class="form-control" 
+                   id="requestingEmail" 
+                   name="requestingEmail" 
+                   placeholder="investigator@peelpolice.ca"
+                   required>
+            <div class="invalid-feedback"></div>
+          </div>
+        </div>
+        
+        <!-- Clear investigator info button -->
+        <div class="form-group text-right">
+          <button type="button" 
+                  class="btn btn-sm btn-secondary" 
+                  id="clearOfficerInfo">
+            Clear Investigator Info
+          </button>
+          <small class="form-text d-block mt-1">
+            Removes saved investigator information from this browser
+          </small>
+        </div>
+      </section>
+
+      <!-- Evidence Details Section -->
+      <section class="form-section">
+        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Evidence Details</h2>
+        
+        <!-- Video Seized From - full width -->
+        <div class="form-group">
+          <label for="videoSeizedFrom" class="form-label">
+            Video Seized From <span class="required">*</span>
+          </label>
+          <input type="text" 
+                 class="form-control" 
+                 id="videoSeizedFrom" 
+                 name="videoSeizedFrom" 
+                 placeholder="Address where video was recovered"
+                 required>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <!-- Business Name - full width -->
+        <div class="form-group">
+          <label for="businessName" class="form-label">Business Name</label>
+          <input type="text" 
+                 class="form-control" 
+                 id="businessName" 
+                 name="businessName" 
+                 placeholder="Leave blank if none">
+          <small class="form-text">Name of business at the address above</small>
+        </div>
+
+        <!-- City - full width -->
+        <div class="form-group">
+          <label for="city" class="form-label">
+            City <span class="required">*</span>
+          </label>
+          <select class="form-control" id="city" name="city" required>
+            <option value="">Select city</option>
+            <option value="Brampton">Brampton</option>
+            <option value="Mississauga">Mississauga</option>
+            <option value="Toronto">Toronto</option>
+            <option value="Other">Other</option>
+          </select>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <!-- Conditional field for Other city -->
+        <div class="form-group d-none" id="cityOtherGroup">
+          <label for="cityOther" class="form-label">
+            Specify City <span class="required">*</span>
+          </label>
+          <input type="text" 
+                 class="form-control" 
+                 id="cityOther" 
+                 name="cityOther" 
+                 placeholder="Enter city name">
+          <small class="form-text">Please enter the city name</small>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <!-- Row: Recording Date + Job Required -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="recordingDate" class="form-label">
+              Recording Date <span class="required">*</span>
+            </label>
+            <input type="date" 
+                   class="form-control" 
+                   id="recordingDate" 
+                   name="recordingDate"
+                   required>
+            <small class="form-text">Date the video was recorded</small>
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="jobRequired" class="form-label">
+              Job Required <span class="required">*</span>
+            </label>
+            <select class="form-control" id="jobRequired" name="jobRequired" required>
+              <option value="">Select...</option>
+              <option value="Clarification">Clarification</option>
+              <option value="Comparison">Comparison</option>
+              <option value="Timeline">Timeline</option>
+              <option value="Analysis">Analysis</option>
+              <option value="Other">Other</option>
+            </select>
+            <div class="invalid-feedback"></div>
+          </div>
+        </div>
+
+        <!-- File Names - full width -->
+        <div class="form-group">
+          <label for="fileNames" class="form-label">File Names</label>
+          <textarea class="form-control" 
+                    id="fileNames" 
+                    name="fileNames" 
+                    rows="3" 
+                    placeholder="List all file names (one per line)"></textarea>
+          <small class="form-text">Enter each file name on a separate line</small>
+        </div>
+      </section>
+
+      <!-- Hidden field for occurrence date (required by third-party) -->
+      <input type="hidden" id="occDate" name="occDate">
+
+      <!-- Request Details Section -->
+      <section class="form-section">
+        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Request Details</h2>
+        
+        <!-- Service Required - full width -->
+        <div class="form-group">
+          <label for="serviceRequired" class="form-label">
+            Service Required <span class="required">*</span>
+          </label>
+          <select class="form-control" id="serviceRequired" name="serviceRequired" required>
+            <option value="">Select...</option>
+            <option value="Video/Image Clarification">Video/Image Clarification</option>
+            <option value="Audio Clarification">Audio Clarification</option>
+            <option value="Comparator Analysis">Comparator Analysis</option>
+            <option value="Timeline">Timeline</option>
+            <option value="Make Playable">Make Playable</option>
+            <option value="Data Carving">Data Carving</option>
+            <option value="Other">Other</option>
+          </select>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <!-- Conditional field for Other service -->
+        <div class="form-group d-none" id="serviceRequiredOtherGroup">
+          <label for="serviceRequiredOther" class="form-label">
+            Specify Service Required <span class="required">*</span>
+          </label>
+          <input type="text" 
+                 class="form-control" 
+                 id="serviceRequiredOther" 
+                 name="serviceRequiredOther" 
+                 placeholder="Please specify the service required">
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <!-- Request Details - large textarea -->
+        <div class="form-group">
+          <label for="requestDetails" class="form-label">
+            Request Details <span class="required">*</span>
+          </label>
+          <textarea class="form-control" 
+                    id="requestDetails" 
+                    name="requestDetails" 
+                    rows="6" 
+                    placeholder="Provide detailed information about your request..."
+                    required></textarea>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="form-group">
+          <label for="additionalInfo" class="form-label">Additional Information</label>
+          <textarea class="form-control" 
+                    id="additionalInfo" 
+                    name="additionalInfo" 
+                    rows="4" 
+                    placeholder="Any additional information relevant to this request"></textarea>
+        </div>
+      </section>
+
+      <!-- Form Actions -->
+      <div class="form-actions" style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+        <button type="submit" class="btn btn-primary" style="min-width: 150px;">
+          Submit Request
+        </button>
+        <button type="reset" class="btn btn-secondary" style="min-width: 150px;">
+          Clear Form
+        </button>
+      </div>
+    </form>
+
+    <!-- Progress Bar -->
+    <div class="progress-container" style="position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface-dark); padding: 1rem; border-top: 1px solid var(--border-color);">
+      <div class="progress-label" style="text-align: center; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">
+        <span id="progress-percentage">0%</span> Complete
+      </div>
+      <div class="progress" style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+        <div class="progress-bar" id="form-progress" style="width: 0%; height: 100%; background: var(--color-danger); transition: all 0.3s ease; border-radius: 4px;"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- JavaScript Modules -->
+  <script type="module">
+    import { CONFIG } from './assets/js/config.js';
+    import { AnalysisFormHandler } from './assets/js/form-handler.js';
+    
+    // Initialize theme
+    const savedTheme = localStorage.getItem('fvu-theme') || 'dark';
+    document.body.setAttribute('data-theme', savedTheme);
+    
+    // Theme toggle
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      const currentTheme = document.body.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', newTheme);
+      localStorage.setItem('fvu-theme', newTheme);
+    });
+    
+    // Initialize form handler
+    const formHandler = new AnalysisFormHandler('analysis-form');
+  </script>
+</body>
+</html>

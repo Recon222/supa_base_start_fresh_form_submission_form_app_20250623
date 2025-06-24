@@ -56,7 +56,22 @@ export const CONFIG = {
     TIME_CORRECT: 'isTimeDateCorrect',
     TIME_OFFSET: 'timeOffset',
     DVR_EARLIEST: 'dvrEarliestDate',
-    OTHER_INFO: 'otherInfo'
+    OTHER_INFO: 'otherInfo',
+    
+    // Analysis form specific
+    OFFENCE_TYPE: 'offenceType',
+    OFFENCE_TYPE_OTHER: 'offenceTypeOther',
+    VIDEO_LOCATION: 'videoLocation',
+    VIDEO_LOCATION_OTHER: 'videoLocationOther',
+    BAG_NUMBER: 'bagNumber',
+    VIDEO_SEIZED_FROM: 'videoSeizedFrom',
+    RECORDING_DATE: 'recordingDate',
+    JOB_REQUIRED: 'jobRequired',
+    FILE_NAMES: 'fileNames',
+    SERVICE_REQUIRED: 'serviceRequired',
+    SERVICE_REQUIRED_OTHER: 'serviceRequiredOther',
+    REQUEST_DETAILS: 'requestDetails',
+    ADDITIONAL_INFO: 'additionalInfo'
   },
   
   // Form Types
@@ -89,6 +104,9 @@ export const CONFIG = {
     TIME_OFFSET_REQUIRED: 'Please specify the time offset',
     CITY_OTHER_REQUIRED: 'Please specify the city name',
     MEDIA_OTHER_REQUIRED: 'Please specify the media type',
+    OFFENCE_OTHER_REQUIRED: 'Please specify the offence type',
+    VIDEO_LOCATION_OTHER_REQUIRED: 'Please specify the storage location',
+    SERVICE_OTHER_REQUIRED: 'Please specify the service required',
     DRAFT_SAVED: 'Draft saved',
     DRAFT_LOADED: 'Draft loaded',
     SUBMISSION_SUCCESS: 'Request submitted successfully',
@@ -96,10 +114,10 @@ export const CONFIG = {
     NETWORK_ERROR: 'Network error. Your draft has been saved.',
     SESSION_WARNING: 'Your session will expire in 5 minutes',
     SESSION_EXPIRED: 'Session expired. Please refresh the page.',
-    OFFICER_INFO_LOADED: 'Officer information loaded',
-    OFFICER_INFO_SAVED: 'Officer information saved',
-    OFFICER_INFO_CLEARED: 'Officer information cleared',
-    OFFICER_STORAGE_NOTICE: 'Your officer information will be saved locally for convenience'
+    OFFICER_INFO_LOADED: 'Investigator information loaded',
+    OFFICER_INFO_SAVED: 'Investigator information saved',
+    OFFICER_INFO_CLEARED: 'Investigator information cleared',
+    OFFICER_STORAGE_NOTICE: 'Your investigator information will be saved locally for convenience'
   },
   
   // City Options
@@ -118,6 +136,36 @@ export const CONFIG = {
     { value: 'Hard Drive', text: 'Hard Drive' },
     { value: 'SD Card', text: 'SD Card' },
     { value: 'CD/DVD', text: 'CD/DVD' },
+    { value: 'Other', text: 'Other' }
+  ],
+  
+  // Analysis Form Options
+  OFFENCE_TYPE_OPTIONS: [
+    { value: '', text: 'Select...' },
+    { value: 'Homicide', text: 'Homicide' },
+    { value: 'Missing Person', text: 'Missing Person' },
+    { value: 'Other', text: 'Other' }
+  ],
+  
+  VIDEO_LOCATION_OPTIONS: [
+    { value: '', text: 'Select...' },
+    { value: 'NAS Storage', text: 'NAS Storage' },
+    { value: 'Evidence.com Locker', text: 'Evidence.com Locker' },
+    { value: 'USB', text: 'USB' },
+    { value: 'Hard Drive', text: 'Hard Drive' },
+    { value: 'SD Card', text: 'SD Card' },
+    { value: 'CD/DVD', text: 'CD/DVD' },
+    { value: 'Other', text: 'Other' }
+  ],
+  
+  SERVICE_REQUIRED_OPTIONS: [
+    { value: '', text: 'Select...' },
+    { value: 'Video/Image Clarification', text: 'Video/Image Clarification' },
+    { value: 'Audio Clarification', text: 'Audio Clarification' },
+    { value: 'Comparator Analysis', text: 'Comparator Analysis' },
+    { value: 'Timeline', text: 'Timeline' },
+    { value: 'Make Playable', text: 'Make Playable' },
+    { value: 'Data Carving', text: 'Data Carving' },
     { value: 'Other', text: 'Other' }
   ],
   

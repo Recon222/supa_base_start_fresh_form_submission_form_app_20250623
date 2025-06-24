@@ -102,5 +102,37 @@ function generateCalculations(formData, formType) {
     }
   }
   
+  if (formType === 'analysis') {
+    // Count file names if provided
+    if (formData.fileNames) {
+      const fileCount = formData.fileNames.split('\n').filter(f => f.trim()).length;
+      calculations.fileCount = fileCount;
+      calculations.hasMultipleFiles = fileCount > 1;
+    }
+    
+    // Days since recording
+    if (formData.recordingDate) {
+      const recordingDate = new Date(formData.recordingDate);
+      const today = new Date();
+      const daysSince = Math.floor((today - recordingDate) / (1000 * 60 * 60 * 24));
+      calculations.daysSinceRecording = daysSince;
+    }
+    
+    // Analysis type information
+    calculations.analysisType = {
+      service: formData.serviceRequiredDisplay || formData.serviceRequired,
+      jobRequired: formData.jobRequired,
+      isUrgent: formData.jobRequired === 'Urgent' || formData.serviceRequired === 'Make Playable'
+    };
+    
+    // Evidence location summary
+    calculations.evidenceLocation = {
+      storageType: formData.videoLocationDisplay || formData.videoLocation,
+      hasPhysicalLocation: !!formData.bagNumber || !!formData.lockerNumber,
+      bagNumber: formData.bagNumber || null,
+      lockerNumber: formData.lockerNumber || null
+    };
+  }
+  
   return calculations;
 }

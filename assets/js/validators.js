@@ -43,6 +43,9 @@ export function validateField(value, fieldName, required = false) {
     case CONFIG.FIELD_NAMES.LOCKER_NUMBER:
       return validateLockerNumber(trimmedValue);
       
+    case CONFIG.FIELD_NAMES.RECORDING_DATE:
+      return validatePastDate(trimmedValue);
+      
     default:
       return null;
   }
@@ -124,6 +127,25 @@ function validateLockerNumber(lockerNumber) {
 }
 
 /**
+ * Validate past date (must not be in the future)
+ * @param {string} date - Date to validate
+ * @returns {string|null} Error message or null
+ */
+function validatePastDate(date) {
+  if (!date) return null;
+  
+  const inputDate = new Date(date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  if (inputDate > today) {
+    return 'Date cannot be in the future';
+  }
+  
+  return null;
+}
+
+/**
  * Validate date/time ranges
  * @param {string} startTime - Start time
  * @param {string} endTime - End time
@@ -171,6 +193,22 @@ export function validateConditionalFields(formData) {
   // Check time offset if time is not correct
   if (formData.isTimeDateCorrect === 'No' && !formData.timeOffset?.trim()) {
     errors.timeOffset = CONFIG.MESSAGES.TIME_OFFSET_REQUIRED;
+  }
+  
+  // Analysis form specific conditionals
+  // Check offence type "Other"
+  if (formData.offenceType === 'Other' && !formData.offenceTypeOther?.trim()) {
+    errors.offenceTypeOther = CONFIG.MESSAGES.OFFENCE_OTHER_REQUIRED;
+  }
+  
+  // Check video location "Other"
+  if (formData.videoLocation === 'Other' && !formData.videoLocationOther?.trim()) {
+    errors.videoLocationOther = CONFIG.MESSAGES.VIDEO_LOCATION_OTHER_REQUIRED;
+  }
+  
+  // Check service required "Other"
+  if (formData.serviceRequired === 'Other' && !formData.serviceRequiredOther?.trim()) {
+    errors.serviceRequiredOther = CONFIG.MESSAGES.SERVICE_OTHER_REQUIRED;
   }
   
   return errors;

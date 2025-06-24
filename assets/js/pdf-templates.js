@@ -29,8 +29,8 @@ export const PDF_TEMPLATES = {
           ['Submission Date', formatDateTime(new Date())]
         ]),
         
-        // Officer Information
-        this.buildSection('Submitting Officer', [
+        // Investigator Information
+        this.buildSection('Submitting Investigator', [
           ['Name', data.rName],
           ['Badge #', data.badge],
           ['Phone', data.requestingPhone],
@@ -215,10 +215,160 @@ export const PDF_TEMPLATES = {
     }
   },
   
-  // Placeholder for other form types
   analysis: {
+    /**
+     * Build content for analysis form PDF
+     * @param {Object} data - Form data
+     * @returns {Array} PDF content definition
+     */
     buildContent(data) {
-      return [{ text: 'Analysis form PDF not implemented yet' }];
+      return [
+        // Header
+        this.buildHeader('Forensic Video Analysis Request'),
+        
+        // Case Information
+        this.buildSection('Case Information', [
+          ['Occurrence Number', data.occNumber],
+          ['Type of Offence', data.offenceTypeDisplay || data.offenceType],
+          ['Location of Video', data.videoLocationDisplay || data.videoLocation],
+          ['Bag Number', data.bagNumber || 'N/A'],
+          ['Locker Number', data.lockerNumber || 'N/A']
+        ]),
+        
+        // Investigator Information
+        this.buildSection('Submitting Investigator', [
+          ['Name', data.rName],
+          ['Badge #', data.badge],
+          ['Phone', data.requestingPhone],
+          ['Email', data.requestingEmail]
+        ]),
+        
+        // Evidence Details
+        this.buildSection('Evidence Details', [
+          ['Video Seized From', data.videoSeizedFrom],
+          ['Business Name', data.businessName || 'N/A'],
+          ['City', data.cityDisplay || data.city],
+          ['Recording Date', formatDateTime(data.recordingDate)],
+          ['Job Required', data.jobRequired]
+        ]),
+        
+        // File Names if provided
+        data.fileNames ? this.buildFileNamesSection(data.fileNames) : {},
+        
+        // Request Details
+        this.buildSection('Analysis Request', [
+          ['Service Required', data.serviceRequiredDisplay || data.serviceRequired]
+        ]),
+        
+        // Request Details Text
+        this.buildRequestDetailsSection(data.requestDetails),
+        
+        // Additional Information
+        data.additionalInfo ? this.buildNotesSection(data.additionalInfo) : {},
+        
+        // Footer
+        this.buildFooter()
+      ];
+    },
+    
+    buildHeader(title) {
+      return {
+        columns: [
+          {
+            text: 'PEEL REGIONAL POLICE\nForensic Video Unit',
+            style: 'header'
+          },
+          {
+            text: title,
+            style: 'header',
+            alignment: 'right'
+          }
+        ],
+        margin: [0, 0, 0, 20]
+      };
+    },
+    
+    buildSection(title, fields) {
+      return {
+        margin: [0, 15, 0, 0],
+        stack: [
+          { text: title, style: 'subheader' },
+          {
+            table: {
+              widths: ['35%', '65%'],
+              body: fields.map(([label, value]) => [
+                { text: label, style: 'label' },
+                { text: value || 'N/A', style: 'value' }
+              ])
+            },
+            layout: 'lightHorizontalLines'
+          }
+        ]
+      };
+    },
+    
+    buildFileNamesSection(fileNames) {
+      const files = fileNames.split('\n').filter(f => f.trim());
+      
+      return {
+        margin: [0, 15, 0, 0],
+        stack: [
+          { text: 'File Names', style: 'subheader' },
+          {
+            ul: files.map(file => ({ text: file.trim(), fontSize: 10 }))
+          }
+        ]
+      };
+    },
+    
+    buildRequestDetailsSection(details) {
+      return {
+        margin: [0, 15, 0, 0],
+        stack: [
+          { text: 'Request Details', style: 'subheader' },
+          {
+            table: {
+              widths: ['*'],
+              body: [[{
+                text: details || 'No details provided',
+                margin: [5, 5, 5, 5],
+                fontSize: 11
+              }]]
+            },
+            layout: {
+              fillColor: '#f8f8f8'
+            }
+          }
+        ]
+      };
+    },
+    
+    buildNotesSection(notes) {
+      return {
+        margin: [0, 15, 0, 0],
+        stack: [
+          { text: 'Additional Information', style: 'subheader' },
+          {
+            text: notes,
+            fontSize: 11,
+            margin: [0, 5, 0, 0]
+          }
+        ]
+      };
+    },
+    
+    buildFooter() {
+      return [
+        { text: '\n\n' },
+        { 
+          text: `Generated: ${new Date().toLocaleString()}`, 
+          style: 'footer' 
+        },
+        { 
+          text: 'This is an official request document', 
+          style: 'footer' 
+        }
+      ];
     }
   },
   

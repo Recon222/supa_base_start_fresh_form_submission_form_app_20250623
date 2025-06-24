@@ -5,6 +5,7 @@
  */
 
 import { CONFIG } from './config.js';
+import { PDF_TEMPLATES } from './pdf-templates.js';
 
 /**
  * Generate PDF from form data
@@ -13,19 +14,33 @@ import { CONFIG } from './config.js';
  * @returns {Promise<Blob>} PDF blob
  */
 export async function generatePDF(formData, formType) {
-  // For now, return a placeholder
-  // In production, this would use pdfmake to generate actual PDFs
+  const template = PDF_TEMPLATES[formType];
+  if (!template) {
+    throw new Error(`No PDF template found for form type: ${formType}`);
+  }
   
-  const placeholderContent = `
-    ${formType.toUpperCase()} REQUEST FORM
-    
-    Generated: ${new Date().toISOString()}
-    
-    Form Data:
-    ${JSON.stringify(formData, null, 2)}
-  `;
+  // Build document definition
+  const docDefinition = {
+    pageSize: 'LETTER',
+    pageMargins: [40, 60, 40, 60],
+    content: template.buildContent(formData),
+    styles: PDF_STYLES,
+    defaultStyle: {
+      font: 'Helvetica'
+    }
+  };
   
-  return new Blob([placeholderContent], { type: 'application/pdf' });
+  // Generate PDF using pdfmake
+  return new Promise((resolve, reject) => {
+    try {
+      const pdf = pdfMake.createPdf(docDefinition);
+      pdf.getBlob((blob) => {
+        resolve(blob);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
 /**

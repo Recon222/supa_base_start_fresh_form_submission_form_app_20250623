@@ -9,6 +9,8 @@ import { saveDraft, loadDraft, clearDraft, hasDraft, getDraftAge, saveSessionSta
 import { saveOfficerInfo, loadOfficerInfo, hasOfficerInfo, isFirstTimeUse, acknowledgeStorage, clearOfficerInfo } from './officer-storage.js';
 import { debounce, toggleElement, scrollToElement, showToast, createElement, generateId } from './utils.js';
 import { calculateRetentionDays, generateFieldSummaries } from './calculations.js';
+import { generatePDF } from './pdf-generator.js';
+import { generateJSON } from './json-generator.js';
 
 /**
  * Base FormHandler class
@@ -72,7 +74,7 @@ export class FormHandler {
     const clearBtn = document.getElementById('clearOfficerInfo');
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
-        if (confirm('Clear saved officer information from this browser?')) {
+        if (confirm('Clear saved investigator information from this browser?')) {
           if (clearOfficerInfo()) {
             // Clear the fields
             ['rName', 'badge', 'requestingPhone', 'requestingEmail'].forEach(name => {
@@ -250,7 +252,7 @@ export class FormHandler {
     
     if (saveOfficerInfo(officerData)) {
       // Subtle feedback that info was saved
-      console.log('Officer info saved for next time');
+      console.log('Investigator info saved for next time');
     }
     
     // This will be overridden by specific form handlers
@@ -997,17 +999,288 @@ export class UploadFormHandler extends FormHandler {
   }
   
   async submitForm(formData) {
-    // For now, just log the data
-    console.log('Upload form ready for submission:', formData);
+    // Save officer info automatically
+    const officerData = {
+      rName: formData.rName,
+      badge: formData.badge,
+      requestingPhone: formData.requestingPhone,
+      requestingEmail: formData.requestingEmail
+    };
     
-    // In production, this would:
-    // 1. Generate PDF using pdf-generator
-    // 2. Generate JSON using json-generator
-    // 3. Submit via api-client
+    if (saveOfficerInfo(officerData)) {
+      console.log('Investigator info saved for next time');
+    }
     
-    showToast('Upload form validated successfully! (Submission not implemented)', 'success');
+    try {
+      // Generate PDF and JSON
+      const [pdfBlob, jsonBlob] = await Promise.all([
+        generatePDF(formData, this.formType),
+        generateJSON(formData, this.formType)
+      ]);
+      
+      console.log('Upload form ready for submission:', formData);
+      console.log('PDF generated:', pdfBlob.size, 'bytes');
+      console.log('JSON generated:', jsonBlob.size, 'bytes');
+      
+      // In production, this would submit via api-client
+      // For now, we can download the files for testing
+      if (CONFIG.IS_DEVELOPMENT) {
+        // Download PDF
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        const pdfLink = document.createElement('a');
+        pdfLink.href = pdfUrl;
+        pdfLink.download = `upload_${Date.now()}.pdf`;
+        pdfLink.click();
+        URL.revokeObjectURL(pdfUrl);
+        
+        // Download JSON
+        const jsonUrl = URL.createObjectURL(jsonBlob);
+        const jsonLink = document.createElement('a');
+        jsonLink.href = jsonUrl;
+        jsonLink.download = `upload_${Date.now()}.json`;
+        jsonLink.click();
+        URL.revokeObjectURL(jsonUrl);
+      }
+      
+      showToast('Upload form processed successfully!', 'success');
+      
+      // Clear draft on successful submission
+      clearDraft(this.formType);
+      
+    } catch (error) {
+      console.error('Error generating files:', error);
+      showToast('Error generating PDF/JSON files', 'error');
+    }
+  }
+}
+
+/**
+ * Analysis Form Handler
+ * Specific handling for analysis form
+ */
+export class AnalysisFormHandler extends FormHandler {
+  constructor(formId) {
+    super(formId);
+    this.setupAnalysisSpecificListeners();
+  }
+  
+  setupAnalysisSpecificListeners() {
+    // Offence Type conditional
+    const offenceTypeField = this.form.querySelector('#offenceType');
+    if (offenceTypeField) {
+      offenceTypeField.addEventListener('change', (e) => {
+        const otherGroup = document.getElementById('offenceTypeOtherGroup');
+        const otherField = document.getElementById('offenceTypeOther');
+        const showOther = e.target.value === 'Other';
+        
+        toggleElement(otherGroup, showOther);
+        if (showOther) {
+          otherField.setAttribute('required', 'required');
+        } else {
+          otherField.removeAttribute('required');
+          otherField.value = '';
+          this.showFieldValidation(otherField, null);
+        }
+      });
+    }
     
-    // Clear draft on successful submission
-    clearDraft(this.formType);
+    // Video Location conditional
+    const videoLocationField = this.form.querySelector('#videoLocation');
+    if (videoLocationField) {
+      videoLocationField.addEventListener('change', (e) => {
+        const otherGroup = document.getElementById('videoLocationOtherGroup');
+        const otherField = document.getElementById('videoLocationOther');
+        const showOther = e.target.value === 'Other';
+        
+        toggleElement(otherGroup, showOther);
+        if (showOther) {
+          otherField.setAttribute('required', 'required');
+        } else {
+          otherField.removeAttribute('required');
+          otherField.value = '';
+          this.showFieldValidation(otherField, null);
+        }
+      });
+    }
+    
+    // City conditional
+    const cityField = this.form.querySelector('#city');
+    if (cityField) {
+      cityField.addEventListener('change', (e) => {
+        const otherGroup = document.getElementById('cityOtherGroup');
+        const otherField = document.getElementById('cityOther');
+        const showOther = e.target.value === 'Other';
+        
+        toggleElement(otherGroup, showOther);
+        if (showOther) {
+          otherField.setAttribute('required', 'required');
+        } else {
+          otherField.removeAttribute('required');
+          otherField.value = '';
+          this.showFieldValidation(otherField, null);
+        }
+      });
+    }
+    
+    // Service Required conditional
+    const serviceRequiredField = this.form.querySelector('#serviceRequired');
+    if (serviceRequiredField) {
+      serviceRequiredField.addEventListener('change', (e) => {
+        const otherGroup = document.getElementById('serviceRequiredOtherGroup');
+        const otherField = document.getElementById('serviceRequiredOther');
+        const showOther = e.target.value === 'Other';
+        
+        toggleElement(otherGroup, showOther);
+        if (showOther) {
+          otherField.setAttribute('required', 'required');
+        } else {
+          otherField.removeAttribute('required');
+          otherField.value = '';
+          this.showFieldValidation(otherField, null);
+        }
+      });
+    }
+    
+    // Set occurrence date from recording date
+    const recordingDateField = this.form.querySelector('#recordingDate');
+    if (recordingDateField) {
+      recordingDateField.addEventListener('change', (e) => {
+        const occDateField = this.form.querySelector('#occDate');
+        if (occDateField && e.target.value) {
+          occDateField.value = e.target.value;
+        }
+      });
+    }
+  }
+  
+  setupConditionalField(selectId, groupId, inputId, triggerValue) {
+    const selectField = this.form.querySelector(`#${selectId}`);
+    if (selectField) {
+      selectField.addEventListener('change', (e) => {
+        const group = document.getElementById(groupId);
+        const input = document.getElementById(inputId);
+        const show = e.target.value === triggerValue;
+        
+        toggleElement(group, show);
+        if (show) {
+          input.setAttribute('required', 'required');
+        } else {
+          input.removeAttribute('required');
+          input.value = '';
+          this.showFieldValidation(input, null);
+        }
+      });
+    }
+  }
+  
+  collectFormData() {
+    const data = super.collectFormData();
+    
+    // Set request area
+    data[CONFIG.FIELD_NAMES.REQUEST_AREA] = CONFIG.FORM_TYPES.ANALYSIS;
+    
+    // Map occurrence type
+    data[CONFIG.FIELD_NAMES.OCCURRENCE_TYPE] = data.offenceType === 'Other' ? 
+      data.offenceTypeOther : data.offenceType;
+    
+    // Generate field summaries for third-party
+    data[CONFIG.FIELD_NAMES.FILE_DETAILS] = this.generateFileDetails(data);
+    data[CONFIG.FIELD_NAMES.REQUEST_DETAILS] = data.requestDetails || '';
+    
+    // Handle conditional fields for display
+    if (data.offenceType === 'Other' && data.offenceTypeOther) {
+      data.offenceTypeDisplay = data.offenceTypeOther;
+    } else {
+      data.offenceTypeDisplay = data.offenceType;
+    }
+    
+    if (data.videoLocation === 'Other' && data.videoLocationOther) {
+      data.videoLocationDisplay = data.videoLocationOther;
+    } else {
+      data.videoLocationDisplay = data.videoLocation;
+    }
+    
+    if (data.city === 'Other' && data.cityOther) {
+      data.cityDisplay = data.cityOther;
+    } else {
+      data.cityDisplay = data.city;
+    }
+    
+    if (data.serviceRequired === 'Other' && data.serviceRequiredOther) {
+      data.serviceRequiredDisplay = data.serviceRequiredOther;
+    } else {
+      data.serviceRequiredDisplay = data.serviceRequired;
+    }
+    
+    return data;
+  }
+  
+  generateFileDetails(data) {
+    const details = [];
+    if (data.videoLocation) {
+      const location = data.videoLocation === 'Other' ? data.videoLocationOther : data.videoLocation;
+      details.push(`Location: ${location}`);
+    }
+    if (data.videoSeizedFrom) details.push(`Seized from: ${data.videoSeizedFrom}`);
+    if (data.fileNames) {
+      const fileCount = data.fileNames.split('\n').filter(f => f.trim()).length;
+      details.push(`${fileCount} file(s) listed`);
+    }
+    return details.join(' | ');
+  }
+  
+  async submitForm(formData) {
+    // Save officer info automatically
+    const officerData = {
+      rName: formData.rName,
+      badge: formData.badge,
+      requestingPhone: formData.requestingPhone,
+      requestingEmail: formData.requestingEmail
+    };
+    
+    if (saveOfficerInfo(officerData)) {
+      console.log('Investigator info saved for next time');
+    }
+    
+    try {
+      // Generate PDF and JSON
+      const [pdfBlob, jsonBlob] = await Promise.all([
+        generatePDF(formData, this.formType),
+        generateJSON(formData, this.formType)
+      ]);
+      
+      console.log('Analysis form ready for submission:', formData);
+      console.log('PDF generated:', pdfBlob.size, 'bytes');
+      console.log('JSON generated:', jsonBlob.size, 'bytes');
+      
+      // In production, this would submit via api-client
+      // For now, we can download the files for testing
+      if (CONFIG.IS_DEVELOPMENT) {
+        // Download PDF
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        const pdfLink = document.createElement('a');
+        pdfLink.href = pdfUrl;
+        pdfLink.download = `analysis_${Date.now()}.pdf`;
+        pdfLink.click();
+        URL.revokeObjectURL(pdfUrl);
+        
+        // Download JSON
+        const jsonUrl = URL.createObjectURL(jsonBlob);
+        const jsonLink = document.createElement('a');
+        jsonLink.href = jsonUrl;
+        jsonLink.download = `analysis_${Date.now()}.json`;
+        jsonLink.click();
+        URL.revokeObjectURL(jsonUrl);
+      }
+      
+      showToast('Analysis form processed successfully!', 'success');
+      
+      // Clear draft on successful submission
+      clearDraft(this.formType);
+      
+    } catch (error) {
+      console.error('Error generating files:', error);
+      showToast('Error generating PDF/JSON files', 'error');
+    }
   }
 }
