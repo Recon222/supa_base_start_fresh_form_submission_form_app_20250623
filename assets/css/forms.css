@@ -818,6 +818,25 @@ select.form-control.is-valid {
   display: none;
 }
 
+/* Theme-specific icon colors for visibility */
+[data-theme="light"] .theme-toggle svg {
+  stroke: #000000; /* Black sun in light mode */
+}
+
+[data-theme="dark"] .theme-toggle svg {
+  stroke: #ffffff; /* White moon in dark mode */
+}
+
+/* Optional: Smooth color transition */
+.theme-toggle svg {
+  transition: stroke 0.3s ease;
+}
+
+/* Optional: Hover effect */
+.theme-toggle:hover svg {
+  stroke: var(--color-primary); /* Blue on hover */
+}
+
 /* ========================================
    11. UTILITY CLASSES
    Keep it DRY!
