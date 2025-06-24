@@ -55,6 +55,19 @@
   --font-size-3xl: 2rem;
   --font-size-4xl: 3rem;
   
+  /* Line height and typography spacing */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  --input-line-height: 1.4;
+  --select-arrow-size: 0.5rem;
+  --select-arrow-spacing: 2.5rem;
+  
+  /* Note: SVG data URIs don't support CSS variables, so arrow colors are hardcoded
+     but documented here for maintenance:
+     Dark mode arrow: #9ca3af (improved contrast)
+     Light mode arrow: #6c757d */
+  
   /* Layout */
   --container-max-width: 1200px;
   --header-height: 80px;
@@ -156,6 +169,22 @@
 
 [data-theme="light"] .form-control:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 var(--input-autofill-shadow-depth) var(--surface-elevated) inset !important;
+}
+
+/* Light theme select fixes */
+[data-theme="light"] select.form-control {
+  /* Light mode arrow (#6c757d) */
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+[data-theme="light"] select.form-control option {
+  background-color: var(--surface-elevated);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] select.form-control option:hover,
+[data-theme="light"] select.form-control option:checked {
+  background-color: var(--surface-dark);
 }
 
 /* ========================================
@@ -438,10 +467,12 @@ a:hover {
 /* Form controls - the heart of the forms */
 .form-control {
   width: 100%;
-  height: var(--input-height);
+  min-height: var(--input-height);
+  height: auto;
   padding: var(--input-padding-y) var(--input-padding-x);
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
+  line-height: var(--input-line-height);
   color: var(--text-primary);
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
@@ -480,9 +511,50 @@ textarea.form-control {
   resize: vertical;
 }
 
-/* Select specific */
+/* Select specific fixes */
 select.form-control {
   cursor: pointer;
+  /* Ensure text doesn't get cut off */
+  padding-top: calc(var(--input-padding-y) + 2px);
+  padding-bottom: calc(var(--input-padding-y) + 2px);
+  /* Fix dropdown arrow positioning */
+  padding-right: var(--select-arrow-spacing);
+  /* Custom arrow styling */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  /* Dark mode arrow with improved contrast (#9ca3af) */
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--input-padding-x) center;
+  background-size: var(--select-arrow-size);
+}
+
+/* Fix select dropdown colors in dark mode */
+select.form-control option {
+  background-color: var(--surface-dark);
+  color: var(--text-primary);
+  padding: var(--space-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+/* Hover state for options */
+select.form-control option:hover,
+select.form-control option:checked {
+  background-color: var(--surface-elevated);
+  color: var(--text-primary);
+}
+
+/* Text input specific fixes */
+input[type="text"].form-control,
+input[type="email"].form-control,
+input[type="tel"].form-control,
+input[type="number"].form-control {
+  /* Ensure text baseline alignment */
+  display: flex;
+  align-items: center;
+  padding-top: calc(var(--input-padding-y) - 2px);
+  padding-bottom: calc(var(--input-padding-y) - 2px);
 }
 
 /* ========================================
@@ -526,11 +598,21 @@ select.form-control {
 
 /* Special handling for select elements */
 select.form-control.is-valid {
-  /* Selects can't have background images in some browsers */
   border-color: var(--color-success);
   background-color: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
-  box-shadow: inset 0 0 0 1px rgba(var(--input-success-shadow-rgb), var(--input-valid-shadow-alpha));
+  /* Dual backgrounds: arrow and checkmark */
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16.667 5L7.5 14.167 3.333 10' stroke='%2328a745' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-position: 
+    right var(--input-padding-x) center,
+    right calc(var(--input-padding-x) + var(--select-arrow-spacing)) center;
+  background-repeat: no-repeat;
+  background-size: 
+    var(--select-arrow-size),
+    var(--input-checkmark-size);
+  padding-right: calc(var(--select-arrow-spacing) + var(--space-xl));
 }
 
 .invalid-feedback {
@@ -749,7 +831,35 @@ select.form-control.is-valid {
 }
 
 /* ========================================
-   13. RESPONSIVE
+   13. BROWSER-SPECIFIC FIXES
+   ======================================== */
+/* Firefox-specific select fixes */
+@-moz-document url-prefix() {
+  select.form-control {
+    padding-top: calc(var(--input-padding-y) + 4px);
+    padding-bottom: calc(var(--input-padding-y) + 4px);
+  }
+  
+  select.form-control option {
+    background-color: var(--surface-dark) !important;
+    color: var(--text-primary) !important;
+  }
+}
+
+/* Webkit-specific select styling */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  select.form-control {
+    background-color: var(--glass-bg) !important;
+  }
+  
+  select.form-control option {
+    background-color: var(--surface-dark) !important;
+    color: var(--text-primary) !important;
+  }
+}
+
+/* ========================================
+   14. RESPONSIVE
    Mobile-first approach
    ======================================== */
 /* Note: CSS variables don't work in media queries, so we use the raw value */
