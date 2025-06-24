@@ -818,23 +818,46 @@ select.form-control.is-valid {
   display: none;
 }
 
-/* Theme-specific icon colors for visibility */
-[data-theme="light"] .theme-toggle svg {
-  stroke: #000000; /* Black sun in light mode */
+/* Force sun icon to be black in light mode */
+[data-theme="light"] .theme-toggle .sun-icon {
+  stroke: #000000 !important;
+  fill: none !important;
+  opacity: 1 !important;
+  display: block !important;
 }
 
-[data-theme="dark"] .theme-toggle svg {
-  stroke: #ffffff; /* White moon in dark mode */
+/* Target ALL child elements of sun icon */
+[data-theme="light"] .theme-toggle .sun-icon circle,
+[data-theme="light"] .theme-toggle .sun-icon path {
+  stroke: #000000 !important;
+  stroke-width: 2px !important;
+  fill: none !important;
 }
 
-/* Optional: Smooth color transition */
-.theme-toggle svg {
-  transition: stroke 0.3s ease;
+/* Hide moon in light mode */
+[data-theme="light"] .theme-toggle .moon-icon {
+  display: none !important;
 }
 
-/* Optional: Hover effect */
-.theme-toggle:hover svg {
-  stroke: var(--color-primary); /* Blue on hover */
+/* Force moon icon to be white in dark mode */
+[data-theme="dark"] .theme-toggle .moon-icon {
+  stroke: #ffffff !important;
+  fill: #ffffff !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+
+/* Hide sun in dark mode */
+[data-theme="dark"] .theme-toggle .sun-icon {
+  display: none !important;
+}
+
+/* Hover state for both */
+.theme-toggle:hover .sun-icon circle,
+.theme-toggle:hover .sun-icon path,
+.theme-toggle:hover .moon-icon,
+.theme-toggle:hover .moon-icon path {
+  stroke: var(--color-primary) !important;
 }
 
 /* ========================================
