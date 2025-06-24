@@ -47,6 +47,7 @@ export const CONFIG = {
     EVIDENCE_BAG: 'evidenceBag',
     BADGE: 'badge',
     MEDIA_TYPE: 'mediaType',
+    LOCKER_NUMBER: 'lockerNumber',
     BUSINESS_NAME: 'businessName',
     LOCATION_ADDRESS: 'locationAddress',
     CITY: 'city',

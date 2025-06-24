@@ -40,6 +40,9 @@ export function validateField(value, fieldName, required = false) {
     case CONFIG.FIELD_NAMES.TIME_OFFSET:
       return validateTimeOffset(trimmedValue);
       
+    case CONFIG.FIELD_NAMES.LOCKER_NUMBER:
+      return validateLockerNumber(trimmedValue);
+      
     default:
       return null;
   }
@@ -93,6 +96,30 @@ function validateTimeOffset(timeOffset) {
   if (!CONFIG.VALIDATION_PATTERNS.TIME_OFFSET.test(timeOffset)) {
     return CONFIG.MESSAGES.TIME_OFFSET_REQUIRED;
   }
+  return null;
+}
+
+/**
+ * Validate locker number (1-15, optional field)
+ * @param {string} lockerNumber - Locker number to validate
+ * @returns {string|null} Error message or null
+ */
+function validateLockerNumber(lockerNumber) {
+  // If empty, it's valid (optional field)
+  if (!lockerNumber || lockerNumber.trim() === '') {
+    return null;
+  }
+  
+  const num = parseInt(lockerNumber, 10);
+  
+  if (isNaN(num)) {
+    return 'Locker number must be a number';
+  }
+  
+  if (num < 1 || num > 15) {
+    return 'Locker number must be between 1 and 15';
+  }
+  
   return null;
 }
 

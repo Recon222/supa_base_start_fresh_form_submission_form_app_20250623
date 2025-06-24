@@ -557,6 +557,19 @@ input[type="number"].form-control {
   padding-bottom: calc(var(--input-padding-y) - 2px);
 }
 
+/* Number input specific styling */
+input[type="number"].form-control {
+  -moz-appearance: textfield; /* Firefox - removes spinner by default */
+}
+
+/* Show spinner buttons but style them properly */
+input[type="number"].form-control::-webkit-outer-spin-button,
+input[type="number"].form-control::-webkit-inner-spin-button {
+  opacity: 1;
+  height: var(--input-height);
+  margin: 0;
+}
+
 /* ========================================
    9. FORM VALIDATION STATES
    The red/green borders you wanted!
@@ -793,7 +806,54 @@ select.form-control.is-valid {
 .d-flex { display: flex; }
 
 /* ========================================
-   12. ANIMATIONS
+   12. FORM LAYOUT
+   Two-column responsive layout
+   ======================================== */
+/* Two-column form layout */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+/* Full width field within form-row */
+.form-row .full-width {
+  grid-column: 1 / -1;
+}
+
+/* Remove margin from form-groups inside form-row to prevent double spacing */
+.form-row .form-group {
+  margin-bottom: 0;
+}
+
+/* Optional: Allow specific sizing */
+.form-row.weighted-left {
+  grid-template-columns: 2fr 1fr;
+}
+
+.form-row.weighted-right {
+  grid-template-columns: 1fr 2fr;
+}
+
+/* Stack on mobile */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Restore margin on mobile since fields stack */
+  .form-row .form-group {
+    margin-bottom: var(--space-lg);
+  }
+  
+  .form-row .form-group:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* ========================================
+   13. ANIMATIONS
    All keyframes in one place
    ======================================== */
 @keyframes gridMove {
