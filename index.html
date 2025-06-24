@@ -8,6 +8,13 @@
   
   <!-- Main CSS -->
   <link rel="stylesheet" href="assets/css/forms.css">
+  
+  <!-- Early theme initialization to prevent FOUC -->
+  <script>
+    // Prevent flash of unstyled content by setting theme before body renders
+    document.documentElement.setAttribute('data-theme', 
+      localStorage.getItem('fvu-theme') || 'dark');
+  </script>
 </head>
 <body>
   <!-- Animated Background - The cool grid effect with floating shapes -->
@@ -144,19 +151,12 @@
   </main>
 
   <!-- Simple JavaScript for theme toggle and initialization -->
-  <script>
-    // Initialize theme from localStorage or default to dark
-    const savedTheme = localStorage.getItem('fvu-theme') || 'dark';
-    document.body.setAttribute('data-theme', savedTheme);
+  <script type="module">
+    import { initTheme, setupThemeToggle } from './assets/js/theme-manager.js';
     
-    // Theme toggle functionality
-    document.getElementById('theme-toggle').addEventListener('click', function() {
-      const currentTheme = document.body.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      
-      document.body.setAttribute('data-theme', newTheme);
-      localStorage.setItem('fvu-theme', newTheme);
-    });
+    // Initialize theme system
+    initTheme();
+    setupThemeToggle();
     
     // Add 3D tilt effect on card hover (optional enhancement)
     document.querySelectorAll('.form-card').forEach(card => {

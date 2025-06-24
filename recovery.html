@@ -9,11 +9,18 @@
   <!-- CSS Files -->
   <link rel="stylesheet" href="assets/css/forms.css">
   
+  <!-- Early theme initialization to prevent FOUC -->
+  <script>
+    // Prevent flash of unstyled content by setting theme before body renders
+    document.documentElement.setAttribute('data-theme', 
+      localStorage.getItem('fvu-theme') || 'dark');
+  </script>
+  
   <!-- Libraries -->
   <script src="lib/pdfmake.min.js"></script>
   <script src="lib/vfs_fonts.js"></script>
 </head>
-<body data-theme="dark">
+<body>
   <!-- Background Elements -->
   <div class="grid-background"></div>
   <div class="floating-shapes">
@@ -476,18 +483,11 @@
   <script type="module">
     import { CONFIG } from './assets/js/config.js';
     import { RecoveryFormHandler } from './assets/js/form-handler.js';
+    import { initTheme, setupThemeToggle } from './assets/js/theme-manager.js';
     
-    // Initialize theme
-    const savedTheme = localStorage.getItem('fvu-theme') || 'dark';
-    document.body.setAttribute('data-theme', savedTheme);
-    
-    // Theme toggle
-    document.getElementById('theme-toggle').addEventListener('click', function() {
-      const currentTheme = document.body.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      document.body.setAttribute('data-theme', newTheme);
-      localStorage.setItem('fvu-theme', newTheme);
-    });
+    // Initialize theme system
+    initTheme();
+    setupThemeToggle();
     
     // Initialize form handler
     const formHandler = new RecoveryFormHandler('recovery-form');

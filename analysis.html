@@ -9,11 +9,18 @@
   <!-- CSS Files -->
   <link rel="stylesheet" href="assets/css/forms.css">
   
+  <!-- Early theme initialization to prevent FOUC -->
+  <script>
+    // Prevent flash of unstyled content by setting theme before body renders
+    document.documentElement.setAttribute('data-theme', 
+      localStorage.getItem('fvu-theme') || 'dark');
+  </script>
+  
   <!-- Libraries -->
   <script src="lib/pdfmake.min.js"></script>
   <script src="lib/vfs_fonts.js"></script>
 </head>
-<body data-theme="dark">
+<body>
   <!-- Background Elements -->
   <div class="grid-background"></div>
   <div class="floating-shapes">
@@ -37,7 +44,7 @@
       <div class="header-actions">
         <!-- Back Button & Theme Toggle -->
         <div class="d-flex" style="gap: 1rem; align-items: center;">
-          <a href="index.html" class="btn btn-secondary">ê Back</a>
+          <a href="index.html" class="btn btn-secondary">ÔøΩ Back</a>
           <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
             <svg class="sun-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <circle cx="12" cy="12" r="5" stroke-width="2"/>
@@ -428,18 +435,11 @@
   <script type="module">
     import { CONFIG } from './assets/js/config.js';
     import { AnalysisFormHandler } from './assets/js/form-handler.js';
+    import { initTheme, setupThemeToggle } from './assets/js/theme-manager.js';
     
-    // Initialize theme
-    const savedTheme = localStorage.getItem('fvu-theme') || 'dark';
-    document.body.setAttribute('data-theme', savedTheme);
-    
-    // Theme toggle
-    document.getElementById('theme-toggle').addEventListener('click', function() {
-      const currentTheme = document.body.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      document.body.setAttribute('data-theme', newTheme);
-      localStorage.setItem('fvu-theme', newTheme);
-    });
+    // Initialize theme system
+    initTheme();
+    setupThemeToggle();
     
     // Initialize form handler
     const formHandler = new AnalysisFormHandler('analysis-form');
