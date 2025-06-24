@@ -6,6 +6,7 @@
 import { CONFIG } from './config.js';
 import { validateField, validateDateRange, validateConditionalFields, validateLocations, calculateFormCompletion, formatPhone } from './validators.js';
 import { saveDraft, loadDraft, clearDraft, hasDraft, getDraftAge, saveSessionStart } from './storage.js';
+import { saveOfficerInfo, loadOfficerInfo, hasOfficerInfo, isFirstTimeUse, acknowledgeStorage, clearOfficerInfo } from './officer-storage.js';
 import { debounce, toggleElement, scrollToElement, showToast, createElement, generateId } from './utils.js';
 import { calculateRetentionDays, generateFieldSummaries } from './calculations.js';
 
@@ -33,6 +34,9 @@ export class FormHandler {
     
     // Set up event listeners
     this.setupEventListeners();
+    
+    // Load officer info if exists
+    this.loadOfficerInfoIfExists();
     
     // Load draft if exists
     this.loadDraftIfExists();
@@ -63,6 +67,26 @@ export class FormHandler {
     
     // Progress bar updates
     this.form.addEventListener('change', () => this.updateProgress());
+    
+    // Clear officer info button
+    const clearBtn = document.getElementById('clearOfficerInfo');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        if (confirm('Clear saved officer information from this browser?')) {
+          if (clearOfficerInfo()) {
+            // Clear the fields
+            ['rName', 'badge', 'requestingPhone', 'requestingEmail'].forEach(name => {
+              const field = this.form.querySelector(`[name="${name}"]`);
+              if (field) {
+                field.value = '';
+                field.classList.remove('is-valid');
+              }
+            });
+            showToast(CONFIG.MESSAGES.OFFICER_INFO_CLEARED, 'info');
+          }
+        }
+      });
+    }
   }
   
   validateSingleField(field) {
@@ -216,6 +240,19 @@ export class FormHandler {
   }
   
   async submitForm(formData) {
+    // Save officer info automatically
+    const officerData = {
+      rName: formData.rName,
+      badge: formData.badge,
+      requestingPhone: formData.requestingPhone,
+      requestingEmail: formData.requestingEmail
+    };
+    
+    if (saveOfficerInfo(officerData)) {
+      // Subtle feedback that info was saved
+      console.log('Officer info saved for next time');
+    }
+    
     // This will be overridden by specific form handlers
     console.log('Form data ready for submission:', formData);
     showToast('Form submission not implemented yet', 'info');
@@ -258,6 +295,34 @@ export class FormHandler {
         }, 2000);
       }
     }
+  }
+  
+  loadOfficerInfoIfExists() {
+    const officerInfo = loadOfficerInfo();
+    if (!officerInfo) return;
+    
+    // Show first-time notice if needed
+    if (isFirstTimeUse()) {
+      showToast(CONFIG.MESSAGES.OFFICER_STORAGE_NOTICE, 'info', 5000);
+      acknowledgeStorage();
+    }
+    
+    // Only populate officer fields
+    const officerFields = ['rName', 'badge', 'requestingPhone', 'requestingEmail'];
+    
+    officerFields.forEach(fieldName => {
+      if (officerInfo[fieldName]) {
+        const field = this.form.querySelector(`[name="${fieldName}"]`);
+        if (field) {
+          field.value = officerInfo[fieldName];
+          // Trigger validation to show green border
+          this.validateSingleField(field);
+        }
+      }
+    });
+    
+    // Use existing toast system
+    showToast(CONFIG.MESSAGES.OFFICER_INFO_LOADED, 'success', 2000);
   }
   
   loadDraftIfExists() {

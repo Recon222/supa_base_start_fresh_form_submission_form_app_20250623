@@ -95,7 +95,11 @@ export const CONFIG = {
     SUBMISSION_ERROR: 'Error submitting request',
     NETWORK_ERROR: 'Network error. Your draft has been saved.',
     SESSION_WARNING: 'Your session will expire in 5 minutes',
-    SESSION_EXPIRED: 'Session expired. Please refresh the page.'
+    SESSION_EXPIRED: 'Session expired. Please refresh the page.',
+    OFFICER_INFO_LOADED: 'Officer information loaded',
+    OFFICER_INFO_SAVED: 'Officer information saved',
+    OFFICER_INFO_CLEARED: 'Officer information cleared',
+    OFFICER_STORAGE_NOTICE: 'Your officer information will be saved locally for convenience'
   },
   
   // City Options
@@ -134,6 +138,14 @@ export const CONFIG = {
     SESSION_WARNINGS: true,
     PROGRESS_BAR: true,
     ANIMATIONS: true
+  },
+  
+  // Officer Storage Configuration
+  OFFICER_STORAGE: {
+    ENABLED: true,
+    KEY: 'fvu_officer_info',
+    VERSION: '1.0',
+    FIRST_TIME_KEY: 'fvu_officer_storage_acknowledged'
   }
 };
 

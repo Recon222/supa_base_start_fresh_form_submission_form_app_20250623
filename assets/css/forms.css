@@ -788,6 +788,7 @@ select.form-control.is-valid {
    Keep it DRY!
    ======================================== */
 .text-center { text-align: center; }
+.text-right { text-align: right; }
 .text-muted { color: var(--text-secondary); }
 .text-danger { color: var(--color-danger); }
 .text-success { color: var(--color-success); }
