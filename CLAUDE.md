@@ -25,6 +25,7 @@ Forensic Video Unit Request System for Peel Regional Police with three request f
 - `api-client.js` - Form submission to PHP endpoint
 - `utils.js` - DOM helpers, toast notifications
 - `calculations.js` - Business logic calculations
+- `theme-manager.js` - Theme switching functionality
 
 ### Key Development Rules
 - **No over-engineering**: No React/Vue, no bundlers, no state management
@@ -50,7 +51,7 @@ occDate           // Occurrence date
 
 ### Form Features
 - Draft auto-save functionality
-- Client-side PDF and JSON generation (PDFMake only)
+- Client-side PDF and JSON generation (PDFMake with Roboto font only)
 - Progress tracking for required fields
 - Conditional field visibility
 - Session timeout warnings
@@ -58,6 +59,7 @@ occDate           // Occurrence date
 - Red borders + shake animation on errors
 - Smooth scroll to first error on submit
 - Clear forms after successful submission
+- Dark/light theme toggle with persistence
 
 ### Deployment Process
 1. Develop with HTML files locally
@@ -76,3 +78,11 @@ occDate           // Occurrence date
 - Handle JSON responses properly
 - Build forms FIRST to understand requirements
 - Create only modules needed to support forms
+- Theme stored in localStorage as 'fvu-theme'
+- Development mode detected via protocol, localhost, or 127.0.0.1
+
+### Common Issues & Solutions
+- **Font errors in PDF**: Use 'Roboto' font only (not Helvetica)
+- **Theme not switching**: Ensure data-theme is set on both html and body elements
+- **SVG icons invisible**: Remove stroke="currentColor" from SVGs, use CSS for colors
+- **Development mode not working**: Check if hostname is 127.0.0.1 (now supported)

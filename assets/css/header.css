@@ -1,0 +1,266 @@
+/* ========================================
+   HEADER STYLES - PEEL REGIONAL POLICE
+   ======================================== */
+
+/* Define Peel Colors as CSS Variables */
+:root {
+  --peel-blue: #1B3A6B;
+  --peel-yellow: #FFD100;
+  --peel-blue-light: #2B5AA8;
+  
+  /* Form title color - yellow in dark mode */
+  --form-title-color: var(--peel-yellow);
+  
+  /* Header specific sizes - fitted to content */
+  --header-height: 80px;
+  --header-divider-height: 50px;
+  --header-button-size: 56px;
+  
+  /* Draft button shadows */
+  --draft-shadow-blue: 0 2px 8px rgba(27, 58, 107, 0.3);
+  --draft-shadow-blue-hover: 0 4px 12px rgba(27, 58, 107, 0.4);
+  --draft-shadow-yellow: 0 2px 8px rgba(255, 209, 0, 0.3);
+  --draft-shadow-yellow-hover: 0 4px 12px rgba(255, 209, 0, 0.4);
+  --draft-shadow-default: 0 4px 12px rgba(0, 0, 0, 0.2);
+  
+  /* Animation values */
+  --pulse-duration: 1s;
+  --pulse-opacity-min: 0.7;
+  
+  /* Icon sizes - scaled up */
+  --draft-icon-size: 24px;
+  --theme-icon-size: 28px;
+}
+
+/* Light theme overrides */
+[data-theme="light"] {
+  /* Form title blue in light mode */
+  --form-title-color: var(--peel-blue);
+}
+
+/* Main Header - uses existing variables from forms.css */
+.main-header {
+  height: var(--header-height);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: var(--input-border-width) solid var(--border-color);
+  position: relative;
+  z-index: var(--z-sticky);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: var(--space-sm) 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  flex: 1;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* Form Title */
+.form-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--form-title-color);
+  white-space: nowrap;
+  margin: 0;
+  transition: color var(--transition-base);
+  line-height: var(--line-height-tight);
+}
+
+/* Header Divider */
+.header-divider {
+  width: var(--input-border-width);
+  height: var(--header-divider-height);
+  background: var(--border-color);
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast);
+}
+
+/* Draft Button Base */
+.draft-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  /* Default to auto-save style */
+  background: linear-gradient(135deg, var(--peel-blue) 0%, var(--peel-blue-light) 50%, var(--peel-yellow) 100%);
+  color: var(--color-white);
+  box-shadow: var(--draft-shadow-blue);
+}
+
+/* Draft button states - show when class applied */
+.draft-button.auto-save {
+  display: flex;
+  background: linear-gradient(135deg, var(--peel-blue) 0%, var(--peel-blue-light) 50%, var(--peel-yellow) 100%);
+  color: var(--color-white);
+  box-shadow: var(--draft-shadow-blue);
+}
+
+.draft-button.auto-save:hover {
+  transform: translateY(var(--btn-hover-lift));
+  box-shadow: var(--draft-shadow-blue-hover);
+}
+
+.draft-button.load-draft {
+  display: flex;
+  background: linear-gradient(135deg, var(--peel-yellow) 0%, var(--peel-blue-light) 100%);
+  color: var(--peel-blue);
+  font-weight: 600;
+  box-shadow: var(--draft-shadow-yellow);
+}
+
+.draft-button.load-draft:hover {
+  transform: translateY(var(--btn-hover-lift));
+  box-shadow: var(--draft-shadow-yellow-hover);
+}
+
+.draft-button.saving {
+  display: flex;
+  background: linear-gradient(135deg, var(--peel-blue) 0%, var(--peel-blue-light) 100%);
+  color: var(--color-white);
+  animation: pulse var(--pulse-duration) ease-in-out infinite;
+}
+
+.draft-button:hover {
+  transform: translateY(var(--btn-hover-lift));
+  box-shadow: var(--draft-shadow-blue-hover);
+}
+
+.draft-button:focus-visible {
+  outline: 2px solid var(--form-title-color);
+  outline-offset: 2px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: var(--pulse-opacity-min); }
+}
+
+/* Draft Icon */
+.draft-icon {
+  width: var(--draft-icon-size);
+  height: var(--draft-icon-size);
+  flex-shrink: 0;
+}
+
+/* Theme Toggle - reuse existing variables */
+.theme-toggle {
+  background: var(--glass-bg);
+  border: var(--input-border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--space-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--header-button-size);
+  height: var(--header-button-size);
+}
+
+.theme-toggle:hover {
+  background: var(--glass-bg-hover);
+  transform: translateY(var(--btn-hover-lift));
+}
+
+.theme-toggle svg {
+  width: var(--theme-icon-size);
+  height: var(--theme-icon-size);
+}
+
+/* Theme icon visibility */
+[data-theme="dark"] .sun-icon {
+  display: none;
+}
+
+[data-theme="light"] .moon-icon {
+  display: none;
+}
+
+/* Icon colors */
+.theme-toggle .sun-icon,
+.theme-toggle .sun-icon * {
+  stroke: var(--color-black);
+}
+
+.theme-toggle .moon-icon,
+.theme-toggle .moon-icon * {
+  stroke: var(--color-white);
+}
+
+.theme-toggle:hover svg,
+.theme-toggle:hover svg * {
+  stroke: var(--color-primary);
+}
+
+/* Logo Section (for index.html compatibility) */
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* Mobile Responsive - using breakpoint variable */
+@media (max-width: 768px) {
+  .header-content {
+    position: relative;
+    padding: var(--space-sm) var(--space-md);
+  }
+  
+  .header-left {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+  
+  .header-divider {
+    display: none;
+  }
+  
+  .form-title {
+    font-size: var(--font-size-lg);
+    flex: 1 0 100%;
+    order: 2;
+  }
+  
+  .btn-secondary.btn-sm {
+    order: 1;
+  }
+  
+  .header-right {
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-md);
+  }
+  
+  /* Draft button mobile - icon only */
+  .draft-button span:not(.draft-icon) {
+    display: none;
+  }
+  
+  .draft-button {
+    width: var(--header-button-size);
+    height: var(--header-button-size);
+    padding: 0;
+    justify-content: center;
+  }
+}

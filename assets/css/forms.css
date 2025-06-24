@@ -70,7 +70,6 @@
   
   /* Layout */
   --container-max-width: 1200px;
-  --header-height: 80px;
   --border-radius: 12px;
   --border-radius-lg: 20px;
   --border-radius-sm: 6px;
@@ -310,27 +309,6 @@ a:hover {
   padding: 0 var(--space-lg);
 }
 
-.main-header {
-  height: var(--header-height);
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  border-bottom: var(--input-border-width) solid var(--border-color);
-  position: relative;
-  z-index: var(--z-sticky);
-}
-
-.header-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 100%;
-}
-
-.logo-section {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-}
 
 /* ========================================
    6. HERO SECTION & CARDS
@@ -785,55 +763,6 @@ select.form-control.is-valid {
   transition: opacity var(--transition-base);
 }
 
-/* Theme toggle specific styles */
-.theme-toggle {
-  background: var(--glass-bg);
-  border: var(--input-border-width) solid var(--border-color);
-  border-radius: var(--border-radius);
-  padding: var(--space-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-}
-
-.theme-toggle:hover {
-  background: var(--glass-bg-hover);
-  transform: translateY(-2px);
-}
-
-.theme-toggle svg {
-  width: 24px;
-  height: 24px;
-}
-
-[data-theme="dark"] .sun-icon {
-  display: none;
-}
-
-[data-theme="light"] .moon-icon {
-  display: none;
-}
-
-/* Icon colors - much simpler now! */
-.theme-toggle .sun-icon,
-.theme-toggle .sun-icon * {
-  stroke: #000000;
-}
-
-.theme-toggle .moon-icon,
-.theme-toggle .moon-icon * {
-  stroke: #ffffff;
-}
-
-/* Hover state */
-.theme-toggle:hover svg,
-.theme-toggle:hover svg * {
-  stroke: var(--color-primary);
-}
 
 /* ========================================
    11. UTILITY CLASSES

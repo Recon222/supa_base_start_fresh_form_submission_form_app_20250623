@@ -209,6 +209,49 @@ export const CONFIG = {
     KEY: 'fvu_officer_info',
     VERSION: '1.0',
     FIRST_TIME_KEY: 'fvu_officer_storage_acknowledged'
+  },
+  
+  // Peel Regional Police Configuration
+  PEEL_COLORS: {
+    BLUE: '#1B3A6B',
+    YELLOW: '#FFD100',
+    BLUE_LIGHT: '#2B5AA8'
+  },
+
+  // Form Titles
+  FORM_TITLES: {
+    UPLOAD: 'Video Evidence Upload Request Form',
+    ANALYSIS: 'Forensic Analysis Request Form', 
+    RECOVERY: 'CCTV Recovery Request Form'
+  },
+
+  // Draft Button States
+  DRAFT_STATES: {
+    LOAD: 'load-draft',
+    AUTO_SAVE: 'auto-save',
+    SAVING: 'saving'
+  },
+
+  // Header Specific Sizes
+  HEADER_SIZES: {
+    DIVIDER_HEIGHT: '40px',
+    BUTTON_SIZE: '44px',
+    MOBILE_BREAKPOINT: '768px'
+  },
+
+  // Box Shadow Values
+  SHADOWS: {
+    DRAFT_BUTTON: '0 2px 8px rgba(27, 58, 107, 0.3)',
+    DRAFT_BUTTON_HOVER: '0 4px 12px rgba(27, 58, 107, 0.4)',
+    DRAFT_BUTTON_YELLOW: '0 2px 8px rgba(255, 209, 0, 0.3)',
+    DRAFT_BUTTON_YELLOW_HOVER: '0 4px 12px rgba(255, 209, 0, 0.4)',
+    BUTTON_HOVER: '0 4px 12px rgba(0, 0, 0, 0.2)'
+  },
+
+  // Draft Animation Values  
+  DRAFT_ANIMATIONS: {
+    PULSE_DURATION: 1000,
+    PULSE_OPACITY_MIN: 0.7
   }
 };
 
@@ -219,3 +262,9 @@ Object.freeze(CONFIG.FIELD_NAMES);
 Object.freeze(CONFIG.FORM_TYPES);
 Object.freeze(CONFIG.MESSAGES);
 Object.freeze(CONFIG.FEATURES);
+Object.freeze(CONFIG.PEEL_COLORS);
+Object.freeze(CONFIG.FORM_TITLES);
+Object.freeze(CONFIG.DRAFT_STATES);
+Object.freeze(CONFIG.HEADER_SIZES);
+Object.freeze(CONFIG.SHADOWS);
+Object.freeze(CONFIG.DRAFT_ANIMATIONS);
