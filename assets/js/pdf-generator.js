@@ -26,7 +26,7 @@ export async function generatePDF(formData, formType) {
     content: template.buildContent(formData),
     styles: PDF_STYLES,
     defaultStyle: {
-      font: 'Helvetica'
+      font: 'Roboto'
     }
   };
   
