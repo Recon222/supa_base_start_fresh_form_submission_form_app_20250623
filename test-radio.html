@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radio Button Test</title>
+  <link rel="stylesheet" href="assets/css/forms.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Radio Button Test</h1>
+    
+    <div class="form-section">
+      <h2>Test 1: Basic Radio Buttons (No Required)</h2>
+      <div class="form-group">
+        <label class="form-label">Is the Time & Date correct?</label>
+        <small class="form-text mb-2 d-block">Is the DVR time synchronized with actual time?</small>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="test1" id="test1Yes" value="Yes">
+          <label class="form-check-label" for="test1Yes">
+            Yes
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="test1" id="test1No" value="No">
+          <label class="form-check-label" for="test1No">
+            No
+          </label>
+        </div>
+      </div>
+
+      <h2>Test 2: Radio Buttons with Required</h2>
+      <div class="form-group">
+        <label class="form-label">Is the Time & Date correct? <span class="required">*</span></label>
+        <small class="form-text mb-2 d-block">Is the DVR time synchronized with actual time?</small>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="test2" id="test2Yes" value="Yes" required>
+          <label class="form-check-label" for="test2Yes">
+            Yes
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="test2" id="test2No" value="No" required>
+          <label class="form-check-label" for="test2No">
+            No
+          </label>
+        </div>
+        <div class="invalid-feedback"></div>
+      </div>
+
+      <h2>Test 3: Exact Copy from Recovery Form</h2>
+      <div class="form-group">
+        <label class="form-label">Is the Time & Date correct?</label>
+        <small class="form-text mb-2 d-block">Is the DVR time synchronized with actual time?</small>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectYes" value="Yes" required>
+          <label class="form-check-label" for="timeCorrectYes">
+            Yes
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectNo" value="No" required>
+          <label class="form-check-label" for="timeCorrectNo">
+            No
+          </label>
+        </div>
+        <div class="invalid-feedback"></div>
+      </div>
+
+      <div class="form-group d-none" id="timeOffsetGroup">
+        <label for="timeOffset" class="form-label">Time Offset</label>
+        <input type="text" 
+               class="form-control" 
+               id="timeOffset" 
+               name="timeOffset" 
+               placeholder="e.g., DVR is 1hr 5min 30sec AHEAD of real time">
+        <small class="form-text">Describe how the DVR time differs from actual time</small>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Event Listener Test</h2>
+      <p id="status">Click a radio button to test...</p>
+    </div>
+  </div>
+
+  <script>
+    // Test all radio buttons
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+      radio.addEventListener('click', (e) => {
+        console.log('Radio clicked:', e.target.name, e.target.value);
+        document.getElementById('status').textContent = `Clicked: ${e.target.name} = ${e.target.value}`;
+      });
+      
+      radio.addEventListener('change', (e) => {
+        console.log('Radio changed:', e.target.name, e.target.value);
+        
+        // Test the specific recovery form logic
+        if (e.target.name === 'isTimeDateCorrect') {
+          const offsetGroup = document.getElementById('timeOffsetGroup');
+          const offsetField = document.getElementById('timeOffset');
+          
+          if (e.target.value === 'No') {
+            offsetGroup.classList.remove('d-none');
+            console.log('Showing offset group');
+          } else {
+            offsetGroup.classList.add('d-none');
+            offsetField.value = '';
+            console.log('Hiding offset group');
+          }
+        }
+      });
+    });
+    
+    // Log initial state
+    console.log('Radio buttons found:', document.querySelectorAll('input[type="radio"]').length);
+  </script>
+</body>
+</html>

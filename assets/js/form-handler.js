@@ -1284,3 +1284,255 @@ export class AnalysisFormHandler extends FormHandler {
     }
   }
 }
+
+/**
+ * Recovery Form Handler
+ * Specific handling for recovery form
+ */
+export class RecoveryFormHandler extends FormHandler {
+  constructor(formId) {
+    super(formId);
+    this.setupRecoverySpecificListeners();
+  }
+  
+  setupRecoverySpecificListeners() {
+    // Offence Type conditional (optional field)
+    const offenceTypeField = this.form.querySelector('#offenceType');
+    if (offenceTypeField) {
+      offenceTypeField.addEventListener('change', (e) => {
+        const otherGroup = document.getElementById('offenceTypeOtherGroup');
+        const otherField = document.getElementById('offenceTypeOther');
+        const showOther = e.target.value === 'Other';
+        
+        toggleElement(otherGroup, showOther);
+        if (showOther) {
+          otherField.setAttribute('required', 'required');
+        } else {
+          otherField.removeAttribute('required');
+          otherField.value = '';
+          this.showFieldValidation(otherField, null);
+        }
+      });
+    }
+    
+    // City conditional
+    const cityField = this.form.querySelector('#city');
+    if (cityField) {
+      cityField.addEventListener('change', (e) => {
+        const otherGroup = document.getElementById('cityOtherGroup');
+        const otherField = document.getElementById('cityOther');
+        const showOther = e.target.value === 'Other';
+        
+        toggleElement(otherGroup, showOther);
+        if (showOther) {
+          otherField.setAttribute('required', 'required');
+        } else {
+          otherField.removeAttribute('required');
+          otherField.value = '';
+          this.showFieldValidation(otherField, null);
+        }
+      });
+    }
+    
+    // Time & Date correct - special handling (no warning, optional offset)
+    const timeSyncRadios = this.form.querySelectorAll('[name="isTimeDateCorrect"]');
+    timeSyncRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const offsetGroup = document.getElementById('timeOffsetGroup');
+        const offsetField = document.getElementById('timeOffset');
+        
+        if (e.target.value === 'No') {
+          toggleElement(offsetGroup, true);
+          // Note: NOT setting required attribute - different from upload form
+        } else {
+          toggleElement(offsetGroup, false);
+          offsetField.value = '';
+          this.showFieldValidation(offsetField, null);
+        }
+      });
+    });
+    
+    // Extraction time validation
+    const startTimeField = this.form.querySelector('#extractionStartTime');
+    const endTimeField = this.form.querySelector('#extractionEndTime');
+    
+    if (startTimeField && endTimeField) {
+      endTimeField.addEventListener('change', () => {
+        const dateError = validateDateRange(startTimeField.value, endTimeField.value);
+        if (dateError) {
+          this.showFieldValidation(endTimeField, dateError);
+        }
+      });
+      
+      startTimeField.addEventListener('change', () => {
+        if (endTimeField.value) {
+          const dateError = validateDateRange(startTimeField.value, endTimeField.value);
+          if (dateError) {
+            this.showFieldValidation(endTimeField, dateError);
+          } else {
+            this.showFieldValidation(endTimeField, null);
+          }
+        }
+      });
+    }
+    
+    // Phone number formatting for location contact
+    const locationPhoneField = this.form.querySelector('#locationContactPhone');
+    if (locationPhoneField) {
+      locationPhoneField.addEventListener('input', debounce(() => this.validateSingleField(locationPhoneField), 500));
+    }
+  }
+  
+  collectFormData() {
+    const data = super.collectFormData();
+    
+    // Set request area
+    data[CONFIG.FIELD_NAMES.REQUEST_AREA] = CONFIG.FORM_TYPES.RECOVERY;
+    
+    // Set occurrence type
+    if (data.offenceType === 'Other' && data.offenceTypeOther) {
+      data[CONFIG.FIELD_NAMES.OCCURRENCE_TYPE] = data.offenceTypeOther;
+    } else if (data.offenceType) {
+      data[CONFIG.FIELD_NAMES.OCCURRENCE_TYPE] = data.offenceType;
+    } else {
+      data[CONFIG.FIELD_NAMES.OCCURRENCE_TYPE] = 'Recovery Request';
+    }
+    
+    // Set occurrence date to extraction start date
+    if (data.extractionStartTime) {
+      data[CONFIG.FIELD_NAMES.OCCURRENCE_DATE] = data.extractionStartTime.split('T')[0];
+    }
+    
+    // Format location contact phone
+    if (data[CONFIG.FIELD_NAMES.LOCATION_CONTACT_PHONE]) {
+      data[CONFIG.FIELD_NAMES.LOCATION_CONTACT_PHONE] = formatPhone(data[CONFIG.FIELD_NAMES.LOCATION_CONTACT_PHONE]);
+    }
+    
+    // Generate field summaries for third-party
+    data[CONFIG.FIELD_NAMES.FILE_DETAILS] = this.generateFileDetails(data);
+    data[CONFIG.FIELD_NAMES.REQUEST_DETAILS] = data.incidentDescription || '';
+    
+    // Handle conditional fields for display
+    if (data.offenceType === 'Other' && data.offenceTypeOther) {
+      data.offenceTypeDisplay = data.offenceTypeOther;
+    } else {
+      data.offenceTypeDisplay = data.offenceType || 'Not specified';
+    }
+    
+    if (data.city === 'Other' && data.cityOther) {
+      data.cityDisplay = data.cityOther;
+    } else {
+      data.cityDisplay = data.city;
+    }
+    
+    return data;
+  }
+  
+  generateFileDetails(data) {
+    const details = [];
+    
+    // Add location info
+    if (data.businessName) {
+      details.push(`Business: ${data.businessName}`);
+    }
+    details.push(`Location: ${data.locationAddress}, ${data.cityDisplay}`);
+    
+    // Add extraction time info
+    if (data.extractionStartTime && data.extractionEndTime) {
+      const startDate = new Date(data.extractionStartTime);
+      const endDate = new Date(data.extractionEndTime);
+      const duration = Math.round((endDate - startDate) / (1000 * 60)); // minutes
+      details.push(`Extraction period: ${duration} minutes`);
+    }
+    
+    // Add time period type
+    if (data.timePeriodType) {
+      details.push(`Time type: ${data.timePeriodType}`);
+    }
+    
+    // Add camera info
+    if (data.cameraDetails) {
+      const cameraCount = data.cameraDetails.split('\n').filter(c => c.trim()).length;
+      details.push(`${cameraCount} camera(s) listed`);
+    }
+    
+    return details.join(' | ');
+  }
+  
+  validateForm() {
+    const result = super.validateForm();
+    
+    // Additional validation for extraction date range
+    const startTimeField = this.form.querySelector('#extractionStartTime');
+    const endTimeField = this.form.querySelector('#extractionEndTime');
+    
+    if (startTimeField && endTimeField && startTimeField.value && endTimeField.value) {
+      const dateError = validateDateRange(startTimeField.value, endTimeField.value);
+      if (dateError) {
+        result.errors.extractionEndTime = dateError;
+        result.isValid = false;
+        this.showFieldValidation(endTimeField, dateError);
+        if (!result.firstErrorField) {
+          result.firstErrorField = endTimeField;
+        }
+      }
+    }
+    
+    return result;
+  }
+  
+  async submitForm(formData) {
+    // Save officer info automatically
+    const officerData = {
+      rName: formData.rName,
+      badge: formData.badge,
+      requestingPhone: formData.requestingPhone,
+      requestingEmail: formData.requestingEmail
+    };
+    
+    if (saveOfficerInfo(officerData)) {
+      console.log('Investigator info saved for next time');
+    }
+    
+    try {
+      // Generate PDF and JSON
+      const [pdfBlob, jsonBlob] = await Promise.all([
+        generatePDF(formData, this.formType),
+        generateJSON(formData, this.formType)
+      ]);
+      
+      console.log('Recovery form ready for submission:', formData);
+      console.log('PDF generated:', pdfBlob.size, 'bytes');
+      console.log('JSON generated:', jsonBlob.size, 'bytes');
+      
+      // In production, this would submit via api-client
+      // For now, we can download the files for testing
+      if (CONFIG.IS_DEVELOPMENT) {
+        // Download PDF
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        const pdfLink = document.createElement('a');
+        pdfLink.href = pdfUrl;
+        pdfLink.download = `recovery_${Date.now()}.pdf`;
+        pdfLink.click();
+        URL.revokeObjectURL(pdfUrl);
+        
+        // Download JSON
+        const jsonUrl = URL.createObjectURL(jsonBlob);
+        const jsonLink = document.createElement('a');
+        jsonLink.href = jsonUrl;
+        jsonLink.download = `recovery_${Date.now()}.json`;
+        jsonLink.click();
+        URL.revokeObjectURL(jsonUrl);
+      }
+      
+      showToast('Recovery form processed successfully!', 'success');
+      
+      // Clear draft on successful submission
+      clearDraft(this.formType);
+      
+    } catch (error) {
+      console.error('Error generating files:', error);
+      showToast('Error generating PDF/JSON files', 'error');
+    }
+  }
+}

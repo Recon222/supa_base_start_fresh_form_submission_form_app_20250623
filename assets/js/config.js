@@ -71,7 +71,22 @@ export const CONFIG = {
     SERVICE_REQUIRED: 'serviceRequired',
     SERVICE_REQUIRED_OTHER: 'serviceRequiredOther',
     REQUEST_DETAILS: 'requestDetails',
-    ADDITIONAL_INFO: 'additionalInfo'
+    ADDITIONAL_INFO: 'additionalInfo',
+    
+    // Recovery form specific
+    UNIT: 'unit',
+    LOCATION_CONTACT: 'locationContact',
+    LOCATION_CONTACT_PHONE: 'locationContactPhone',
+    EXTRACTION_START_TIME: 'extractionStartTime',
+    EXTRACTION_END_TIME: 'extractionEndTime',
+    TIME_PERIOD_TYPE: 'timePeriodType',
+    DVR_MAKE_MODEL: 'dvrMakeModel',
+    CAMERA_DETAILS: 'cameraDetails',
+    DVR_RETENTION: 'dvrRetention',
+    DVR_USERNAME: 'dvrUsername',
+    DVR_PASSWORD: 'dvrPassword',
+    HAS_VIDEO_MONITOR: 'hasVideoMonitor',
+    INCIDENT_DESCRIPTION: 'incidentDescription'
   },
   
   // Form Types

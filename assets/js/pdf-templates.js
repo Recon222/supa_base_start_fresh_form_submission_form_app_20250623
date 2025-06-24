@@ -373,8 +373,188 @@ export const PDF_TEMPLATES = {
   },
   
   recovery: {
+    /**
+     * Build content for recovery form PDF
+     * @param {Object} data - Form data
+     * @returns {Array} PDF content definition
+     */
     buildContent(data) {
-      return [{ text: 'Recovery form PDF not implemented yet' }];
+      return [
+        // Header
+        this.buildHeader('On-Site DVR Recovery Request'),
+        
+        // Investigator Information
+        this.buildSection('Submitting Investigator', [
+          ['Name', data.rName],
+          ['Badge #', data.badge],
+          ['Phone', data.requestingPhone],
+          ['Email', data.requestingEmail],
+          ['Unit', data.unit]
+        ]),
+        
+        // Location Information
+        this.buildSection('Location Information', [
+          ['Business Name', data.businessName || 'N/A'],
+          ['Location Address', data.locationAddress],
+          ['City', data.cityDisplay || data.city],
+          ['Location Contact', data.locationContact],
+          ['Contact Phone', data.locationContactPhone],
+          ['Type of Offence', data.offenceTypeDisplay || data.offenceType || 'Not specified']
+        ]),
+        
+        // Video Extraction Details
+        this.buildSection('Video Extraction Details', [
+          ['Extraction Start Time', formatDateTime(data.extractionStartTime)],
+          ['Extraction End Time', formatDateTime(data.extractionEndTime)],
+          ['Time Period Type', data.timePeriodType],
+          ['Extraction Duration', this.calculateDuration(data.extractionStartTime, data.extractionEndTime)]
+        ]),
+        
+        // DVR Information
+        this.buildDvrSection(data),
+        
+        // Access Information
+        this.buildSection('Access Information', [
+          ['DVR Username', data.dvrUsername || 'Not provided'],
+          ['DVR Password', data.dvrPassword],
+          ['Video Monitor On-Site', data.hasVideoMonitor || 'Not specified']
+        ]),
+        
+        // Camera Details
+        this.buildCameraSection(data.cameraDetails),
+        
+        // Incident Description
+        this.buildIncidentSection(data.incidentDescription),
+        
+        // Footer
+        this.buildFooter()
+      ];
+    },
+    
+    buildHeader(title) {
+      return {
+        columns: [
+          {
+            text: 'PEEL REGIONAL POLICE\nForensic Video Unit',
+            style: 'header'
+          },
+          {
+            text: title,
+            style: 'header',
+            alignment: 'right'
+          }
+        ],
+        margin: [0, 0, 0, 20]
+      };
+    },
+    
+    buildSection(title, fields) {
+      return {
+        margin: [0, 15, 0, 0],
+        stack: [
+          { text: title, style: 'subheader' },
+          {
+            table: {
+              widths: ['35%', '65%'],
+              body: fields.map(([label, value]) => [
+                { text: label + ':', bold: true },
+                { text: value || 'N/A' }
+              ])
+            },
+            layout: 'noBorders'
+          }
+        ]
+      };
+    },
+    
+    buildDvrSection(data) {
+      const fields = [
+        ['DVR Make/Model', data.dvrMakeModel || 'Not specified'],
+        ['Time & Date Correct', data.isTimeDateCorrect || 'Not specified']
+      ];
+      
+      // Add time offset if applicable
+      if (data.isTimeDateCorrect === 'No' && data.timeOffset) {
+        fields.push(['Time Offset', data.timeOffset]);
+      }
+      
+      // Add retention date if provided
+      if (data.dvrRetention) {
+        const retention = calculateRetentionDays(data.dvrRetention);
+        fields.push(['DVR Retention Date', formatDateTime(data.dvrRetention)]);
+        fields.push(['Retention Info', retention.message]);
+      }
+      
+      return this.buildSection('DVR Information', fields);
+    },
+    
+    buildCameraSection(cameraDetails) {
+      if (!cameraDetails) {
+        return {};
+      }
+      
+      const cameras = cameraDetails.split('\n').filter(c => c.trim());
+      
+      return {
+        margin: [0, 15, 0, 0],
+        stack: [
+          { text: 'Camera Details', style: 'subheader' },
+          { text: 'Cameras to be Extracted:', bold: true, margin: [0, 5, 0, 5] },
+          {
+            ul: cameras.map(camera => camera.trim())
+          }
+        ]
+      };
+    },
+    
+    buildIncidentSection(description) {
+      return {
+        margin: [0, 15, 0, 0],
+        stack: [
+          { text: 'Incident Description', style: 'subheader' },
+          { text: 'Description of what takes place on camera:', bold: true, margin: [0, 5, 0, 5] },
+          {
+            text: description || 'No description provided',
+            margin: [0, 5, 0, 0],
+            style: 'description'
+          }
+        ]
+      };
+    },
+    
+    calculateDuration(startTime, endTime) {
+      if (!startTime || !endTime) return 'N/A';
+      
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+      const diffMinutes = Math.round((end - start) / (1000 * 60));
+      
+      if (diffMinutes < 60) {
+        return `${diffMinutes} minutes`;
+      }
+      
+      const hours = Math.floor(diffMinutes / 60);
+      const minutes = diffMinutes % 60;
+      
+      if (minutes === 0) {
+        return `${hours} hour${hours > 1 ? 's' : ''}`;
+      }
+      
+      return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${minutes > 1 ? 's' : ''}`;
+    },
+    
+    buildFooter() {
+      return [
+        { text: '\n\n' },
+        { 
+          text: `Generated: ${new Date().toLocaleString()}`, 
+          style: 'footer' 
+        },
+        { 
+          text: 'This is an official request document', 
+          style: 'footer' 
+        }
+      ];
     }
   }
 };

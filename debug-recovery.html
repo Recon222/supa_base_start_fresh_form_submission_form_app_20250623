@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Recovery Form</title>
+  <link rel="stylesheet" href="assets/css/forms.css">
+</head>
+<body data-theme="dark">
+  <div class="background-animation">
+    <div class="grid-overlay"></div>
+    <div class="floating-shapes"></div>
+  </div>
+
+  <main class="main-content">
+    <div class="container">
+      <h1>Debug Recovery Form Radio Buttons</h1>
+      
+      <form id="test-form">
+        <div class="form-group">
+          <label class="form-label">Is the Time & Date correct?</label>
+          <small class="form-text mb-2 d-block">Is the DVR time synchronized with actual time?</small>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectYes" value="Yes" required>
+            <label class="form-check-label" for="timeCorrectYes">
+              Yes
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectNo" value="No" required>
+            <label class="form-check-label" for="timeCorrectNo">
+              No
+            </label>
+          </div>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group d-none" id="timeOffsetGroup">
+          <label for="timeOffset" class="form-label">Time Offset</label>
+          <input type="text" 
+                 class="form-control" 
+                 id="timeOffset" 
+                 name="timeOffset" 
+                 placeholder="e.g., DVR is 1hr 5min 30sec AHEAD of real time">
+          <small class="form-text">Describe how the DVR time differs from actual time</small>
+        </div>
+      </form>
+
+      <div class="debug-output" style="margin-top: 2rem; padding: 1rem; background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 4px;">
+        <h3>Debug Output:</h3>
+        <pre id="debug" style="color: #0f0; font-family: monospace;"></pre>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    const debug = document.getElementById('debug');
+    
+    function log(msg) {
+      debug.textContent += msg + '\n';
+      console.log(msg);
+    }
+    
+    // Check if elements exist
+    log('=== Element Check ===');
+    log('Form found: ' + !!document.getElementById('test-form'));
+    log('Radio buttons found: ' + document.querySelectorAll('[name="isTimeDateCorrect"]').length);
+    log('timeOffsetGroup found: ' + !!document.getElementById('timeOffsetGroup'));
+    log('timeOffset field found: ' + !!document.getElementById('timeOffset'));
+    
+    // Test direct click handling
+    const radios = document.querySelectorAll('[name="isTimeDateCorrect"]');
+    log('\n=== Setting up listeners ===');
+    
+    radios.forEach((radio, index) => {
+      log(`Radio ${index}: id=${radio.id}, value=${radio.value}`);
+      
+      // Try multiple event types
+      radio.addEventListener('click', (e) => {
+        log(`CLICK event: ${e.target.value}`);
+      });
+      
+      radio.addEventListener('change', (e) => {
+        log(`CHANGE event: ${e.target.value}`);
+        
+        const offsetGroup = document.getElementById('timeOffsetGroup');
+        const offsetField = document.getElementById('timeOffset');
+        
+        if (e.target.value === 'No') {
+          log('Showing offset group');
+          offsetGroup.classList.remove('d-none');
+        } else {
+          log('Hiding offset group');
+          offsetGroup.classList.add('d-none');
+          offsetField.value = '';
+        }
+      });
+      
+      radio.addEventListener('mousedown', (e) => {
+        log(`MOUSEDOWN event: ${e.target.value}`);
+      });
+    });
+    
+    // Test if radio can be checked programmatically
+    log('\n=== Programmatic test ===');
+    try {
+      document.getElementById('timeCorrectYes').checked = true;
+      log('Successfully checked Yes radio programmatically');
+    } catch (e) {
+      log('Error checking radio: ' + e.message);
+    }
+    
+    // Check for any overlapping elements
+    log('\n=== Style check ===');
+    const yesRadio = document.getElementById('timeCorrectYes');
+    const computedStyle = window.getComputedStyle(yesRadio);
+    log('Pointer events: ' + computedStyle.pointerEvents);
+    log('Position: ' + computedStyle.position);
+    log('Z-index: ' + computedStyle.zIndex);
+    log('Display: ' + computedStyle.display);
+    log('Visibility: ' + computedStyle.visibility);
+    
+    // Import and test the actual RecoveryFormHandler
+    import { RecoveryFormHandler } from './assets/js/form-handler.js';
+    
+    log('\n=== RecoveryFormHandler test ===');
+    try {
+      const handler = new RecoveryFormHandler('test-form');
+      log('RecoveryFormHandler initialized successfully');
+    } catch (e) {
+      log('Error initializing RecoveryFormHandler: ' + e.message);
+    }
+  </script>
+</body>
+</html>

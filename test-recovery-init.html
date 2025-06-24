@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Recovery Init</title>
+  <link rel="stylesheet" href="assets/css/forms.css">
+</head>
+<body data-theme="dark">
+  <div class="background-animation">
+    <div class="grid-overlay"></div>
+    <div class="floating-shapes"></div>
+  </div>
+
+  <main class="main-content">
+    <div class="container">
+      <h1>Test Recovery Form Initialization</h1>
+      
+      <form id="recovery-form">
+        <div class="form-section">
+          <h2>DVR Information Section</h2>
+          
+          <div class="form-group">
+            <label class="form-label">Is the Time & Date correct?</label>
+            <small class="form-text mb-2 d-block">Is the DVR time synchronized with actual time?</small>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectYes" value="Yes" required>
+              <label class="form-check-label" for="timeCorrectYes">
+                Yes
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectNo" value="No" required>
+              <label class="form-check-label" for="timeCorrectNo">
+                No
+              </label>
+            </div>
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <div class="form-group d-none" id="timeOffsetGroup">
+            <label for="timeOffset" class="form-label">Time Offset</label>
+            <input type="text" 
+                   class="form-control" 
+                   id="timeOffset" 
+                   name="timeOffset" 
+                   placeholder="e.g., DVR is 1hr 5min 30sec AHEAD of real time">
+            <small class="form-text">Describe how the DVR time differs from actual time</small>
+          </div>
+        </div>
+      </form>
+
+      <div class="debug-output" style="margin-top: 2rem; padding: 1rem; background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 4px;">
+        <h3>Debug Output:</h3>
+        <pre id="debug" style="color: #0f0; font-family: monospace;"></pre>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    const debug = document.getElementById('debug');
+    
+    function log(msg) {
+      debug.textContent += msg + '\n';
+      console.log(msg);
+    }
+    
+    // First test: Basic event listeners without any form handler
+    log('=== Test 1: Basic Event Listeners ===');
+    const radios = document.querySelectorAll('[name="isTimeDateCorrect"]');
+    radios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        log(`Basic change event fired: ${e.target.value}`);
+      });
+    });
+    
+    // Try clicking programmatically
+    document.getElementById('timeCorrectYes').click();
+    
+    // Now import and test with the actual handler
+    log('\n=== Test 2: With RecoveryFormHandler ===');
+    
+    import { RecoveryFormHandler } from './assets/js/form-handler.js';
+    
+    setTimeout(() => {
+      try {
+        // Remove existing listeners first
+        const form = document.getElementById('recovery-form');
+        const newForm = form.cloneNode(true);
+        form.parentNode.replaceChild(newForm, form);
+        
+        // Initialize handler
+        const handler = new RecoveryFormHandler('recovery-form');
+        log('RecoveryFormHandler initialized');
+        
+        // Test clicking after handler init
+        setTimeout(() => {
+          log('\n=== Clicking after handler init ===');
+          document.getElementById('timeCorrectNo').click();
+        }, 100);
+        
+      } catch (e) {
+        log('Error: ' + e.message);
+        log('Stack: ' + e.stack);
+      }
+    }, 500);
+  </script>
+</body>
+</html>

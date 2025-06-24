@@ -32,6 +32,7 @@ export function validateField(value, fieldName, required = false) {
       return validateEmail(trimmedValue);
       
     case CONFIG.FIELD_NAMES.OFFICER_PHONE:
+    case CONFIG.FIELD_NAMES.LOCATION_CONTACT_PHONE:
       return validatePhone(trimmedValue);
       
     case CONFIG.FIELD_NAMES.OCCURRENCE_NUMBER:
