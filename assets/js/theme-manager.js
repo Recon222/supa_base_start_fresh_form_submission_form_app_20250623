@@ -24,6 +24,7 @@ export function getCurrentTheme() {
 export function setTheme(theme) {
   if (!VALID_THEMES.includes(theme)) return;
   
+  document.documentElement.setAttribute('data-theme', theme);
   document.body.setAttribute('data-theme', theme);
   localStorage.setItem(THEME_KEY, theme);
 }
