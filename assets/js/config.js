@@ -193,7 +193,7 @@ export const CONFIG = {
   },
   
   // Development Mode
-  IS_DEVELOPMENT: window.location.protocol === 'file:' || window.location.hostname === 'localhost',
+  IS_DEVELOPMENT: window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
   
   // Feature Flags
   FEATURES: {
