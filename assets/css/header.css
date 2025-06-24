@@ -176,41 +176,13 @@
   justify-content: center;
   width: var(--header-button-size);
   height: var(--header-button-size);
+  font-size: 1.5rem;
 }
 
 .theme-toggle:hover {
   background: var(--glass-bg-hover);
   transform: translateY(var(--btn-hover-lift));
-}
-
-.theme-toggle svg {
-  width: var(--theme-icon-size);
-  height: var(--theme-icon-size);
-}
-
-/* Theme icon visibility */
-[data-theme="dark"] .sun-icon {
-  display: none;
-}
-
-[data-theme="light"] .moon-icon {
-  display: none;
-}
-
-/* Icon colors */
-.theme-toggle .sun-icon,
-.theme-toggle .sun-icon * {
-  stroke: var(--color-black);
-}
-
-.theme-toggle .moon-icon,
-.theme-toggle .moon-icon * {
-  stroke: var(--color-white);
-}
-
-.theme-toggle:hover svg,
-.theme-toggle:hover svg * {
-  stroke: var(--color-primary);
+  transform: rotate(15deg) translateY(var(--btn-hover-lift));
 }
 
 /* Logo Section (for index.html compatibility) */
@@ -218,6 +190,34 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
+}
+
+/* Index Page Specific Styles */
+.index-header {
+  --header-height: 100px; /* Larger header for index page */
+}
+
+.index-header .header-content {
+  justify-content: center;
+  position: relative;
+}
+
+.index-header .header-left {
+  justify-content: center;
+  text-align: center;
+}
+
+.index-header .header-right {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Keep index title the same size as h1 */
+.index-title {
+  font-size: var(--font-size-4xl);
+  padding-right: calc(var(--header-button-size) + var(--space-lg));
 }
 
 /* Mobile Responsive - using breakpoint variable */
@@ -262,5 +262,15 @@
     height: var(--header-button-size);
     padding: 0;
     justify-content: center;
+  }
+  
+  /* Index page mobile adjustments */
+  .index-header .header-content {
+    padding: var(--space-md);
+  }
+  
+  .index-title {
+    font-size: var(--font-size-xl);
+    padding-right: calc(var(--header-button-size) + var(--space-md));
   }
 }
