@@ -26,6 +26,7 @@ export class FormHandler {
     this.formType = this.form.id.replace('-form', '');
     this.isSubmitting = false;
     this.draftTimer = null;
+    this.hasStartedWorking = false; // Track if user has started typing
     
     this.init();
   }
@@ -64,8 +65,18 @@ export class FormHandler {
       }
     });
     
+    // Track first input to switch button state immediately
+    this.form.addEventListener('input', () => {
+      if (!this.hasStartedWorking) {
+        this.hasStartedWorking = true;
+        this.updateDraftButton(); // Switch to auto-save active immediately
+      }
+    }, { once: true }); // Only run once
+    
     // Auto-save draft on input
-    this.form.addEventListener('input', debounce(() => this.saveDraftAuto(), 2000));
+    this.form.addEventListener('input', debounce(() => {
+      this.saveDraftAuto();
+    }, 2000));
     
     // Progress bar updates
     this.form.addEventListener('change', () => this.updateProgress());
@@ -84,6 +95,11 @@ export class FormHandler {
                 field.classList.remove('is-valid');
               }
             });
+            
+            // Also clear any draft for this form
+            clearDraft(this.formType);
+            this.updateDraftButton(); // Update button state
+            
             showToast(CONFIG.MESSAGES.OFFICER_INFO_CLEARED, 'info');
           }
         }
@@ -284,19 +300,7 @@ export class FormHandler {
     if (!CONFIG.FEATURES.SAVE_DRAFTS) return;
     
     const formData = this.collectFormData();
-    const saved = saveDraft(this.formType, formData);
-    
-    if (saved) {
-      // Show subtle indicator
-      const indicator = document.getElementById('draft-indicator');
-      if (indicator) {
-        indicator.textContent = 'Draft saved';
-        indicator.style.opacity = '1';
-        setTimeout(() => {
-          indicator.style.opacity = '0';
-        }, 2000);
-      }
-    }
+    saveDraft(this.formType, formData);
   }
   
   loadOfficerInfoIfExists() {
@@ -330,19 +334,57 @@ export class FormHandler {
   loadDraftIfExists() {
     if (!CONFIG.FEATURES.SAVE_DRAFTS) return;
     
+    // Just update button state - NO MORE POPUPS!
+    this.updateDraftButton();
+  }
+  
+  updateDraftButton() {
+    const draftBtn = document.getElementById('draft-button');
+    if (!draftBtn) return;
+    
+    const draftText = draftBtn.querySelector('.draft-text');
+    
+    // If user has started working, always show auto-save active
+    if (this.hasStartedWorking) {
+      draftBtn.className = 'draft-button auto-save';
+      draftText.textContent = 'Auto-save active';
+      draftBtn.onclick = null;
+      return;
+    }
+    
+    // Otherwise, check for draft
+    const draft = loadDraft(this.formType);
+    
+    if (draft) {
+      const age = getDraftAge(this.formType);
+      draftBtn.className = 'draft-button load-draft';
+      draftText.textContent = `Load Draft (${age})`;
+      
+      // Wire up click to load draft
+      draftBtn.onclick = () => this.loadDraftFromButton();
+    } else {
+      draftBtn.className = 'draft-button auto-save';
+      draftText.textContent = 'Auto-save active';
+      draftBtn.onclick = null;
+    }
+  }
+  
+  loadDraftFromButton() {
     const draft = loadDraft(this.formType);
     if (!draft) return;
     
-    const age = getDraftAge(this.formType);
-    const message = `Found a draft from ${age}. Load it?`;
+    // Load the draft
+    this.populateForm(draft);
+    showToast(CONFIG.MESSAGES.DRAFT_LOADED, 'success');
     
-    if (confirm(message)) {
-      this.populateForm(draft);
-      showToast(CONFIG.MESSAGES.DRAFT_LOADED, 'success');
-      
-      // Update progress after loading
-      setTimeout(() => this.updateProgress(), 100);
-    }
+    // Mark that user has started working
+    this.hasStartedWorking = true;
+    
+    // Update button to auto-save state
+    this.updateDraftButton();
+    
+    // Update progress after loading
+    setTimeout(() => this.updateProgress(), 100);
   }
   
   populateForm(data) {
