@@ -16,6 +16,39 @@
     document.documentElement.setAttribute('data-theme', 
       localStorage.getItem('fvu-theme') || 'dark');
   </script>
+  
+  <!-- Responsive CSS for logos -->
+  <style>
+    .logo-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4rem;
+      margin-bottom: 2rem;
+    }
+    
+    .header-logo {
+      width: 300px;
+      height: 300px;
+      flex-shrink: 0;
+    }
+    
+    @media (max-width: 768px) {
+      .logo-header {
+        flex-direction: column;
+        gap: 2rem;
+      }
+      
+      .header-logo {
+        width: 200px;
+        height: 200px;
+      }
+      
+      .hero-title {
+        font-size: 2rem !important;
+      }
+    }
+  </style>
 </head>
 <body>
   <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" style="position: fixed; top: 20px; right: 20px; z-index: 100;">
@@ -35,8 +68,13 @@
   <main class="hero-section">
     <div class="container">
       <div class="hero-content" style="margin-top: -2rem;">
-        <!-- Hero Title with gradient effect -->
-        <h2 class="hero-title" style="margin-bottom: 4rem;">FVU Request Portal</h2>
+        <!-- Logo Header Section -->
+        <div class="logo-header" style="display: flex; align-items: center; justify-content: center; gap: 4rem; margin-bottom: 2rem;">
+          <img src="assets/images/homicide-logo-300x300.svg" alt="Forensic Video Unit" class="header-logo" style="width: 300px; height: 300px;">
+          <h2 class="hero-title" style="margin: 0;">FVU Request Portal</h2>
+          <img src="assets/images/peel-logo.svg" alt="Peel Regional Police" class="header-logo" style="width: 300px; height: 300px;">
+        </div>
+        
         <p class="text-muted" style="margin-bottom: 1.5rem; margin-top: 4rem;">Choose the appropriate form for your video evidence needs</p>
         
         <!-- Form Cards Grid - The 3D cards you love! -->
