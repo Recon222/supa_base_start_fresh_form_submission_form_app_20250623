@@ -318,19 +318,34 @@
           </div>
 
           <div class="form-group">
-            <label for="jobRequired" class="form-label">
-              Job Required <span class="required">*</span>
+            <label for="serviceRequired" class="form-label">
+              Service Required <span class="required">*</span>
             </label>
-            <select class="form-control" id="jobRequired" name="jobRequired" required>
+            <select class="form-control" id="serviceRequired" name="serviceRequired" required>
               <option value="">Select...</option>
-              <option value="Clarification">Clarification</option>
-              <option value="Comparison">Comparison</option>
+              <option value="Video/Image Clarification">Video/Image Clarification</option>
+              <option value="Audio Clarification">Audio Clarification</option>
+              <option value="Comparator Analysis">Comparator Analysis</option>
               <option value="Timeline">Timeline</option>
-              <option value="Analysis">Analysis</option>
+              <option value="Make Playable">Make Playable</option>
+              <option value="Data Carving">Data Carving</option>
               <option value="Other">Other</option>
             </select>
             <div class="invalid-feedback"></div>
           </div>
+        </div>
+
+        <!-- Conditional field for Other service -->
+        <div class="form-group d-none" id="serviceRequiredOtherGroup">
+          <label for="serviceRequiredOther" class="form-label">
+            Specify Service Required <span class="required">*</span>
+          </label>
+          <input type="text" 
+                 class="form-control" 
+                 id="serviceRequiredOther" 
+                 name="serviceRequiredOther" 
+                 placeholder="Please specify the service required">
+          <div class="invalid-feedback"></div>
         </div>
 
         <!-- File Names - full width -->
@@ -352,36 +367,6 @@
       <section class="form-section">
         <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Request Details</h2>
         
-        <!-- Service Required - full width -->
-        <div class="form-group">
-          <label for="serviceRequired" class="form-label">
-            Service Required <span class="required">*</span>
-          </label>
-          <select class="form-control" id="serviceRequired" name="serviceRequired" required>
-            <option value="">Select...</option>
-            <option value="Video/Image Clarification">Video/Image Clarification</option>
-            <option value="Audio Clarification">Audio Clarification</option>
-            <option value="Comparator Analysis">Comparator Analysis</option>
-            <option value="Timeline">Timeline</option>
-            <option value="Make Playable">Make Playable</option>
-            <option value="Data Carving">Data Carving</option>
-            <option value="Other">Other</option>
-          </select>
-          <div class="invalid-feedback"></div>
-        </div>
-
-        <!-- Conditional field for Other service -->
-        <div class="form-group d-none" id="serviceRequiredOtherGroup">
-          <label for="serviceRequiredOther" class="form-label">
-            Specify Service Required <span class="required">*</span>
-          </label>
-          <input type="text" 
-                 class="form-control" 
-                 id="serviceRequiredOther" 
-                 name="serviceRequiredOther" 
-                 placeholder="Please specify the service required">
-          <div class="invalid-feedback"></div>
-        </div>
 
         <!-- Request Details - large textarea -->
         <div class="form-group">
