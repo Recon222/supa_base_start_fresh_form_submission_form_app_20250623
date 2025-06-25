@@ -48,6 +48,12 @@
   z-index: var(--z-sticky);
 }
 
+/* Override container padding for header */
+.main-header .container {
+  padding-right: var(--space-md);
+  max-width: none;
+}
+
 .header-content {
   display: flex;
   align-items: center;
@@ -67,6 +73,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
+  flex: 1;
+  justify-content: flex-end;
 }
 
 /* Form Title */
@@ -181,7 +189,6 @@
 
 .theme-toggle:hover {
   background: var(--glass-bg-hover);
-  transform: translateY(var(--btn-hover-lift));
   transform: rotate(15deg) translateY(var(--btn-hover-lift));
 }
 
