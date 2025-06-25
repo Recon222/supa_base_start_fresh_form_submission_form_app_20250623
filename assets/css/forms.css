@@ -144,6 +144,11 @@
   
   /* Breakpoints */
   --breakpoint-mobile: 768px;
+  
+  /* Light mode background opacity values */
+  --light-grid-opacity: 0.08;
+  --light-shape-opacity: 0.02;
+  --light-grid-color: rgba(0, 0, 0, var(--light-grid-opacity));
 }
 
 /* Light theme overrides */
@@ -261,6 +266,14 @@ a:hover {
   animation: gridMove var(--anim-grid-move) linear infinite;
 }
 
+[data-theme="light"] .grid-overlay {
+  background-image: 
+    linear-gradient(var(--light-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--light-grid-color) 1px, transparent 1px);
+  background-size: var(--anim-grid-size) var(--anim-grid-size);
+  animation: gridMove var(--anim-grid-move) linear infinite;
+}
+
 .floating-shapes {
   position: absolute;
   inset: 0;
@@ -298,6 +311,23 @@ a:hover {
   bottom: var(--anim-shape-3-offset);
   left: var(--anim-shape-3-left);
   animation: float3 var(--anim-float-3) ease-in-out infinite;
+}
+
+[data-theme="light"] .floating-shapes .shape {
+  opacity: var(--light-shape-opacity);
+  filter: var(--shape-blur);
+}
+
+[data-theme="light"] .shape-1 {
+  background: #0066ff;
+}
+
+[data-theme="light"] .shape-2 {
+  background: #6366f1;
+}
+
+[data-theme="light"] .shape-3 {
+  background: #94a3b8;
 }
 
 /* ========================================
