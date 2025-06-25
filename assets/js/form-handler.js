@@ -144,6 +144,15 @@ export class FormHandler {
     
     if (this.isSubmitting) return;
     
+    // ADD: Confirmation dialog before proceeding
+    const formTypeDisplay = this.formType.charAt(0).toUpperCase() + this.formType.slice(1);
+    const confirmMessage = `Are you sure you want to submit this ${formTypeDisplay} Request?\n\n` +
+                          `This action cannot be undone and the form will be cleared after submission.`;
+    
+    if (!confirm(confirmMessage)) {
+      return; // User cancelled, stop submission
+    }
+    
     this.isSubmitting = true;
     const submitButton = this.form.querySelector('button[type="submit"]');
     const originalText = submitButton.textContent;
@@ -294,6 +303,43 @@ export class FormHandler {
     setTimeout(() => this.updateProgress(), 100);
     
     showToast('Form cleared', 'info');
+  }
+  
+  /**
+   * Clear form after successful submission
+   * More thorough than reset - clears all states
+   */
+  clearFormAfterSubmission() {
+    // Reset the form HTML
+    this.form.reset();
+    
+    // Clear all validation states
+    this.form.querySelectorAll('.form-control').forEach(field => {
+      field.classList.remove('is-valid', 'is-invalid');
+      // Clear any error messages
+      const feedback = field.parentElement.querySelector('.invalid-feedback');
+      if (feedback) {
+        feedback.textContent = '';
+      }
+    });
+    
+    // Reset progress to 0
+    const progressBar = document.getElementById('form-progress');
+    const progressLabel = document.getElementById('progress-percentage');
+    if (progressBar) {
+      progressBar.style.width = '0%';
+      progressBar.style.background = CONFIG.PROGRESS_COLORS.LOW;
+    }
+    if (progressLabel) {
+      progressLabel.textContent = '0%';
+    }
+    
+    // Update draft button to show no draft exists
+    this.hasStartedWorking = false;
+    this.updateDraftButton();
+    
+    // Scroll to top of form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   
   saveDraftAuto() {
@@ -1086,6 +1132,9 @@ export class UploadFormHandler extends FormHandler {
       
       showToast('Upload form processed successfully!', 'success');
       
+      // ADD: Clear the form after successful submission
+      this.clearFormAfterSubmission();
+      
       // Clear draft on successful submission
       clearDraft(this.formType);
       
@@ -1316,6 +1365,9 @@ export class AnalysisFormHandler extends FormHandler {
       }
       
       showToast('Analysis form processed successfully!', 'success');
+      
+      // ADD: Clear the form after successful submission
+      this.clearFormAfterSubmission();
       
       // Clear draft on successful submission
       clearDraft(this.formType);
@@ -1568,6 +1620,9 @@ export class RecoveryFormHandler extends FormHandler {
       }
       
       showToast('Recovery form processed successfully!', 'success');
+      
+      // ADD: Clear the form after successful submission
+      this.clearFormAfterSubmission();
       
       // Clear draft on successful submission
       clearDraft(this.formType);
