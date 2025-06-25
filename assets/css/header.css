@@ -197,9 +197,16 @@
   --header-height: 100px; /* Larger header for index page */
 }
 
+.index-header .container {
+  position: relative;
+  max-width: 100%;
+  padding: 0;
+}
+
 .index-header .header-content {
   justify-content: center;
   position: relative;
+  padding: 0 var(--space-md);
 }
 
 .index-header .header-left {
@@ -209,9 +216,9 @@
 
 .index-header .header-right {
   position: absolute;
-  right: 0;
+  right: var(--space-md);
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-35%);
 }
 
 /* Keep index title the same size as h1 */
