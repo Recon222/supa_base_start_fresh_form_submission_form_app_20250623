@@ -4,7 +4,8 @@
  * No business logic - just values
  */
 
-import { HOMICIDE_LOGO_BASE64 } from './logo-data.js';
+// Simple placeholder logo - 1x1 transparent PNG
+const PLACEHOLDER_LOGO_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
 
 export const CONFIG = {
   // API Configuration
@@ -271,7 +272,7 @@ export const CONFIG = {
   
   // PDF Logo Configuration
   PDF_LOGO: {
-    HOMICIDE: HOMICIDE_LOGO_BASE64,
+    HOMICIDE: PLACEHOLDER_LOGO_BASE64,
     WIDTH: 80,
     HEIGHT: 80
   }
