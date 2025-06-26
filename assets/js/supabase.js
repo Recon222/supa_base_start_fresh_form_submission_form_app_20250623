@@ -46,14 +46,22 @@ export async function submitToSupabase(formData) {
   try {
     const supabase = await initSupabase();
     
+    // Extract attachments if they exist
+    const attachments = formData.attachments || [];
+    
+    // Remove attachments from formData to avoid duplication
+    const cleanFormData = { ...formData };
+    delete cleanFormData.attachments;
+    
     // Prepare the submission data
     const submission = {
       request_type: formData.reqArea,
-      form_data: formData,
+      form_data: cleanFormData,
       requesting_email: formData.requestingEmail,
       requesting_name: formData.rName,
       occurrence_number: formData.occNumber || null,
-      status: 'pending'
+      status: 'pending',
+      attachments: attachments // Add attachments to the submission
     };
     
     // Insert into form_submissions table
