@@ -5,7 +5,7 @@
  */
 
 import { CONFIG } from './config.js';
-import { PDF_TEMPLATES } from './pdf-templates.js';
+import { buildDocumentDefinition } from './pdf-templates.js';
 
 /**
  * Generate PDF from form data
@@ -14,21 +14,11 @@ import { PDF_TEMPLATES } from './pdf-templates.js';
  * @returns {Promise<Blob>} PDF blob
  */
 export async function generatePDF(formData, formType) {
-  const template = PDF_TEMPLATES[formType];
-  if (!template) {
-    throw new Error(`No PDF template found for form type: ${formType}`);
-  }
+  // Get document definition from templates
+  const docDefinition = buildDocumentDefinition(formData, formType);
   
-  // Build document definition
-  const docDefinition = {
-    pageSize: 'LETTER',
-    pageMargins: [40, 60, 40, 60],
-    content: template.buildContent(formData),
-    styles: PDF_STYLES,
-    defaultStyle: {
-      font: 'Roboto'
-    }
-  };
+  // Add styles to document definition
+  docDefinition.styles = PDF_STYLES;
   
   // Generate PDF using pdfmake
   return new Promise((resolve, reject) => {
@@ -44,7 +34,7 @@ export async function generatePDF(formData, formType) {
 }
 
 /**
- * Shared PDF styles
+ * Comprehensive PDF styles
  */
 export const PDF_STYLES = {
   header: {
@@ -58,6 +48,12 @@ export const PDF_STYLES = {
     bold: true,
     color: '#333333',
     margin: [0, 10, 0, 5]
+  },
+  sectionHeader: {
+    fontSize: 13,
+    bold: true,
+    color: CONFIG.PEEL_COLORS.BLUE,
+    margin: [0, 15, 0, 5]
   },
   label: {
     fontSize: 10,
@@ -73,5 +69,20 @@ export const PDF_STYLES = {
     italics: true,
     color: '#666666',
     alignment: 'center'
+  },
+  urgentBanner: {
+    fontSize: 14,
+    bold: true,
+    color: 'white',
+    fillColor: '#DC3545'
+  },
+  warningText: {
+    fontSize: 11,
+    bold: true,
+    color: CONFIG.PEEL_COLORS.YELLOW
+  },
+  infoText: {
+    fontSize: 11,
+    color: '#17a2b8'
   }
 };

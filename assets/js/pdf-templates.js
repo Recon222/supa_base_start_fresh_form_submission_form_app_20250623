@@ -1,560 +1,593 @@
 /**
- * PDF Templatey
- * Form-specific PDF layouts
+ * PDF Templates
+ * Unified form-specific PDF layouts with professional styling
  */
 
 import { formatDateTime } from './utils.js';
 import { calculateRetentionDays, calculateVideoDuration, parseTimeOffset } from './calculations.js';
+import { CONFIG } from './config.js';
+
+/**
+ * Shared PDF template methods
+ */
+const PDF_BASE = {
+  /**
+   * Build unified header with logo and stacked title
+   * @param {string} formTitle - Specific form title
+   * @returns {Array} Header content
+   */
+  buildUnifiedHeader(formTitle) {
+    return [
+      {
+        columns: [
+          {
+            // Logo column
+            image: CONFIG.PDF_LOGO.HOMICIDE,
+            width: CONFIG.PDF_LOGO.WIDTH || 80,
+            height: CONFIG.PDF_LOGO.HEIGHT || 80
+          },
+          {
+            // Title column - centered and stacked
+            stack: [
+              {
+                text: 'PEEL REGIONAL POLICE',
+                fontSize: 18,
+                bold: true,
+                color: CONFIG.PEEL_COLORS.BLUE,
+                alignment: 'center'
+              },
+              {
+                text: 'Forensic Video Unit',
+                fontSize: 16,
+                color: CONFIG.PEEL_COLORS.BLUE,
+                alignment: 'center',
+                margin: [0, 2, 0, 0]
+              },
+              {
+                text: formTitle,
+                fontSize: 14,
+                bold: true,
+                color: '#333333',
+                alignment: 'center',
+                margin: [0, 4, 0, 0]
+              }
+            ],
+            width: '*',
+            margin: [0, 10, 0, 0]
+          }
+        ],
+        columnGap: 20
+      },
+      // Professional blue line separator
+      {
+        canvas: [
+          {
+            type: 'line',
+            x1: 0,
+            y1: 0,
+            x2: 515,
+            y2: 0,
+            lineWidth: 2,
+            lineColor: CONFIG.PEEL_COLORS.BLUE
+          }
+        ],
+        margin: [0, 15, 0, 20]
+      }
+    ];
+  },
+
+  /**
+   * Build standard section with consistent styling
+   * @param {string} title - Section title
+   * @param {Array} fields - Array of [label, value] pairs
+   * @returns {Object|null} Section content or null if all fields empty
+   */
+  buildStandardSection(title, fields) {
+    // Filter out empty fields
+    const nonEmptyFields = fields.filter(([label, value]) => value && value !== 'N/A');
+    
+    // If all fields are empty, don't render the section
+    if (nonEmptyFields.length === 0) {
+      return null;
+    }
+
+    return {
+      margin: [0, 15, 0, 0],
+      stack: [
+        {
+          text: title,
+          fontSize: 14,
+          bold: true,
+          color: CONFIG.PEEL_COLORS.BLUE,
+          margin: [0, 0, 0, 8]
+        },
+        {
+          table: {
+            widths: ['35%', '65%'],
+            body: nonEmptyFields.map(([label, value]) => [
+              {
+                text: label,
+                fontSize: 10,
+                bold: true,
+                color: '#666666'
+              },
+              {
+                text: value || 'N/A',
+                fontSize: 11,
+                color: '#000000'
+              }
+            ])
+          },
+          layout: {
+            hLineWidth: function(i, node) {
+              return (i === node.table.body.length) ? 0 : 0.5;
+            },
+            vLineWidth: function() {
+              return 0;
+            },
+            hLineColor: function() {
+              return '#E0E0E0';
+            },
+            paddingTop: function() {
+              return 6;
+            },
+            paddingBottom: function() {
+              return 6;
+            }
+          }
+        }
+      ]
+    };
+  },
+
+  /**
+   * Build text section for longer content
+   * @param {string} title - Section title
+   * @param {string} content - Text content
+   * @returns {Object|null} Section content or null if empty
+   */
+  buildTextSection(title, content) {
+    if (!content || content.trim() === '') {
+      return null;
+    }
+
+    return {
+      margin: [0, 15, 0, 0],
+      stack: [
+        {
+          text: title,
+          fontSize: 14,
+          bold: true,
+          color: CONFIG.PEEL_COLORS.BLUE,
+          margin: [0, 0, 0, 8]
+        },
+        {
+          table: {
+            widths: ['*'],
+            body: [[{
+              text: content,
+              fontSize: 11,
+              margin: [8, 8, 8, 8]
+            }]]
+          },
+          layout: {
+            fillColor: function() {
+              return '#F8F9FA';
+            },
+            hLineWidth: function() {
+              return 1;
+            },
+            vLineWidth: function() {
+              return 1;
+            },
+            hLineColor: function() {
+              return CONFIG.PEEL_COLORS.YELLOW;
+            },
+            vLineColor: function() {
+              return CONFIG.PEEL_COLORS.YELLOW;
+            }
+          }
+        }
+      ]
+    };
+  },
+
+  /**
+   * Build footer with page numbers
+   * @param {number} currentPage - Current page number
+   * @param {number} pageCount - Total page count
+   * @returns {Object} Footer content
+   */
+  buildFooter(currentPage, pageCount) {
+    return {
+      columns: [
+        {
+          text: `Generated: ${new Date().toLocaleString()}`,
+          fontSize: 8,
+          color: '#666666',
+          alignment: 'left'
+        },
+        {
+          text: 'OFFICIAL REQUEST DOCUMENT',
+          fontSize: 8,
+          bold: true,
+          color: CONFIG.PEEL_COLORS.BLUE,
+          alignment: 'center'
+        },
+        {
+          text: `Page ${currentPage} of ${pageCount}`,
+          fontSize: 8,
+          color: '#666666',
+          alignment: 'right'
+        }
+      ],
+      margin: [40, 0, 40, 0]
+    };
+  },
+
+  /**
+   * Build urgent banner for priority requests
+   * @param {string} message - Urgent message
+   * @returns {Object} Banner content
+   */
+  buildUrgentBanner(message) {
+    return {
+      margin: [0, 0, 0, 15],
+      table: {
+        widths: ['*'],
+        body: [[{
+          text: `⚠ ${message.toUpperCase()}`,
+          color: 'white',
+          bold: true,
+          fontSize: 12,
+          margin: [10, 8, 10, 8],
+          alignment: 'center'
+        }]]
+      },
+      layout: {
+        fillColor: '#DC3545',
+        hLineWidth: function() { return 0; },
+        vLineWidth: function() { return 0; }
+      }
+    };
+  }
+};
 
 /**
  * PDF template definitions for each form type
  */
 export const PDF_TEMPLATES = {
+  /**
+   * Upload Form Template
+   */
   upload: {
-    /**
-     * Build content for upload form PDF
-     * @param {Object} data - Form data
-     * @returns {Array} PDF content definition
-     */
     buildContent(data) {
-      return [
-        // Header
-        this.buildHeader('Video Evidence Upload Request'),
-        
-        // Evidence Information
-        this.buildSection('Evidence Information', [
-          ['Occurrence Number', data.occNumber],
-          ['Evidence Bag #', data.evidenceBag || 'N/A'],
-          ['Media Type', data.mediaTypeDisplay || data.mediaType],
-          ['Submission Date', formatDateTime(new Date())]
-        ]),
-        
-        // Investigator Information
-        this.buildSection('Submitting Investigator', [
-          ['Name', data.rName],
-          ['Badge #', data.badge],
-          ['Phone', data.requestingPhone],
-          ['Email', data.requestingEmail]
-        ]),
-        
-        // Location & Video Information
-        ...this.buildLocationVideoSections(data.locations),
-        
-        // Additional Information
-        data.otherInfo ? this.buildNotesSection(data.otherInfo) : {},
-        
-        // Footer
-        this.buildFooter()
-      ];
-    },
-    
-    buildHeader(title) {
-      return {
-        columns: [
-          {
-            text: 'PEEL REGIONAL POLICE\nForensic Video Unit',
-            style: 'header'
-          },
-          {
-            text: title,
-            style: 'header',
-            alignment: 'right'
-          }
-        ],
-        margin: [0, 0, 0, 20]
-      };
-    },
-    
-    buildUrgentBanner(message) {
-      return {
-        margin: [0, 10, 0, 10],
-        table: {
-          widths: ['*'],
-          body: [[{
-            text: `� ${message}`,
-            color: 'white',
-            bold: true,
-            fontSize: 12,
-            margin: [5, 5, 5, 5],
-            alignment: 'center'
-          }]]
-        },
-        layout: {
-          fillColor: '#dc3545'
-        }
-      };
-    },
-    
-    buildSection(title, fields) {
-      return {
-        margin: [0, 15, 0, 0],
-        stack: [
-          { text: title, style: 'subheader' },
-          {
-            table: {
-              widths: ['35%', '65%'],
-              body: fields.map(([label, value]) => [
-                { text: label, style: 'label' },
-                { text: value || 'N/A', style: 'value' }
-              ])
-            },
-            layout: 'lightHorizontalLines'
-          }
-        ]
-      };
-    },
-    
-    buildLocationVideoSections(locations) {
-      return locations.map((location, index) => {
-        const city = location.city === 'Other' 
-          ? location.cityOther 
-          : location.city;
-        
-        const sections = [];
-        
-        // Location header for multiple locations
-        if (locations.length > 1) {
-          sections.push({
-            text: `Location ${index + 1}`,
-            style: 'sectionHeader',
-            margin: [0, 20, 0, 10]
-          });
-        }
-        
-        // Location Information
-        sections.push(this.buildSection('Location Information', [
-          ['Business Name', location.businessName || 'N/A'],
-          ['Address', location.locationAddress],
-          ['City', city]
-        ]));
-        
-        // Video Timeframe
-        const duration = calculateVideoDuration(location.videoStartTime, location.videoEndTime);
-        sections.push(this.buildSection('Video Timeframe', [
-          ['Start Time', formatDateTime(location.videoStartTime)],
-          ['End Time', formatDateTime(location.videoEndTime)],
-          ['Duration', duration.formatted],
-          ['Time Synchronized', location.isTimeDateCorrect]
-        ]));
-        
-        // Time offset if applicable
-        if (location.isTimeDateCorrect === 'No' && location.timeOffset) {
-          sections.push(this.buildTimeOffsetSection(location.timeOffset));
-        }
-        
-        // DVR Retention for this location
-        if (location.dvrEarliestDate) {
-          const retention = calculateRetentionDays(location.dvrEarliestDate);
-          sections.push(this.buildRetentionSection(retention));
-        }
-        
-        return sections;
-      }).flat();
-    },
-    
-    buildTimeOffsetSection(timeOffset) {
-      const parsed = parseTimeOffset(timeOffset);
-      return {
-        margin: [0, 10, 0, 0],
-        table: {
-          widths: ['*'],
-          body: [[{
-            text: `Time Offset: ${parsed.formatted}`,
-            color: '#ff6600',
-            bold: true,
-            margin: [5, 5, 5, 5]
-          }]]
-        },
-        layout: {
-          fillColor: '#fff3cd'
-        }
-      };
-    },
-    
-    buildRetentionSection(retention) {
-      return {
-        margin: [0, 15, 0, 0],
-        stack: [
-          { text: 'DVR Retention Status', style: 'subheader' },
-          {
-            text: retention.message,
-            color: '#17a2b8',
-            fontSize: 11,
-            margin: [0, 5, 0, 0]
-          }
-        ]
-      };
-    },
-    
-    buildNotesSection(notes) {
-      return {
-        margin: [0, 15, 0, 0],
-        stack: [
-          { text: 'Additional Information', style: 'subheader' },
-          {
-            text: notes,
-            fontSize: 11,
-            margin: [0, 5, 0, 0]
-          }
-        ]
-      };
-    },
-    
-    buildFooter() {
-      return [
-        { text: '\n\n' },
-        { 
-          text: `Generated: ${new Date().toLocaleString()}`, 
-          style: 'footer' 
-        },
-        { 
-          text: 'This is an official request document', 
-          style: 'footer' 
-        }
-      ];
-    }
-  },
-  
-  analysis: {
-    /**
-     * Build content for analysis form PDF
-     * @param {Object} data - Form data
-     * @returns {Array} PDF content definition
-     */
-    buildContent(data) {
-      return [
-        // Header
-        this.buildHeader('Forensic Video Analysis Request'),
-        
-        // Case Information
-        this.buildSection('Case Information', [
-          ['Occurrence Number', data.occNumber],
-          ['Type of Offence', data.offenceTypeDisplay || data.offenceType],
-          ['Location of Video', data.videoLocationDisplay || data.videoLocation],
-          ['Bag Number', data.bagNumber || 'N/A'],
-          ['Locker Number', data.lockerNumber || 'N/A']
-        ]),
-        
-        // Investigator Information
-        this.buildSection('Submitting Investigator', [
-          ['Name', data.rName],
-          ['Badge #', data.badge],
-          ['Phone', data.requestingPhone],
-          ['Email', data.requestingEmail]
-        ]),
-        
-        // Evidence Details
-        this.buildSection('Evidence Details', [
-          ['Video Seized From', data.videoSeizedFrom],
-          ['Business Name', data.businessName || 'N/A'],
-          ['City', data.cityDisplay || data.city],
-          ['Recording Date', formatDateTime(data.recordingDate)],
-          ['Job Required', data.jobRequired]
-        ]),
-        
-        // File Names if provided
-        data.fileNames ? this.buildFileNamesSection(data.fileNames) : {},
-        
-        // Request Details
-        this.buildSection('Analysis Request', [
-          ['Service Required', data.serviceRequiredDisplay || data.serviceRequired]
-        ]),
-        
-        // Request Details Text
-        this.buildRequestDetailsSection(data.requestDetails),
-        
-        // Additional Information
-        data.additionalInfo ? this.buildNotesSection(data.additionalInfo) : {},
-        
-        // Footer
-        this.buildFooter()
-      ];
-    },
-    
-    buildHeader(title) {
-      return {
-        columns: [
-          {
-            text: 'PEEL REGIONAL POLICE\nForensic Video Unit',
-            style: 'header'
-          },
-          {
-            text: title,
-            style: 'header',
-            alignment: 'right'
-          }
-        ],
-        margin: [0, 0, 0, 20]
-      };
-    },
-    
-    buildSection(title, fields) {
-      return {
-        margin: [0, 15, 0, 0],
-        stack: [
-          { text: title, style: 'subheader' },
-          {
-            table: {
-              widths: ['35%', '65%'],
-              body: fields.map(([label, value]) => [
-                { text: label, style: 'label' },
-                { text: value || 'N/A', style: 'value' }
-              ])
-            },
-            layout: 'lightHorizontalLines'
-          }
-        ]
-      };
-    },
-    
-    buildFileNamesSection(fileNames) {
-      const files = fileNames.split('\n').filter(f => f.trim());
+      const content = [];
       
-      return {
-        margin: [0, 15, 0, 0],
-        stack: [
-          { text: 'File Names', style: 'subheader' },
-          {
-            ul: files.map(file => ({ text: file.trim(), fontSize: 10 }))
+      // Header
+      content.push(...PDF_BASE.buildUnifiedHeader('Video Evidence Upload Request Form'));
+      
+      // Evidence Information
+      const evidenceInfo = PDF_BASE.buildStandardSection('Evidence Information', [
+        ['Occurrence Number', data.occNumber],
+        ['Evidence Bag #', data.evidenceBag],
+        ['Media Type', data.mediaTypeDisplay || data.mediaType],
+        ['Submission Date', formatDateTime(new Date())]
+      ]);
+      if (evidenceInfo) content.push(evidenceInfo);
+      
+      // Investigator Information
+      const investigatorInfo = PDF_BASE.buildStandardSection('Submitting Investigator', [
+        ['Name', data.rName],
+        ['Badge #', data.badge],
+        ['Phone', data.requestingPhone],
+        ['Email', data.requestingEmail]
+      ]);
+      if (investigatorInfo) content.push(investigatorInfo);
+      
+      // Location & Video Information
+      if (data.locations && data.locations.length > 0) {
+        data.locations.forEach((location, index) => {
+          // Location header for multiple locations
+          if (data.locations.length > 1) {
+            content.push({
+              text: `Location ${index + 1}`,
+              fontSize: 13,
+              bold: true,
+              color: CONFIG.PEEL_COLORS.YELLOW,
+              background: CONFIG.PEEL_COLORS.BLUE,
+              margin: [0, 20, 0, 10],
+              padding: [5, 3, 5, 3]
+            });
           }
-        ]
-      };
-    },
-    
-    buildRequestDetailsSection(details) {
-      return {
-        margin: [0, 15, 0, 0],
-        stack: [
-          { text: 'Request Details', style: 'subheader' },
-          {
-            table: {
-              widths: ['*'],
-              body: [[{
-                text: details || 'No details provided',
-                margin: [5, 5, 5, 5],
-                fontSize: 11
-              }]]
-            },
-            layout: {
-              fillColor: '#f8f8f8'
+          
+          // Location details
+          const city = location.city === 'Other' ? location.cityOther : location.city;
+          const locationInfo = PDF_BASE.buildStandardSection('Location Information', [
+            ['Business Name', location.businessName],
+            ['Address', location.locationAddress],
+            ['City', city]
+          ]);
+          if (locationInfo) content.push(locationInfo);
+          
+          // Video timeframe
+          const duration = location.videoStartTime && location.videoEndTime 
+            ? calculateVideoDuration(location.videoStartTime, location.videoEndTime)
+            : null;
+          
+          const timeframeInfo = PDF_BASE.buildStandardSection('Video Timeframe', [
+            ['Start Time', formatDateTime(location.videoStartTime)],
+            ['End Time', formatDateTime(location.videoEndTime)],
+            ['Duration', duration ? duration.formatted : null],
+            ['Time Synchronized', location.isTimeDateCorrect]
+          ]);
+          if (timeframeInfo) content.push(timeframeInfo);
+          
+          // Time offset warning if applicable
+          if (location.isTimeDateCorrect === 'No' && location.timeOffset) {
+            const parsed = parseTimeOffset(location.timeOffset);
+            content.push({
+              margin: [0, 10, 0, 0],
+              table: {
+                widths: ['*'],
+                body: [[{
+                  text: `⚠ TIME OFFSET: ${parsed.formatted}`,
+                  color: CONFIG.PEEL_COLORS.YELLOW,
+                  bold: true,
+                  fontSize: 11,
+                  margin: [8, 6, 8, 6],
+                  alignment: 'center'
+                }]]
+              },
+              layout: {
+                fillColor: CONFIG.PEEL_COLORS.BLUE,
+                hLineWidth: function() { return 0; },
+                vLineWidth: function() { return 0; }
+              }
+            });
+          }
+          
+          // DVR retention warning if applicable
+          if (location.dvrEarliestDate) {
+            const retention = calculateRetentionDays(location.dvrEarliestDate);
+            if (retention.days < 30) {
+              content.push(PDF_BASE.buildUrgentBanner(retention.message));
             }
           }
-        ]
-      };
-    },
-    
-    buildNotesSection(notes) {
-      return {
-        margin: [0, 15, 0, 0],
-        stack: [
-          { text: 'Additional Information', style: 'subheader' },
-          {
-            text: notes,
-            fontSize: 11,
-            margin: [0, 5, 0, 0]
-          }
-        ]
-      };
-    },
-    
-    buildFooter() {
-      return [
-        { text: '\n\n' },
-        { 
-          text: `Generated: ${new Date().toLocaleString()}`, 
-          style: 'footer' 
-        },
-        { 
-          text: 'This is an official request document', 
-          style: 'footer' 
-        }
-      ];
+        });
+      }
+      
+      // Additional Information
+      const additionalInfo = PDF_BASE.buildTextSection('Additional Information', data.otherInfo);
+      if (additionalInfo) content.push(additionalInfo);
+      
+      return content;
     }
   },
-  
-  recovery: {
-    /**
-     * Build content for recovery form PDF
-     * @param {Object} data - Form data
-     * @returns {Array} PDF content definition
-     */
+
+  /**
+   * Analysis Form Template
+   */
+  analysis: {
     buildContent(data) {
-      return [
-        // Header
-        this.buildHeader('On-Site DVR Recovery Request'),
+      const content = [];
+      
+      // Header
+      content.push(...PDF_BASE.buildUnifiedHeader('Forensic Analysis Request Form'));
+      
+      // Urgent banner if applicable
+      if (data.jobRequired === 'Urgent') {
+        content.push(PDF_BASE.buildUrgentBanner('URGENT ANALYSIS REQUEST'));
+      }
+      
+      // Case Information
+      const caseInfo = PDF_BASE.buildStandardSection('Case Information', [
+        ['Occurrence Number', data.occNumber],
+        ['Type of Offence', data.offenceTypeDisplay || data.offenceType],
+        ['Job Priority', data.jobRequired]
+      ]);
+      if (caseInfo) content.push(caseInfo);
+      
+      // Evidence Location
+      const evidenceLocation = PDF_BASE.buildStandardSection('Evidence Location', [
+        ['Storage Location', data.videoLocationDisplay || data.videoLocation],
+        ['Bag Number', data.bagNumber],
+        ['Locker Number', data.lockerNumber]
+      ]);
+      if (evidenceLocation) content.push(evidenceLocation);
+      
+      // Investigator Information
+      const investigatorInfo = PDF_BASE.buildStandardSection('Submitting Investigator', [
+        ['Name', data.rName],
+        ['Badge #', data.badge],
+        ['Phone', data.requestingPhone],
+        ['Email', data.requestingEmail]
+      ]);
+      if (investigatorInfo) content.push(investigatorInfo);
+      
+      // Evidence Details
+      const evidenceDetails = PDF_BASE.buildStandardSection('Evidence Details', [
+        ['Video Seized From', data.videoSeizedFrom],
+        ['Business Name', data.businessName],
+        ['City', data.cityDisplay || data.city],
+        ['Recording Date', formatDateTime(data.recordingDate)]
+      ]);
+      if (evidenceDetails) content.push(evidenceDetails);
+      
+      // File Names if provided
+      if (data.fileNames) {
+        const files = data.fileNames.split('\n').filter(f => f.trim());
+        if (files.length > 0) {
+          content.push({
+            margin: [0, 15, 0, 0],
+            stack: [
+              {
+                text: 'File Names',
+                fontSize: 14,
+                bold: true,
+                color: CONFIG.PEEL_COLORS.BLUE,
+                margin: [0, 0, 0, 8]
+              },
+              {
+                ul: files.map(file => ({ 
+                  text: file.trim(), 
+                  fontSize: 10,
+                  margin: [0, 2, 0, 2]
+                }))
+              }
+            ]
+          });
+        }
+      }
+      
+      // Analysis Request
+      const analysisRequest = PDF_BASE.buildStandardSection('Analysis Request', [
+        ['Service Required', data.serviceRequiredDisplay || data.serviceRequired]
+      ]);
+      if (analysisRequest) content.push(analysisRequest);
+      
+      // Request Details
+      const requestDetails = PDF_BASE.buildTextSection('Request Details', data.requestDetails);
+      if (requestDetails) content.push(requestDetails);
+      
+      // Additional Information
+      const additionalInfo = PDF_BASE.buildTextSection('Additional Information', data.additionalInfo);
+      if (additionalInfo) content.push(additionalInfo);
+      
+      return content;
+    }
+  },
+
+  /**
+   * Recovery Form Template
+   */
+  recovery: {
+    buildContent(data) {
+      const content = [];
+      
+      // Header
+      content.push(...PDF_BASE.buildUnifiedHeader('CCTV Recovery Request Form'));
+      
+      // Investigator Information
+      const investigatorInfo = PDF_BASE.buildStandardSection('Submitting Investigator', [
+        ['Name', data.rName],
+        ['Badge #', data.badge],
+        ['Phone', data.requestingPhone],
+        ['Email', data.requestingEmail],
+        ['Unit', data.unit]
+      ]);
+      if (investigatorInfo) content.push(investigatorInfo);
+      
+      // Location Information
+      const locationInfo = PDF_BASE.buildStandardSection('Location Information', [
+        ['Business Name', data.businessName],
+        ['Location Address', data.locationAddress],
+        ['City', data.cityDisplay || data.city],
+        ['Location Contact', data.locationContact],
+        ['Contact Phone', data.locationContactPhone],
+        ['Type of Offence', data.offenceTypeDisplay || data.offenceType]
+      ]);
+      if (locationInfo) content.push(locationInfo);
+      
+      // Video Extraction Details
+      const extractionDuration = data.extractionStartTime && data.extractionEndTime
+        ? calculateVideoDuration(data.extractionStartTime, data.extractionEndTime)
+        : null;
         
-        // Investigator Information
-        this.buildSection('Submitting Investigator', [
-          ['Name', data.rName],
-          ['Badge #', data.badge],
-          ['Phone', data.requestingPhone],
-          ['Email', data.requestingEmail],
-          ['Unit', data.unit]
-        ]),
-        
-        // Location Information
-        this.buildSection('Location Information', [
-          ['Business Name', data.businessName || 'N/A'],
-          ['Location Address', data.locationAddress],
-          ['City', data.cityDisplay || data.city],
-          ['Location Contact', data.locationContact],
-          ['Contact Phone', data.locationContactPhone],
-          ['Type of Offence', data.offenceTypeDisplay || data.offenceType || 'Not specified']
-        ]),
-        
-        // Video Extraction Details
-        this.buildSection('Video Extraction Details', [
-          ['Extraction Start Time', formatDateTime(data.extractionStartTime)],
-          ['Extraction End Time', formatDateTime(data.extractionEndTime)],
-          ['Time Period Type', data.timePeriodType],
-          ['Extraction Duration', this.calculateDuration(data.extractionStartTime, data.extractionEndTime)]
-        ]),
-        
-        // DVR Information
-        this.buildDvrSection(data),
-        
-        // Access Information
-        this.buildSection('Access Information', [
-          ['DVR Username', data.dvrUsername || 'Not provided'],
-          ['DVR Password', data.dvrPassword],
-          ['Video Monitor On-Site', data.hasVideoMonitor || 'Not specified']
-        ]),
-        
-        // Camera Details
-        this.buildCameraSection(data.cameraDetails),
-        
-        // Incident Description
-        this.buildIncidentSection(data.incidentDescription),
-        
-        // Footer
-        this.buildFooter()
-      ];
-    },
-    
-    buildHeader(title) {
-      return {
-        columns: [
-          {
-            text: 'PEEL REGIONAL POLICE\nForensic Video Unit',
-            style: 'header'
-          },
-          {
-            text: title,
-            style: 'header',
-            alignment: 'right'
-          }
-        ],
-        margin: [0, 0, 0, 20]
-      };
-    },
-    
-    buildSection(title, fields) {
-      return {
-        margin: [0, 15, 0, 0],
-        stack: [
-          { text: title, style: 'subheader' },
-          {
-            table: {
-              widths: ['35%', '65%'],
-              body: fields.map(([label, value]) => [
-                { text: label + ':', bold: true },
-                { text: value || 'N/A' }
-              ])
-            },
-            layout: 'noBorders'
-          }
-        ]
-      };
-    },
-    
-    buildDvrSection(data) {
-      const fields = [
-        ['DVR Make/Model', data.dvrMakeModel || 'Not specified'],
-        ['Time & Date Correct', data.isTimeDateCorrect || 'Not specified']
+      const extractionDetails = PDF_BASE.buildStandardSection('Video Extraction Details', [
+        ['Extraction Start Time', formatDateTime(data.extractionStartTime)],
+        ['Extraction End Time', formatDateTime(data.extractionEndTime)],
+        ['Time Period Type', data.timePeriodType],
+        ['Extraction Duration', extractionDuration ? extractionDuration.formatted : null]
+      ]);
+      if (extractionDetails) content.push(extractionDetails);
+      
+      // DVR Information
+      let dvrFields = [
+        ['DVR Make/Model', data.dvrMakeModel],
+        ['Time & Date Correct', data.isTimeDateCorrect]
       ];
       
       // Add time offset if applicable
       if (data.isTimeDateCorrect === 'No' && data.timeOffset) {
-        fields.push(['Time Offset', data.timeOffset]);
+        const parsed = parseTimeOffset(data.timeOffset);
+        dvrFields.push(['Time Offset', parsed.formatted]);
       }
       
-      // Add retention date if provided
+      // Add retention info if available
       if (data.dvrRetention) {
         const retention = calculateRetentionDays(data.dvrRetention);
-        fields.push(['DVR Retention Date', formatDateTime(data.dvrRetention)]);
-        fields.push(['Retention Info', retention.message]);
-      }
-      
-      return this.buildSection('DVR Information', fields);
-    },
-    
-    buildCameraSection(cameraDetails) {
-      if (!cameraDetails) {
-        return {};
-      }
-      
-      const cameras = cameraDetails.split('\n').filter(c => c.trim());
-      
-      return {
-        margin: [0, 15, 0, 0],
-        stack: [
-          { text: 'Camera Details', style: 'subheader' },
-          { text: 'Cameras to be Extracted:', bold: true, margin: [0, 5, 0, 5] },
-          {
-            ul: cameras.map(camera => camera.trim())
-          }
-        ]
-      };
-    },
-    
-    buildIncidentSection(description) {
-      return {
-        margin: [0, 15, 0, 0],
-        stack: [
-          { text: 'Incident Description', style: 'subheader' },
-          { text: 'Description of what takes place on camera:', bold: true, margin: [0, 5, 0, 5] },
-          {
-            text: description || 'No description provided',
-            margin: [0, 5, 0, 0],
-            style: 'description'
-          }
-        ]
-      };
-    },
-    
-    calculateDuration(startTime, endTime) {
-      if (!startTime || !endTime) return 'N/A';
-      
-      const start = new Date(startTime);
-      const end = new Date(endTime);
-      const diffMinutes = Math.round((end - start) / (1000 * 60));
-      
-      if (diffMinutes < 60) {
-        return `${diffMinutes} minutes`;
-      }
-      
-      const hours = Math.floor(diffMinutes / 60);
-      const minutes = diffMinutes % 60;
-      
-      if (minutes === 0) {
-        return `${hours} hour${hours > 1 ? 's' : ''}`;
-      }
-      
-      return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${minutes > 1 ? 's' : ''}`;
-    },
-    
-    buildFooter() {
-      return [
-        { text: '\n\n' },
-        { 
-          text: `Generated: ${new Date().toLocaleString()}`, 
-          style: 'footer' 
-        },
-        { 
-          text: 'This is an official request document', 
-          style: 'footer' 
+        dvrFields.push(['DVR Retention', retention.message]);
+        
+        // Add urgent banner if retention is low
+        if (retention.days < 30) {
+          content.push(PDF_BASE.buildUrgentBanner(`DVR DATA AT RISK - ${retention.message}`));
         }
-      ];
+      }
+      
+      const dvrInfo = PDF_BASE.buildStandardSection('DVR Information', dvrFields);
+      if (dvrInfo) content.push(dvrInfo);
+      
+      // Access Information
+      const accessInfo = PDF_BASE.buildStandardSection('Access Information', [
+        ['DVR Username', data.dvrUsername],
+        ['DVR Password', data.dvrPassword],
+        ['Video Monitor On-Site', data.hasVideoMonitor]
+      ]);
+      if (accessInfo) content.push(accessInfo);
+      
+      // Camera Details
+      const cameraDetails = PDF_BASE.buildTextSection('Camera Details', data.cameraDetails);
+      if (cameraDetails) content.push(cameraDetails);
+      
+      // Incident Description
+      const incidentDesc = PDF_BASE.buildTextSection('Incident Description', data.incidentDescription);
+      if (incidentDesc) content.push(incidentDesc);
+      
+      return content;
     }
   }
 };
+
+/**
+ * Generate document definition for PDFMake
+ * @param {Object} formData - Form data
+ * @param {string} formType - Form type
+ * @returns {Object} Document definition
+ */
+export function buildDocumentDefinition(formData, formType) {
+  const template = PDF_TEMPLATES[formType];
+  if (!template) {
+    throw new Error(`No PDF template found for form type: ${formType}`);
+  }
+  
+  return {
+    pageSize: 'LETTER',
+    pageMargins: [40, 100, 40, 60], // Increased top margin for header
+    
+    // Document metadata
+    info: {
+      title: `${CONFIG.FORM_TITLES[formType.toUpperCase()]} - ${formData.occNumber || 'No Occurrence #'}`,
+      author: CONFIG.PDF_CONFIG?.METADATA?.author || 'Peel Regional Police - Forensic Video Unit',
+      subject: CONFIG.PDF_CONFIG?.METADATA?.subject || 'Evidence Request',
+      keywords: CONFIG.PDF_CONFIG?.METADATA?.keywords || 'forensic, video, evidence',
+      creator: 'FVU Request System',
+      producer: 'FVU Request System'
+    },
+    
+    // Main content
+    content: template.buildContent(formData),
+    
+    // Page footer
+    footer: function(currentPage, pageCount) {
+      return PDF_BASE.buildFooter(currentPage, pageCount);
+    },
+    
+    // Default styles
+    defaultStyle: {
+      font: 'Roboto',
+      fontSize: 11,
+      lineHeight: 1.3
+    }
+  };
+}

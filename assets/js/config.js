@@ -4,6 +4,8 @@
  * No business logic - just values
  */
 
+import { HOMICIDE_LOGO_BASE64 } from './logo-data.js';
+
 export const CONFIG = {
   // API Configuration
   API_ENDPOINT: 'rfs_request_process.php',
@@ -252,6 +254,22 @@ export const CONFIG = {
   DRAFT_ANIMATIONS: {
     PULSE_DURATION: 1000,
     PULSE_OPACITY_MIN: 0.7
+  },
+  
+  // PDF Configuration
+  PDF_CONFIG: {
+    METADATA: {
+      author: 'Peel Regional Police - Forensic Video Unit',
+      subject: 'Evidence Request',
+      keywords: 'forensic, video, evidence'
+    }
+  },
+  
+  // PDF Logo Configuration
+  PDF_LOGO: {
+    HOMICIDE: HOMICIDE_LOGO_BASE64,
+    WIDTH: 80,
+    HEIGHT: 80
   }
 };
 
@@ -268,3 +286,5 @@ Object.freeze(CONFIG.DRAFT_STATES);
 Object.freeze(CONFIG.HEADER_SIZES);
 Object.freeze(CONFIG.SHADOWS);
 Object.freeze(CONFIG.DRAFT_ANIMATIONS);
+Object.freeze(CONFIG.PDF_CONFIG);
+Object.freeze(CONFIG.PDF_LOGO);
