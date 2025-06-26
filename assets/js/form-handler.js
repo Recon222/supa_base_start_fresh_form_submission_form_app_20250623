@@ -11,6 +11,7 @@ import { debounce, toggleElement, scrollToElement, showToast, createElement, gen
 import { calculateRetentionDays, generateFieldSummaries } from './calculations.js';
 import { generatePDF } from './pdf-generator.js';
 import { generateJSON } from './json-generator.js';
+import { showConfirmModal } from './notifications.js';
 
 /**
  * Base FormHandler class
@@ -84,8 +85,16 @@ export class FormHandler {
     // Clear officer info button
     const clearBtn = document.getElementById('clearOfficerInfo');
     if (clearBtn) {
-      clearBtn.addEventListener('click', () => {
-        if (confirm('Clear saved investigator information from this browser?')) {
+      clearBtn.addEventListener('click', async () => {
+        const confirmed = await showConfirmModal({
+          title: 'Clear Investigator Information',
+          message: 'Clear saved investigator information from this browser?\n\nThis will remove your saved name, badge, phone, and email.',
+          confirmText: 'Clear Information',
+          cancelText: 'Cancel',
+          type: 'warning'
+        });
+        
+        if (confirmed) {
           if (clearOfficerInfo()) {
             // Clear the fields
             ['rName', 'badge', 'requestingPhone', 'requestingEmail'].forEach(name => {
@@ -144,13 +153,18 @@ export class FormHandler {
     
     if (this.isSubmitting) return;
     
-    // ADD: Confirmation dialog before proceeding
+    // Use beautiful modal instead of ugly confirm()
     const formTypeDisplay = this.formType.charAt(0).toUpperCase() + this.formType.slice(1);
-    const confirmMessage = `Are you sure you want to submit this ${formTypeDisplay} Request?\n\n` +
-                          `This action cannot be undone and the form will be cleared after submission.`;
+    const confirmed = await showConfirmModal({
+      title: `Confirm ${formTypeDisplay} Submission`,
+      message: `Are you sure you want to submit this ${formTypeDisplay} Request?\n\nThis action cannot be undone and the form will be cleared after submission.`,
+      confirmText: 'Submit Request',
+      cancelText: 'Cancel',
+      type: 'warning'
+    });
     
-    if (!confirm(confirmMessage)) {
-      return; // User cancelled, stop submission
+    if (!confirmed) {
+      return; // User cancelled
     }
     
     this.isSubmitting = true;
@@ -285,9 +299,18 @@ export class FormHandler {
     showToast('Form submission not implemented yet', 'info');
   }
   
-  handleReset(e) {
-    if (!confirm('Are you sure you want to clear the form? This will also clear any saved draft.')) {
-      e.preventDefault();
+  async handleReset(e) {
+    e.preventDefault(); // Always prevent default first
+    
+    const confirmed = await showConfirmModal({
+      title: 'Clear Form',
+      message: 'Are you sure you want to clear the form?\n\nThis will also clear any saved draft.',
+      confirmText: 'Clear Form',
+      cancelText: 'Cancel',
+      type: 'warning'
+    });
+    
+    if (!confirmed) {
       return;
     }
     
@@ -298,6 +321,9 @@ export class FormHandler {
     this.form.querySelectorAll('.form-control').forEach(field => {
       field.classList.remove('is-valid', 'is-invalid');
     });
+    
+    // Reset the form
+    this.form.reset();
     
     // Reset progress
     setTimeout(() => this.updateProgress(), 100);
@@ -310,12 +336,18 @@ export class FormHandler {
    * More thorough than reset - clears all states
    */
   clearFormAfterSubmission() {
-    // Reset the form HTML
-    this.form.reset();
+    // Clear draft first
+    clearDraft(this.formType);
     
-    // Clear all validation states
+    // Clear all form fields without triggering reset event
     this.form.querySelectorAll('.form-control').forEach(field => {
+      if (field.type === 'checkbox' || field.type === 'radio') {
+        field.checked = false;
+      } else {
+        field.value = '';
+      }
       field.classList.remove('is-valid', 'is-invalid');
+      
       // Clear any error messages
       const feedback = field.parentElement.querySelector('.invalid-feedback');
       if (feedback) {
@@ -340,6 +372,9 @@ export class FormHandler {
     
     // Scroll to top of form
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Show success message
+    showToast('Form cleared', 'info');
   }
   
   saveDraftAuto() {
@@ -1132,11 +1167,8 @@ export class UploadFormHandler extends FormHandler {
       
       showToast('Upload form processed successfully!', 'success');
       
-      // ADD: Clear the form after successful submission
+      // Clear the form after successful submission
       this.clearFormAfterSubmission();
-      
-      // Clear draft on successful submission
-      clearDraft(this.formType);
       
     } catch (error) {
       console.error('Error generating files:', error);
@@ -1366,11 +1398,8 @@ export class AnalysisFormHandler extends FormHandler {
       
       showToast('Analysis form processed successfully!', 'success');
       
-      // ADD: Clear the form after successful submission
+      // Clear the form after successful submission
       this.clearFormAfterSubmission();
-      
-      // Clear draft on successful submission
-      clearDraft(this.formType);
       
     } catch (error) {
       console.error('Error generating files:', error);
@@ -1621,11 +1650,8 @@ export class RecoveryFormHandler extends FormHandler {
       
       showToast('Recovery form processed successfully!', 'success');
       
-      // ADD: Clear the form after successful submission
+      // Clear the form after successful submission
       this.clearFormAfterSubmission();
-      
-      // Clear draft on successful submission
-      clearDraft(this.formType);
       
     } catch (error) {
       console.error('Error generating files:', error);

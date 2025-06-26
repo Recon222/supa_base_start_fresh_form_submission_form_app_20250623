@@ -1,0 +1,203 @@
+/**
+ * Notification Styles
+ * Modals, alerts, and notification components
+ * Depends on: CSS variables from forms.css
+ * Max 500 lines (currently ~150)
+ */
+
+/* ========================================
+   1. MODAL OVERLAY
+   ======================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: var(--z-modal);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-base), visibility var(--transition-base);
+}
+
+.modal-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ========================================
+   2. MODAL CONTENT
+   ======================================== */
+.modal-content {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--input-border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: auto;
+  transform: translateY(20px) scale(0.95);
+  transition: transform var(--transition-base);
+}
+
+.modal-overlay.show .modal-content {
+  transform: translateY(0) scale(1);
+}
+
+/* ========================================
+   3. MODAL STRUCTURE
+   ======================================== */
+.modal-header {
+  padding: var(--space-xl);
+  border-bottom: var(--input-border-width) solid var(--border-color);
+}
+
+.modal-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modal-body {
+  padding: var(--space-xl);
+}
+
+.modal-message {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
+  margin: 0;
+  white-space: pre-line;
+}
+
+.modal-actions {
+  padding: var(--space-lg) var(--space-xl);
+  border-top: var(--input-border-width) solid var(--border-color);
+  display: flex;
+  gap: var(--space-md);
+  justify-content: flex-end;
+}
+
+/* ========================================
+   4. MODAL TYPES
+   ======================================== */
+.modal-content.modal-warning .modal-header {
+  border-bottom-color: var(--color-warning);
+}
+
+.modal-content.modal-warning .modal-title {
+  color: var(--color-warning);
+}
+
+.modal-content.modal-danger .modal-header {
+  border-bottom-color: var(--color-danger);
+}
+
+.modal-content.modal-danger .modal-title {
+  color: var(--color-danger);
+}
+
+.modal-content.modal-success .modal-header {
+  border-bottom-color: var(--color-success);
+}
+
+.modal-content.modal-success .modal-title {
+  color: var(--color-success);
+}
+
+/* ========================================
+   5. MODAL ICON
+   ======================================== */
+.modal-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  border: 2px solid currentColor;
+  font-size: 1.5rem;
+}
+
+.modal-content.modal-warning .modal-icon {
+  color: var(--color-warning);
+  background: rgba(255, 193, 7, 0.1);
+}
+
+/* ========================================
+   6. ANIMATIONS
+   ======================================== */
+@keyframes modalShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.modal-content.shake {
+  animation: modalShake var(--transition-base);
+}
+
+/* ========================================
+   7. RESPONSIVE
+   ======================================== */
+@media (max-width: 480px) {
+  .modal-content {
+    width: 95%;
+    margin: var(--space-md);
+  }
+  
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .modal-actions .btn {
+    width: 100%;
+  }
+}
+
+/* ========================================
+   8. ACCESSIBILITY
+   ======================================== */
+.modal-content:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Focus state for buttons in modal */
+.modal-actions .btn:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.25);
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-content {
+    transition: none;
+  }
+  
+  .modal-content.shake {
+    animation: none;
+  }
+}
+
+/* ========================================
+   9. LIGHT THEME OVERRIDES
+   ======================================== */
+[data-theme="light"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .modal-content {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
