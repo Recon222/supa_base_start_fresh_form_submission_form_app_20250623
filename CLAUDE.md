@@ -3,86 +3,69 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-Forensic Video Unit Request System for Peel Regional Police with three request forms:
-- **analysis.html** - Video analysis requests (enhancement, comparison, timeline creation)
-- **upload.html** - Evidence upload requests
-- **recovery.html** - On-site DVR recovery requests
+
+This is the Forensic Video Unit (FVU) Request System for Peel Regional Police - a vanilla JavaScript web application that allows investigators to submit three types of video evidence requests: Analysis, Upload, and Recovery. The system generates PDF and JSON files from form submissions and integrates with a third-party PHP ticketing system.
 
 ## Development Commands
-- **Run locally**: Use VS Code Live Server (port 5502) or any static web server
-- **No build process**: Files are served directly as ES6 modules
-- **Testing**: Manual testing only - no test framework configured
 
-## Architecture & Structure
+This project has no build process or npm dependencies. To develop:
 
-### JavaScript Modules (assets/js/)
-- `form-handler.js` - Base FormHandler class for form lifecycle
-- `validators.js` - Field validation logic
-- `config.js` - API endpoints, patterns, field mappings
-- `pdf-generator.js` & `pdf-templates.js` - Client-side PDF generation
-- `json-generator.js` - JSON file creation from forms
-- `storage.js` - Local storage for drafts
-- `api-client.js` - Form submission to PHP endpoint
-- `utils.js` - DOM helpers, toast notifications
-- `calculations.js` - Business logic calculations
-- `theme-manager.js` - Theme switching functionality
+1. **Run locally**: Use VS Code Live Server (port 5502) or any static web server
+2. **Open directly**: HTML files can be opened directly in browser for development
+3. **No build/test commands**: Pure vanilla JS with no build tooling
 
-### Key Development Rules
-- **No over-engineering**: No React/Vue, no bundlers, no state management
-- **File size limits**: JS files max 450 lines, CSS max 550 lines
-- **Use ES6 modules** directly in browser
-- **Security**: Sanitize all input, use textContent not innerHTML
-- **Validation**: Real-time with visual feedback (green/red borders)
-- **Code clarity**: No functions over 50 lines, early returns, if junior dev can't understand - rewrite
-- **No magic numbers**: Use constants for all values
-- **Simple > Complex**: Choose boring over impressive, when tempted to add complexity - DON'T
+## Architecture
 
-### Field Naming (MUST match third-party system)
-```javascript
-rName              // Requesting officer name
-requestingEmail    // Officer email (@peelpolice.ca only)
-requestingPhone    // Officer phone
-reqArea           // Request type
-fileDetails       // File information
-rfsDetails        // Request details
-occType           // Occurrence type
-occDate           // Occurrence date
+### Core Principles
+- **No framework/build tools**: Vanilla JS with ES6 modules only
+- **Appropriately simple**: Avoid over-engineering
+- **File size limits**: JS files max 450 lines, CSS files max 550 lines
+- **Function clarity**: Keep functions under 50 lines with early returns
+
+### Module Structure
+```
+assets/js/
+├── config.js         # Central configuration (API endpoints, field mappings)
+├── form-handler.js   # Core form submission and validation orchestration
+├── validators.js     # Field validation rules and error messaging
+├── pdf-generator.js  # PDF generation using PDFMake
+├── storage.js        # LocalStorage management for drafts and user data
+├── ui-effects.js     # Visual effects (3D tilts, animations)
+├── theme.js          # Dark/light theme toggle
+└── utils.js          # Shared utility functions
 ```
 
-### Form Features
-- Draft auto-save functionality
-- Client-side PDF and JSON generation (PDFMake with Roboto font only)
-- Progress tracking for required fields
-- Conditional field visibility
-- Session timeout warnings
-- Green borders ONLY on valid required fields
-- Red borders + shake animation on errors
-- Smooth scroll to first error on submit
-- Clear forms after successful submission
-- Dark/light theme toggle with persistence
+### Form Submission Flow
+1. Real-time validation with visual feedback
+2. Client-side PDF/JSON generation on submit
+3. FormData creation with attachments
+4. POST to `rfs_request_process.php`
+5. Clear form and show success on completion
 
-### Deployment Process
-1. Develop with HTML files locally
-2. Convert to PHP for production (add session management)
-3. Deploy via SFTP to homicidefvu.fatsystems.ca
-4. Configure API endpoints in config.js
+### Field Naming Convention
+The third-party system requires specific field names:
+- `rName` - Requesting investigator name
+- `requestingEmail` - Email (@peelpolice.ca only)
+- `reqArea` - Request type (analysis/upload/recovery)
+- `locationOfIncident` - Incident location
+- Other fields follow similar patterns
 
-### Important Patterns
-- Forms submit to `rfs_request_process.php` with PDF/JSON attachments
-- Use FormData for multipart submissions
-- CSRF protection added during PHP conversion
-- DVR passwords are plain text fields (not sensitive)
-- Email validation restricted to @peelpolice.ca domain
-- fileAttachmentA = PDF, fileAttachmentB = JSON
-- Include session_verify field in submissions
-- Handle JSON responses properly
-- Build forms FIRST to understand requirements
-- Create only modules needed to support forms
-- Theme stored in localStorage as 'fvu-theme'
-- Development mode detected via protocol, localhost, or 127.0.0.1
+### Production Deployment
+1. Convert HTML to PHP by adding session management:
+   ```php
+   <?php session_start(); ?>
+   <input type="hidden" name="session_verify" value="<?php echo session_id(); ?>">
+   ```
+2. Update API endpoint in config.js
+3. Deploy via SFTP to production server
 
-### Common Issues & Solutions
-- **Font errors in PDF**: Use 'Roboto' font only (not Helvetica)
-- **Theme not switching**: Ensure data-theme is set on both html and body elements
-- **SVG icons invisible**: Remove stroke="currentColor" from SVGs, use CSS for colors
-- **Development mode not working**: Check if hostname is 127.0.0.1 (now supported)
+### Security Considerations
+- Always sanitize user input
+- Use `textContent` instead of `innerHTML`
+- Validate email domain (@peelpolice.ca)
+- Session verification in production
+
+### Browser Support
+Modern browsers only (ES6 modules required):
+- Chrome 60+, Firefox 60+, Safari 11+, Edge 79+
+- No IE11 support

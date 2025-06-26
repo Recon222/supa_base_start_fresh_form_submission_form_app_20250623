@@ -12,6 +12,7 @@ import { calculateRetentionDays, generateFieldSummaries } from './calculations.j
 import { generatePDF } from './pdf-generator.js';
 import { generateJSON } from './json-generator.js';
 import { showConfirmModal } from './notifications.js';
+import { submitForm } from './api-client.js';
 
 /**
  * Base FormHandler class
@@ -295,8 +296,26 @@ export class FormHandler {
     }
     
     // This will be overridden by specific form handlers
-    console.log('Form data ready for submission:', formData);
-    showToast('Form submission not implemented yet', 'info');
+    // But provide a base implementation for safety
+    try {
+      const [pdfBlob, jsonBlob] = await Promise.all([
+        generatePDF(formData, this.formType),
+        generateJSON(formData, this.formType)
+      ]);
+      
+      const result = await submitForm(formData, pdfBlob, jsonBlob);
+      
+      if (result.success) {
+        showToast(`${CONFIG.MESSAGES.SUBMISSION_SUCCESS}. ID: ${result.submissionId || result.ticketNumber}`, 'success');
+        this.clearFormAfterSubmission();
+      } else {
+        showToast(result.message || CONFIG.MESSAGES.SUBMISSION_ERROR, 'error');
+      }
+    } catch (error) {
+      console.error('Error during submission:', error);
+      showToast(error.message || CONFIG.MESSAGES.SUBMISSION_ERROR, 'error');
+      this.saveDraftAuto();
+    }
   }
   
   async handleReset(e) {
@@ -1145,34 +1164,24 @@ export class UploadFormHandler extends FormHandler {
       console.log('PDF generated:', pdfBlob.size, 'bytes');
       console.log('JSON generated:', jsonBlob.size, 'bytes');
       
-      // In production, this would submit via api-client
-      // For now, we can download the files for testing
-      if (CONFIG.IS_DEVELOPMENT) {
-        // Download PDF
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        const pdfLink = document.createElement('a');
-        pdfLink.href = pdfUrl;
-        pdfLink.download = `upload_${Date.now()}.pdf`;
-        pdfLink.click();
-        URL.revokeObjectURL(pdfUrl);
+      // Submit to API (Supabase or PHP)
+      const result = await submitForm(formData, pdfBlob, jsonBlob);
+      
+      if (result.success) {
+        showToast(`${CONFIG.MESSAGES.SUBMISSION_SUCCESS}. ID: ${result.submissionId || result.ticketNumber}`, 'success');
         
-        // Download JSON
-        const jsonUrl = URL.createObjectURL(jsonBlob);
-        const jsonLink = document.createElement('a');
-        jsonLink.href = jsonUrl;
-        jsonLink.download = `upload_${Date.now()}.json`;
-        jsonLink.click();
-        URL.revokeObjectURL(jsonUrl);
+        // Clear the form after successful submission
+        this.clearFormAfterSubmission();
+      } else {
+        showToast(result.message || CONFIG.MESSAGES.SUBMISSION_ERROR, 'error');
       }
       
-      showToast('Upload form processed successfully!', 'success');
-      
-      // Clear the form after successful submission
-      this.clearFormAfterSubmission();
-      
     } catch (error) {
-      console.error('Error generating files:', error);
-      showToast('Error generating PDF/JSON files', 'error');
+      console.error('Error during submission:', error);
+      showToast(error.message || CONFIG.MESSAGES.SUBMISSION_ERROR, 'error');
+      
+      // Save draft on error
+      this.saveDraftAuto();
     }
   }
 }
@@ -1376,34 +1385,24 @@ export class AnalysisFormHandler extends FormHandler {
       console.log('PDF generated:', pdfBlob.size, 'bytes');
       console.log('JSON generated:', jsonBlob.size, 'bytes');
       
-      // In production, this would submit via api-client
-      // For now, we can download the files for testing
-      if (CONFIG.IS_DEVELOPMENT) {
-        // Download PDF
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        const pdfLink = document.createElement('a');
-        pdfLink.href = pdfUrl;
-        pdfLink.download = `analysis_${Date.now()}.pdf`;
-        pdfLink.click();
-        URL.revokeObjectURL(pdfUrl);
+      // Submit to API (Supabase or PHP)
+      const result = await submitForm(formData, pdfBlob, jsonBlob);
+      
+      if (result.success) {
+        showToast(`${CONFIG.MESSAGES.SUBMISSION_SUCCESS}. ID: ${result.submissionId || result.ticketNumber}`, 'success');
         
-        // Download JSON
-        const jsonUrl = URL.createObjectURL(jsonBlob);
-        const jsonLink = document.createElement('a');
-        jsonLink.href = jsonUrl;
-        jsonLink.download = `analysis_${Date.now()}.json`;
-        jsonLink.click();
-        URL.revokeObjectURL(jsonUrl);
+        // Clear the form after successful submission
+        this.clearFormAfterSubmission();
+      } else {
+        showToast(result.message || CONFIG.MESSAGES.SUBMISSION_ERROR, 'error');
       }
       
-      showToast('Analysis form processed successfully!', 'success');
-      
-      // Clear the form after successful submission
-      this.clearFormAfterSubmission();
-      
     } catch (error) {
-      console.error('Error generating files:', error);
-      showToast('Error generating PDF/JSON files', 'error');
+      console.error('Error during submission:', error);
+      showToast(error.message || CONFIG.MESSAGES.SUBMISSION_ERROR, 'error');
+      
+      // Save draft on error
+      this.saveDraftAuto();
     }
   }
 }
@@ -1628,34 +1627,24 @@ export class RecoveryFormHandler extends FormHandler {
       console.log('PDF generated:', pdfBlob.size, 'bytes');
       console.log('JSON generated:', jsonBlob.size, 'bytes');
       
-      // In production, this would submit via api-client
-      // For now, we can download the files for testing
-      if (CONFIG.IS_DEVELOPMENT) {
-        // Download PDF
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        const pdfLink = document.createElement('a');
-        pdfLink.href = pdfUrl;
-        pdfLink.download = `recovery_${Date.now()}.pdf`;
-        pdfLink.click();
-        URL.revokeObjectURL(pdfUrl);
+      // Submit to API (Supabase or PHP)
+      const result = await submitForm(formData, pdfBlob, jsonBlob);
+      
+      if (result.success) {
+        showToast(`${CONFIG.MESSAGES.SUBMISSION_SUCCESS}. ID: ${result.submissionId || result.ticketNumber}`, 'success');
         
-        // Download JSON
-        const jsonUrl = URL.createObjectURL(jsonBlob);
-        const jsonLink = document.createElement('a');
-        jsonLink.href = jsonUrl;
-        jsonLink.download = `recovery_${Date.now()}.json`;
-        jsonLink.click();
-        URL.revokeObjectURL(jsonUrl);
+        // Clear the form after successful submission
+        this.clearFormAfterSubmission();
+      } else {
+        showToast(result.message || CONFIG.MESSAGES.SUBMISSION_ERROR, 'error');
       }
       
-      showToast('Recovery form processed successfully!', 'success');
-      
-      // Clear the form after successful submission
-      this.clearFormAfterSubmission();
-      
     } catch (error) {
-      console.error('Error generating files:', error);
-      showToast('Error generating PDF/JSON files', 'error');
+      console.error('Error during submission:', error);
+      showToast(error.message || CONFIG.MESSAGES.SUBMISSION_ERROR, 'error');
+      
+      // Save draft on error
+      this.saveDraftAuto();
     }
   }
 }

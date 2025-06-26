@@ -1,0 +1,5 @@
+# Protect dashboard with basic auth
+/dashboard/*  200!  Role=admin
+
+# Or use basic password protection
+# /dashboard/*  200!  Basic-Auth=yourboss:secretpassword

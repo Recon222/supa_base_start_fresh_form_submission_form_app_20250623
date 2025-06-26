@@ -11,6 +11,10 @@ export const CONFIG = {
   API_ENDPOINT: 'rfs_request_process.php',
   API_TIMEOUT: 30000, // 30 seconds
   
+  // Supabase Configuration
+  USE_SUPABASE: true, // Toggle between Supabase and PHP endpoint
+  SUPABASE_ENABLED: true,
+  
   // File Configuration
   MAX_FILE_SIZE: 10485760, // 10MB
   ALLOWED_FILE_TYPES: ['application/pdf', 'application/json'],

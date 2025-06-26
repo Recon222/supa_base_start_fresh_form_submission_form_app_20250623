@@ -7,8 +7,14 @@
       "Bash(for file in index.html analysis.html upload.html recovery.html upload_backup.html)",
       "Bash(do echo \"=== $file ===\")",
       "Bash(rg:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__apply_migration"
     ],
     "deny": []
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase"
+  ]
 }

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Access</title>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .access-form {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: #FFD100;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #1B3A6B;
+            margin: 0 auto 2rem;
+            font-size: 1.5rem;
+        }
+        h2 {
+            color: #FFD100;
+            margin-bottom: 2rem;
+        }
+        input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: #1B3A6B;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: #2B5AA8;
+        }
+        .error {
+            color: #dc3545;
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="access-form">
+        <div class="logo">FVU</div>
+        <h2>Dashboard Access</h2>
+        <form onsubmit="checkAccess(event)">
+            <input type="password" id="accessCode" placeholder="Enter access code" required>
+            <button type="submit">Access Dashboard</button>
+            <div class="error" id="error">Invalid access code</div>
+        </form>
+    </div>
+
+    <script>
+        // Simple access control - change this code to something secure
+        const ACCESS_CODE = 'FVU2025admin'; // Change this!
+        
+        function checkAccess(e) {
+            e.preventDefault();
+            const code = document.getElementById('accessCode').value;
+            
+            if (code === ACCESS_CODE) {
+                // Store access in session
+                sessionStorage.setItem('dashboardAccess', 'granted');
+                // Redirect to dashboard
+                window.location.href = './fvu-admin-dashboard.html';
+            } else {
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('accessCode').value = '';
+            }
+        }
+        
+        // Check if already has access
+        if (sessionStorage.getItem('dashboardAccess') === 'granted') {
+            window.location.href = './fvu-admin-dashboard.html';
+        }
+    </script>
+</body>
+</html>

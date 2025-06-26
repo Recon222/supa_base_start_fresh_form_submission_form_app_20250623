@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Supabase Connection</title>
+  <link rel="stylesheet" href="assets/css/forms.css">
+  <style>
+    .test-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+    }
+    .test-section {
+      background: var(--glass-bg);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .test-button {
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      margin-right: 1rem;
+    }
+    .test-button:hover {
+      opacity: 0.9;
+    }
+    .result {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      font-family: monospace;
+      white-space: pre-wrap;
+      background: rgba(0,0,0,0.1);
+    }
+    .success {
+      border: 2px solid var(--color-success);
+      color: var(--color-success);
+    }
+    .error {
+      border: 2px solid var(--color-danger);
+      color: var(--color-danger);
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>Supabase Connection Test</h1>
+    
+    <div class="test-section">
+      <h2>1. Test Connection</h2>
+      <button class="test-button" onclick="testConnection()">Test Connection</button>
+      <div id="connection-result"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>2. Test Submission</h2>
+      <button class="test-button" onclick="testSubmission()">Submit Test Data</button>
+      <div id="submission-result"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>3. View Recent Submissions</h2>
+      <button class="test-button" onclick="viewSubmissions()">View Submissions</button>
+      <div id="view-result"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initSupabase, submitToSupabase, getSubmissionsByEmail } from './assets/js/supabase.js';
+    
+    window.testConnection = async function() {
+      const resultDiv = document.getElementById('connection-result');
+      resultDiv.innerHTML = 'Testing connection...';
+      
+      try {
+        const supabase = await initSupabase();
+        resultDiv.innerHTML = '<div class="result success">✅ Successfully connected to Supabase!</div>';
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ Connection failed: ${error.message}</div>`;
+      }
+    };
+    
+    window.testSubmission = async function() {
+      const resultDiv = document.getElementById('submission-result');
+      resultDiv.innerHTML = 'Submitting test data...';
+      
+      try {
+        const testData = {
+          reqArea: 'upload',
+          rName: 'Test Officer',
+          requestingEmail: 'test@peelpolice.ca',
+          requestingPhone: '4161234567',
+          badge: 'TEST123',
+          occNumber: 'PR123456',
+          occDate: new Date().toISOString().split('T')[0],
+          occType: 'Test Occurrence',
+          locationOfIncident: 'Test Location',
+          fileDetails: 'Test file details',
+          rfsDetails: 'Test request details'
+        };
+        
+        const result = await submitToSupabase(testData);
+        resultDiv.innerHTML = `<div class="result success">✅ Successfully submitted!\nID: ${result.data.id}\nData: ${JSON.stringify(result.data, null, 2)}</div>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ Submission failed: ${error.message}</div>`;
+      }
+    };
+    
+    window.viewSubmissions = async function() {
+      const resultDiv = document.getElementById('view-result');
+      resultDiv.innerHTML = 'Fetching submissions...';
+      
+      try {
+        const submissions = await getSubmissionsByEmail('test@peelpolice.ca');
+        if (submissions.length === 0) {
+          resultDiv.innerHTML = '<div class="result">No submissions found</div>';
+        } else {
+          resultDiv.innerHTML = `<div class="result success">Found ${submissions.length} submissions:\n${JSON.stringify(submissions, null, 2)}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="result error">❌ Failed to fetch submissions: ${error.message}</div>`;
+      }
+    };
+  </script>
+</body>
+</html>
