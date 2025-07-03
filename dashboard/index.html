@@ -3,106 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Access</title>
+    <title>Dashboard Access - FVU</title>
+    
+    <!-- Link to forms CSS for consistent styling -->
+    <link rel="stylesheet" href="../assets/css/forms.css">
+    
+    <!-- Early theme initialization -->
+    <script>
+        document.documentElement.setAttribute('data-theme', 
+            localStorage.getItem('fvu-theme') || 'dark');
+    </script>
+    
     <style>
-        body {
-            background: #0a0a0a;
-            color: white;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        .access-container {
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            justify-content: center;
+            padding: 2rem;
         }
         .access-form {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 2rem;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            padding: 3rem 2rem;
             width: 100%;
             max-width: 400px;
             text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
-        .logo {
-            width: 60px;
-            height: 60px;
-            background: #FFD100;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #1B3A6B;
-            margin: 0 auto 2rem;
-            font-size: 1.5rem;
+        .access-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        h2 {
-            color: #FFD100;
+        
+        .access-subtitle {
+            color: var(--text-secondary);
             margin-bottom: 2rem;
         }
-        input {
+        .access-input {
             width: 100%;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            color: white;
+            padding: 1rem 1.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            color: var(--text-primary);
             font-size: 1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            transition: all var(--transition-base);
         }
-        input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
+        
+        .access-input:focus {
+            outline: none;
+            background: var(--glass-bg-hover);
+            border-color: var(--color-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 255, 0.15);
         }
-        button {
+        
+        .access-input::placeholder {
+            color: var(--text-secondary);
+        }
+        .btn-access {
             width: 100%;
-            padding: 1rem;
-            background: #1B3A6B;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: var(--border-radius);
             font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all var(--transition-fast);
+            position: relative;
+            transform-style: preserve-3d;
+            box-shadow: 
+                0 4px 0 var(--color-primary-dark),
+                0 8px 16px rgba(0, 102, 255, 0.3);
         }
-        button:hover {
-            background: #2B5AA8;
+        
+        .btn-access:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 0 var(--color-primary-dark),
+                0 12px 20px rgba(0, 102, 255, 0.4);
+        }
+        
+        .btn-access:active {
+            transform: translateY(2px);
+            box-shadow: 
+                0 2px 0 var(--color-primary-dark),
+                0 4px 8px rgba(0, 102, 255, 0.3);
         }
         .error {
-            color: #dc3545;
+            color: var(--color-danger);
             margin-top: 1rem;
             display: none;
+            font-size: 0.875rem;
         }
     </style>
 </head>
 <body>
-    <div class="access-form">
-        <div class="logo">FVU</div>
-        <h2>Dashboard Access</h2>
-        <form onsubmit="checkAccess(event)">
-            <input type="password" id="accessCode" placeholder="Enter access code" required>
-            <button type="submit">Access Dashboard</button>
-            <div class="error" id="error">Invalid access code</div>
-        </form>
+    <!-- Animated Background -->
+    <div class="background-animation">
+        <div class="grid-overlay"></div>
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+    </div>
+    
+    <div class="access-container">
+        <div class="access-form">
+            <h1 class="access-title">FVU Dashboard</h1>
+            <p class="access-subtitle">Admin Access Required</p>
+            <form onsubmit="checkAccess(event)">
+                <input type="password" class="access-input" id="accessCode" placeholder="Enter access code" required>
+                <button type="submit" class="btn-access">Access Dashboard</button>
+                <div class="error" id="error">Invalid access code</div>
+            </form>
+        </div>
     </div>
 
-    <script>
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" style="position: fixed; top: 20px; right: 20px; z-index: 100;">
+        🌓
+    </button>
+    
+    <script type="module">
+        import { initTheme, setupThemeToggle } from '../assets/js/theme-manager.js';
+        
+        // Initialize theme
+        initTheme();
+        setupThemeToggle();
+        
         // Simple access control - change this code to something secure
         const ACCESS_CODE = 'FVU2025admin'; // Change this!
         
-        function checkAccess(e) {
+        window.checkAccess = function(e) {
             e.preventDefault();
             const code = document.getElementById('accessCode').value;
             
             if (code === ACCESS_CODE) {
                 // Store access in session
                 sessionStorage.setItem('dashboardAccess', 'granted');
-                // Redirect to dashboard
-                window.location.href = './fvu-admin-dashboard.html';
+                // Add success animation
+                const form = e.target;
+                form.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => {
+                    window.location.href = './fvu-admin-dashboard.html';
+                }, 300);
             } else {
                 document.getElementById('error').style.display = 'block';
                 document.getElementById('accessCode').value = '';
+                // Shake animation for error
+                const input = document.getElementById('accessCode');
+                input.style.animation = 'shake 0.5s ease';
+                setTimeout(() => {
+                    input.style.animation = '';
+                }, 500);
             }
         }
         
@@ -110,6 +175,21 @@
         if (sessionStorage.getItem('dashboardAccess') === 'granted') {
             window.location.href = './fvu-admin-dashboard.html';
         }
+        
+        // Add shake animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+            @keyframes fadeOut {
+                from { opacity: 1; transform: scale(1); }
+                to { opacity: 0; transform: scale(0.95); }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

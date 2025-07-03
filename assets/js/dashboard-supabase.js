@@ -105,7 +105,7 @@ function updateStats(submissions) {
   // Update pending count
   document.getElementById('pending-count').textContent = statusCounts.pending || 0;
   
-  // Count active (in_progress)
+  // Count active (processing)
   document.getElementById('active-count').textContent = statusCounts.processing || 0;
   
   // Count today's submissions
@@ -174,7 +174,7 @@ function createRequestRow(submission) {
     <td><span class="request-type">${submission.request_type.toUpperCase()}</span></td>
     <td>${formData.rName || 'Unknown'}</td>
     <td>${timeAgo}</td>
-    <td><span class="status-badge status-${submission.status}">${formatStatus(submission.status)}</span></td>
+    <td><span class="status-badge status-${submission.status.toLowerCase()}">${formatStatus(submission.status)}</span></td>
     <td>${formData.assignedTo || 'Unassigned'}</td>
     <td>${getPriorityIcon(submission)} ${getPriorityLevel(submission)}</td>
     <td>
@@ -409,10 +409,10 @@ window.downloadJSON = async function(id) {
 function showNotification(message, type = 'info') {
   const notification = document.createElement('div');
   const bgColor = {
-    success: 'linear-gradient(135deg, #28a745 0%, #5cb85c 100%)',
-    error: 'linear-gradient(135deg, #dc3545 0%, #ff6b7a 100%)',
-    warning: 'linear-gradient(135deg, #ffc107 0%, #ffdb4d 100%)',
-    info: 'linear-gradient(135deg, var(--peel-blue) 0%, var(--peel-blue-light) 100%)'
+    success: 'linear-gradient(135deg, var(--color-success) 0%, #5cb85c 100%)',
+    error: 'linear-gradient(135deg, var(--color-danger) 0%, #ff6b7a 100%)',
+    warning: 'linear-gradient(135deg, var(--color-warning) 0%, #ffdb4d 100%)',
+    info: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%)'
   };
   
   notification.style.cssText = `
@@ -482,7 +482,7 @@ function showDetailsModal(submission) {
     <div style="display: grid; gap: 1rem;">
       <div><strong>ID:</strong> ${submission.id}</div>
       <div><strong>Type:</strong> ${submission.request_type}</div>
-      <div><strong>Status:</strong> ${submission.status}</div>
+      <div><strong>Status:</strong> <span class="status-badge status-${submission.status.toLowerCase()}">${formatStatus(submission.status)}</span></div>
       <div><strong>Submitted:</strong> ${new Date(submission.submitted_at).toLocaleString()}</div>
       <div><strong>Officer:</strong> ${formData.rName}</div>
       <div><strong>Email:</strong> ${formData.requestingEmail}</div>

@@ -4,164 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FVU Admin Dashboard - Forensic Video Unit</title>
+    
+    <!-- Link to forms CSS for consistent styling -->
+    <link rel="stylesheet" href="../assets/css/forms.css">
+    
+    <!-- Early theme initialization -->
+    <script>
+        document.documentElement.setAttribute('data-theme', 
+            localStorage.getItem('fvu-theme') || 'dark');
+    </script>
+    
     <style>
-        /* CSS Variables matching the FVU project */
-        :root {
-            --bg-dark: #0a0a0a;
-            --surface-dark: #1a1a1a;
-            --surface-elevated: #242424;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --border-color: rgba(255, 255, 255, 0.1);
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-bg-hover: rgba(255, 255, 255, 0.08);
-            --glass-blur: blur(20px);
-            --peel-blue: #1B3A6B;
-            --peel-yellow: #FFD100;
-            --peel-blue-light: #2B5AA8;
-            --color-success: #28a745;
-            --color-danger: #dc3545;
-            --color-warning: #ffc107;
-            --color-info: #17a2b8;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            overflow-x: hidden;
+        /* Dashboard-specific styles that complement forms.css */
+        .dashboard-container {
             min-height: 100vh;
+            position: relative;
         }
 
-        /* Animated Background */
-        .background-animation {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .grid-overlay {
-            position: absolute;
-            inset: 0;
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: grid-move 20s linear infinite;
-        }
-
-        @keyframes grid-move {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-
-        .floating-shapes {
-            position: absolute;
-            inset: 0;
-        }
-
-        .shape {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.4;
-        }
-
-        .shape-1 {
-            width: 300px;
-            height: 300px;
-            background: var(--peel-blue);
-            top: 10%;
-            left: 10%;
-            animation: float-1 20s ease-in-out infinite;
-        }
-
-        .shape-2 {
-            width: 400px;
-            height: 400px;
-            background: var(--peel-yellow);
-            top: 60%;
-            right: 10%;
-            animation: float-2 25s ease-in-out infinite;
-        }
-
-        .shape-3 {
-            width: 250px;
-            height: 250px;
-            background: var(--peel-blue-light);
-            bottom: 10%;
-            left: 50%;
-            animation: float-3 30s ease-in-out infinite;
-        }
-
-        @keyframes float-1 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(30px, -30px) scale(1.1); }
-        }
-
-        @keyframes float-2 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(-30px, 30px) scale(0.9); }
-        }
-
-        @keyframes float-3 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(20px, 20px) scale(1.05); }
-        }
-
-        /* Header */
-        .main-header {
+        /* Dashboard Header */
+        .dashboard-header {
             background: var(--glass-bg);
             backdrop-filter: var(--glass-blur);
             border-bottom: 1px solid var(--border-color);
-            padding: 1rem 2rem;
+            padding: 1.5rem 2rem;
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
-        .header-content {
+        .dashboard-header-content {
+            max-width: 1400px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1400px;
-            margin: 0 auto;
         }
 
-        .logo-section {
+        .dashboard-logo {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
 
-        .logo {
-            width: 40px;
-            height: 40px;
-            background: var(--peel-yellow);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--peel-blue);
-        }
-
-        .header-title {
-            font-size: 1.5rem;
+        .dashboard-title {
+            font-size: 1.75rem;
             font-weight: 700;
-            color: var(--peel-yellow);
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .header-stats {
+        /* Stats Display */
+        .dashboard-stats {
             display: flex;
-            gap: 2rem;
+            gap: 3rem;
             align-items: center;
         }
 
@@ -170,64 +66,82 @@
         }
 
         .stat-value {
-            font-size: 1.5rem;
+            font-size: 2rem;
             font-weight: 700;
-            color: var(--peel-yellow);
+            color: var(--color-primary-light);
+            line-height: 1;
         }
 
         .stat-label {
             font-size: 0.875rem;
             color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Live Indicator */
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--color-success);
+            font-size: 0.875rem;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--color-success);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.5); }
         }
 
         /* Tab Navigation */
-        .tab-nav {
+        .tab-navigation {
             background: var(--surface-dark);
             border-bottom: 1px solid var(--border-color);
-            padding: 0 2rem;
             position: sticky;
-            top: 73px;
+            top: 94px;
             z-index: 99;
         }
 
-        .tab-nav-inner {
+        .tab-navigation-inner {
             max-width: 1400px;
             margin: 0 auto;
             display: flex;
-            gap: 2rem;
+            gap: 0;
+            padding: 0 2rem;
         }
 
         .tab-button {
             background: none;
             border: none;
             color: var(--text-secondary);
-            padding: 1rem 1.5rem;
+            padding: 1.25rem 2rem;
             cursor: pointer;
             font-size: 1rem;
+            font-weight: 500;
             position: relative;
-            transition: all 0.3s ease;
+            transition: all var(--transition-fast);
+            border-bottom: 3px solid transparent;
         }
 
         .tab-button:hover {
             color: var(--text-primary);
+            background: var(--glass-bg);
         }
 
         .tab-button.active {
-            color: var(--peel-yellow);
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
         }
 
-        .tab-button.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--peel-yellow);
-        }
-
-        /* Main Content */
-        .main-content {
+        /* Main Content Area */
+        .dashboard-content {
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
@@ -235,19 +149,19 @@
 
         .tab-content {
             display: none;
+            animation: fadeIn 0.3s ease;
         }
 
         .tab-content.active {
             display: block;
-            animation: fadeIn 0.3s ease;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Stats Grid */
+        /* Stats Cards Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -259,27 +173,28 @@
             background: var(--glass-bg);
             backdrop-filter: var(--glass-blur);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: var(--border-radius);
             padding: 1.5rem;
-            transition: all 0.3s ease;
+            transition: all var(--transition-base);
         }
 
         .stat-card:hover {
             transform: translateY(-2px);
             background: var(--glass-bg-hover);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         }
 
         .stat-card-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             margin-bottom: 1rem;
         }
 
         .stat-card-title {
             font-size: 0.875rem;
             color: var(--text-secondary);
+            font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
@@ -292,21 +207,25 @@
             align-items: center;
             justify-content: center;
             font-size: 1.25rem;
+            background: var(--surface-elevated);
         }
 
-        .icon-primary { background: rgba(27, 58, 107, 0.2); color: var(--peel-blue-light); }
-        .icon-success { background: rgba(40, 167, 69, 0.2); color: var(--color-success); }
-        .icon-warning { background: rgba(255, 193, 7, 0.2); color: var(--color-warning); }
-        .icon-info { background: rgba(23, 162, 184, 0.2); color: var(--color-info); }
-
         .stat-card-value {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
             margin-bottom: 0.5rem;
         }
 
         .stat-card-change {
             font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-card-change.positive {
             color: var(--color-success);
         }
 
@@ -326,7 +245,7 @@
             background: var(--glass-bg);
             backdrop-filter: var(--glass-blur);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: var(--border-radius);
             padding: 1.5rem;
         }
 
@@ -340,16 +259,23 @@
         .chart-title {
             font-size: 1.125rem;
             font-weight: 600;
+            color: var(--text-primary);
         }
 
         .chart-period {
             background: var(--surface-elevated);
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: var(--border-radius-sm);
             padding: 0.5rem 1rem;
             font-size: 0.875rem;
             color: var(--text-secondary);
             cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .chart-period:hover {
+            background: var(--glass-bg-hover);
+            color: var(--text-primary);
         }
 
         /* Requests Table */
@@ -357,7 +283,7 @@
             background: var(--glass-bg);
             backdrop-filter: var(--glass-blur);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: var(--border-radius);
             overflow: hidden;
         }
 
@@ -369,22 +295,36 @@
             align-items: center;
         }
 
+        .requests-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
         .search-bar {
             display: flex;
             gap: 1rem;
             align-items: center;
             flex: 1;
             max-width: 400px;
+            margin-left: 2rem;
         }
 
         .search-input {
             flex: 1;
             background: var(--surface-elevated);
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: var(--border-radius-sm);
             padding: 0.75rem 1rem;
             color: var(--text-primary);
             font-size: 0.875rem;
+            transition: all var(--transition-fast);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            background: var(--glass-bg-hover);
         }
 
         .search-input::placeholder {
@@ -394,16 +334,85 @@
         .filter-button {
             background: var(--surface-elevated);
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: var(--border-radius-sm);
             padding: 0.75rem 1rem;
             color: var(--text-primary);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all var(--transition-fast);
+            font-size: 0.875rem;
         }
 
         .filter-button:hover {
             background: var(--glass-bg-hover);
             transform: translateY(-1px);
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--surface-dark);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        tr:hover {
+            background: var(--glass-bg-hover);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--color-warning);
+            border: 1px solid rgba(255, 193, 7, 0.2);
+        }
+
+        .status-processing {
+            background: rgba(0, 102, 255, 0.1);
+            color: var(--color-primary);
+            border: 1px solid rgba(0, 102, 255, 0.2);
+        }
+
+        .status-completed {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--color-success);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .status-failed {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--color-danger);
+            border: 1px solid rgba(220, 53, 69, 0.2);
         }
 
         .table-container {
@@ -437,30 +446,20 @@
             background: var(--glass-bg-hover);
         }
 
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .status-pending { background: rgba(255, 193, 7, 0.2); color: var(--color-warning); }
-        .status-assigned { background: rgba(23, 162, 184, 0.2); color: var(--color-info); }
-        .status-in-progress { background: rgba(27, 58, 107, 0.2); color: var(--peel-blue-light); }
-        .status-completed { background: rgba(40, 167, 69, 0.2); color: var(--color-success); }
-
+        /* Request Type Badge */
         .request-type {
             display: inline-block;
             padding: 0.25rem 0.75rem;
-            border-radius: 6px;
+            border-radius: var(--border-radius-sm);
             font-size: 0.75rem;
             font-weight: 600;
             background: var(--surface-elevated);
-            color: var(--peel-yellow);
+            color: var(--color-primary);
             text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
+        /* Action Buttons */
         .action-buttons {
             display: flex;
             gap: 0.5rem;
@@ -469,44 +468,26 @@
         .btn-icon {
             background: var(--surface-elevated);
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: var(--border-radius-sm);
             padding: 0.5rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all var(--transition-fast);
             color: var(--text-primary);
+            font-size: 0.875rem;
+            line-height: 1;
         }
 
         .btn-icon:hover {
-            background: var(--peel-blue);
-            transform: translateY(-1px);
+            background: var(--color-primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 255, 0.15);
         }
 
-        /* Live Indicator */
-        .live-indicator {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: var(--color-success);
-        }
-
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--color-success);
-            border-radius: 50%;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.5); }
-        }
-
-        /* Team Performance */
+        /* Team Performance Cards */
         .team-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem;
         }
 
@@ -514,21 +495,21 @@
             background: var(--glass-bg);
             backdrop-filter: var(--glass-blur);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: var(--border-radius);
             padding: 1.5rem;
             text-align: center;
-            transition: all 0.3s ease;
+            transition: all var(--transition-base);
         }
 
         .team-member-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         }
 
         .member-avatar {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--peel-blue) 0%, var(--peel-blue-light) 100%);
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
             border-radius: 50%;
             margin: 0 auto 1rem;
             display: flex;
@@ -565,15 +546,16 @@
         .member-stat-value {
             font-size: 1.25rem;
             font-weight: 700;
-            color: var(--peel-yellow);
+            color: var(--color-primary);
         }
 
         .member-stat-label {
             font-size: 0.75rem;
             color: var(--text-secondary);
+            margin-top: 0.25rem;
         }
 
-        /* Chart Mockup */
+        /* Chart Placeholder */
         .chart-placeholder {
             height: 300px;
             background: var(--surface-dark);
@@ -587,10 +569,10 @@
 
         .chart-bar {
             flex: 1;
-            background: linear-gradient(to top, var(--peel-yellow), var(--peel-blue));
+            background: linear-gradient(to top, var(--color-primary), var(--color-primary-light));
             border-radius: 4px 4px 0 0;
             position: relative;
-            transition: all 0.3s ease;
+            transition: all var(--transition-base);
         }
 
         .chart-bar:hover {
@@ -606,95 +588,147 @@
             transform: translateX(-50%);
             font-size: 0.75rem;
             font-weight: 600;
-            color: var(--peel-yellow);
+            color: var(--text-secondary);
         }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 100;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            font-size: 1.5rem;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            background: var(--glass-bg-hover);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .dashboard-header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .dashboard-stats {
+                gap: 1.5rem;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tab-navigation-inner {
+                overflow-x: auto;
+                padding: 0 1rem;
+            }
+
+            .search-bar {
+                margin-left: 0;
+                margin-top: 1rem;
+            }
+        }
+
     </style>
 </head>
 <body>
-    <!-- Animated Background -->
-    <div class="background-animation">
-        <div class="grid-overlay"></div>
-        <div class="floating-shapes">
-            <div class="shape shape-1"></div>
-            <div class="shape shape-2"></div>
-            <div class="shape shape-3"></div>
-        </div>
-    </div>
-
-    <!-- Header -->
-    <header class="main-header">
-        <div class="header-content">
-            <div class="logo-section">
-                <div class="logo">FVU</div>
-                <h1 class="header-title">Forensic Video Unit - Admin Dashboard</h1>
-            </div>
-            <div class="header-stats">
-                <div class="stat-item">
-                    <div class="stat-value" id="pending-count">0</div>
-                    <div class="stat-label">Pending</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="active-count">0</div>
-                    <div class="stat-label">Active</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="today-count">0</div>
-                    <div class="stat-label">Today</div>
-                </div>
-                <div class="live-indicator">
-                    <div class="live-dot"></div>
-                    <span>Live</span>
-                </div>
+    <div class="dashboard-container">
+        <!-- Animated Background matching index.html -->
+        <div class="background-animation">
+            <div class="grid-overlay"></div>
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
             </div>
         </div>
-    </header>
 
-    <!-- Tab Navigation -->
-    <nav class="tab-nav">
-        <div class="tab-nav-inner">
-            <button class="tab-button active" onclick="switchTab('overview')">Overview</button>
-            <button class="tab-button" onclick="switchTab('requests')">Requests</button>
-            <button class="tab-button" onclick="switchTab('analytics')">Analytics</button>
-            <button class="tab-button" onclick="switchTab('team')">Team Performance</button>
-        </div>
-    </nav>
+        <!-- Dashboard Header -->
+        <header class="dashboard-header">
+            <div class="dashboard-header-content">
+                <div class="dashboard-logo">
+                    <h1 class="dashboard-title">FVU Admin Dashboard</h1>
+                </div>
+                <div class="dashboard-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="pending-count">0</div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="active-count">0</div>
+                        <div class="stat-label">Active</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="today-count">0</div>
+                        <div class="stat-label">Today</div>
+                    </div>
+                    <div class="live-indicator">
+                        <div class="live-dot"></div>
+                        <span>Live</span>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
+        <!-- Tab Navigation -->
+        <nav class="tab-navigation">
+            <div class="tab-navigation-inner">
+                <button class="tab-button active" onclick="switchTab('overview')">Overview</button>
+                <button class="tab-button" onclick="switchTab('requests')">Requests</button>
+                <button class="tab-button" onclick="switchTab('analytics')">Analytics</button>
+                <button class="tab-button" onclick="switchTab('team')">Team Performance</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="dashboard-content">
         <!-- Overview Tab -->
         <div id="overview-tab" class="tab-content active">
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-card-header">
                         <span class="stat-card-title">Total Requests</span>
-                        <div class="stat-card-icon icon-primary">📊</div>
+                        <div class="stat-card-icon">📊</div>
                     </div>
                     <div class="stat-card-value">1,248</div>
-                    <div class="stat-card-change">↑ 12.5% from last month</div>
+                    <div class="stat-card-change positive">↑ 12.5% from last month</div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-card-header">
                         <span class="stat-card-title">Average Response Time</span>
-                        <div class="stat-card-icon icon-success">⏱️</div>
+                        <div class="stat-card-icon">⏱️</div>
                     </div>
                     <div class="stat-card-value">4.2 hrs</div>
-                    <div class="stat-card-change">↓ 18% improvement</div>
+                    <div class="stat-card-change positive">↓ 18% improvement</div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-card-header">
                         <span class="stat-card-title">Completion Rate</span>
-                        <div class="stat-card-icon icon-warning">✅</div>
+                        <div class="stat-card-icon">✅</div>
                     </div>
                     <div class="stat-card-value">94.3%</div>
-                    <div class="stat-card-change">↑ 2.1% from last week</div>
+                    <div class="stat-card-change positive">↑ 2.1% from last week</div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-card-header">
                         <span class="stat-card-title">Urgent Requests</span>
-                        <div class="stat-card-icon icon-info">🚨</div>
+                        <div class="stat-card-icon">🚨</div>
                     </div>
                     <div class="stat-card-value">3</div>
                     <div class="stat-card-change negative">2 pending assignment</div>
@@ -724,9 +758,9 @@
                         <button class="chart-period">This Month</button>
                     </div>
                     <div class="chart-placeholder">
-                        <div class="chart-bar" style="height: 70%; background: linear-gradient(to top, #FFD100, #FFE555)" data-value="Upload"></div>
-                        <div class="chart-bar" style="height: 85%; background: linear-gradient(to top, #1B3A6B, #2B5AA8)" data-value="Analysis"></div>
-                        <div class="chart-bar" style="height: 45%; background: linear-gradient(to top, #17a2b8, #5bc0de)" data-value="Recovery"></div>
+                        <div class="chart-bar" style="height: 70%;" data-value="Upload"></div>
+                        <div class="chart-bar" style="height: 85%;" data-value="Analysis"></div>
+                        <div class="chart-bar" style="height: 45%;" data-value="Recovery"></div>
                     </div>
                 </div>
             </div>
@@ -788,9 +822,9 @@
                         <button class="chart-period">This Quarter</button>
                     </div>
                     <div class="chart-placeholder">
-                        <div class="chart-bar" style="height: 30%; background: linear-gradient(to top, #28a745, #5cb85c)" data-value="2.1h"></div>
-                        <div class="chart-bar" style="height: 60%; background: linear-gradient(to top, #ffc107, #ffdb4d)" data-value="4.5h"></div>
-                        <div class="chart-bar" style="height: 80%; background: linear-gradient(to top, #dc3545, #ff6b7a)" data-value="6.2h"></div>
+                        <div class="chart-bar" style="height: 30%;" data-value="2.1h"></div>
+                        <div class="chart-bar" style="height: 60%;" data-value="4.5h"></div>
+                        <div class="chart-bar" style="height: 80%;" data-value="6.2h"></div>
                     </div>
                 </div>
             </div>
@@ -880,15 +914,26 @@
                 </div>
             </div>
         </div>
-    </main>
+        </main>
+
+        <!-- Theme Toggle Button -->
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            🌓
+        </button>
+    </div>
 
     <script type="module">
         import { initDashboard, cleanupDashboard } from '../assets/js/dashboard-supabase.js';
+        import { initTheme, setupThemeToggle } from '../assets/js/theme-manager.js';
         
         // Check access first
         if (sessionStorage.getItem('dashboardAccess') !== 'granted') {
             window.location.href = './index.html';
         }
+        
+        // Initialize theme system
+        initTheme();
+        setupThemeToggle();
         
         // Initialize dashboard on load
         window.addEventListener('DOMContentLoaded', async () => {
@@ -905,9 +950,15 @@
                     </div>
                 `;
             } else {
-                // Initial animation on load
+                // Animate cards on load
                 document.querySelectorAll('.stat-card').forEach((card, index) => {
-                    card.style.animation = `fadeIn 0.5s ease ${index * 0.1}s backwards`;
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        card.style.transition = 'all 0.5s ease';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, index * 100);
                 });
             }
         });
@@ -937,19 +988,6 @@
             // You can implement assignment logic here
         };
 
-        // Add slide in animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes fadeOut {
-                from { opacity: 1; }
-                to { opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
         
         // Cleanup on page unload
         window.addEventListener('beforeunload', () => {
