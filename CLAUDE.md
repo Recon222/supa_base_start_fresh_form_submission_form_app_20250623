@@ -4,86 +4,256 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-The Forensic Video Unit (FVU) Request System for Peel Regional Police - a vanilla JavaScript web application for submitting video evidence requests (Analysis, Upload, and Recovery). The system generates PDF/JSON files and integrates with both a legacy PHP ticketing system and Supabase.
+Forensic Video Unit (FVU) Request System for Peel Regional Police - a vanilla JavaScript web application for submitting video evidence requests. The system handles three types of requests (Analysis, Upload, Recovery), generates PDF/JSON artifacts, and integrates with both Supabase and a legacy PHP ticketing system.
 
 ## Development Commands
 
 **No build process** - This is a vanilla JS project with zero npm dependencies:
-- **Run locally**: VS Code Live Server (port 5503) or any static server
-- **Direct access**: Open HTML files directly in browser
+- **Run locally**: VS Code Live Server or any static HTTP server
 - **Testing**: Manual browser testing only
 - **No commands**: No `npm install`, `build`, `test`, or `lint`
 
-## Architecture
+## Architecture Overview
 
-### Core Principles
-- **Zero build tools**: Vanilla JS with ES6 modules only
-- **File size limits**: JS max 450 lines, CSS max 550 lines  
-- **Function size**: Keep under 50 lines with early returns
-- **No over-engineering**: Resist adding unnecessary complexity
+### Core Design Principles
+
+1. **Zero build tools**: Vanilla JS with ES6 modules only
+2. **File size discipline**: JS max 450 lines, CSS max 550 lines
+3. **Function size**: Keep under 50 lines with early returns
+4. **No over-engineering**: Resist adding unnecessary complexity
+
+### Dual Integration System
+
+The application supports two submission backends (toggle via `CONFIG.USE_SUPABASE` in config.js):
+
+**Supabase (Modern Path)**:
+- Project: `xkovwklvxvuehxpsxvwk.supabase.co`
+- Configured via `.mcp.json` for MCP server integration
+- Stores submissions with base64-encoded PDF/JSON attachments
+- Dashboard at `dashboard/fvu-admin-dashboard.html`
+
+**PHP Endpoint (Legacy Path)**:
+- Endpoint: `rfs_request_process.php`
+- Requires conversion to `.php` files in production
+- Session verification via `<?php session_start(); ?>`
+- Deployed to `homicidefvu.fatsystems.ca` via SFTP
+
+### Module Organization
+
+```
+assets/js/
+├── config.js              # Central configuration, field mappings, constants
+├── form-handler.js        # Base FormHandler + 3 form-specific handlers (Upload, Analysis, Recovery)
+├── validators.js          # Validation rules (@peelpolice.ca emails, phone, dates)
+├── api-client.js          # Submission logic for both Supabase and PHP
+├── supabase.js            # Supabase client initialization and helpers
+├── pdf-generator.js       # PDF generation via PDFMake
+├── pdf-templates.js       # PDF layout templates for each form type
+├── json-generator.js      # JSON artifact generation
+├── storage.js             # LocalStorage for draft auto-save
+├── officer-storage.js     # Persistent investigator info storage
+├── notifications.js       # Toast notifications + confirmation modals
+├── theme-manager.js       # Dark/light theme toggle
+├── calculations.js        # Field calculations (retention days, summaries)
+├── utils.js               # DOM helpers, debounce, scrolling
+└── dashboard-supabase.js  # Admin dashboard data fetching
+```
 
 ### Critical Integration Requirements
 
 **Field Names** (must match third-party system exactly):
 ```javascript
-// Required field mappings in config.js
+// From CONFIG.FIELD_NAMES - DO NOT change these
 rName                // Requesting investigator
 requestingEmail      // Must be @peelpolice.ca
-reqArea             // Request type: analysis/upload/recovery
-occNumber           // Must start with "PR"
-locationOfIncident  // Incident location
+requestingPhone      // 10 digits
+reqArea              // Request type: analysis/upload/recovery
+occNumber            // Occurrence number (must start with "PR")
+occDate              // Occurrence date
+occType              // Occurrence type
+fileDetails          // File summary string
+rfsDetails           // Request details/description
 ```
 
-**Dual Integration Paths**:
-1. **Supabase** (Modern): Toggle via `ENABLE_SUPABASE` in config.js
-   - Project ID: `xkovwklvxvuehxpsxvwk`
-   - Configured via `.mcp.json`
-   
-2. **PHP Endpoint** (Legacy): `rfs_request_process.php`
-   - Requires HTML→PHP conversion for production
-   - Add session verification: `<?php session_start(); ?>`
+**Supabase Schema**:
+```sql
+-- Table: form_submissions
+id                  UUID PRIMARY KEY
+request_type        TEXT (analysis/upload/recovery)
+form_data           JSONB (entire form data)
+requesting_email    TEXT (indexed)
+requesting_name     TEXT
+occurrence_number   TEXT
+status              TEXT (pending/complete)
+attachments         JSONB (array of {type, filename, data, size})
+submitted_at        TIMESTAMP WITH TIME ZONE
+```
 
-### Module Organization
+### Form Submission Flow
+
+1. **Real-time Validation**: Validators check fields on blur/input
+2. **Auto-save Drafts**: Every 2 seconds to LocalStorage (`fvu_draft_{formType}`)
+3. **Officer Info Persistence**: Name, badge, phone, email saved across sessions
+4. **PDF/JSON Generation**: Parallel generation on submit
+5. **Dual Submission**: Routes to Supabase OR PHP based on `CONFIG.USE_SUPABASE`
+6. **Progress Tracking**: Live progress bar updates as fields are completed
+
+### Form Handler Class Hierarchy
+
+```javascript
+FormHandler (base class)
+├── UploadFormHandler
+│   └── Dynamic location-video groups (add/remove)
+├── AnalysisFormHandler
+│   └── Conditional fields (offence type, video location, service required)
+└── RecoveryFormHandler
+    └── DVR system info, extraction times, camera details
 ```
-assets/js/
-├── config.js         # Central configuration - API endpoints, field mappings
-├── form-handler.js   # Form submission orchestration
-├── validators.js     # Validation rules (@peelpolice.ca emails only)
-├── api-client.js     # Handles both PHP and Supabase submissions
-├── pdf-generator.js  # PDFMake integration
-└── storage.js        # LocalStorage for auto-save drafts
-```
+
+Each form handler:
+- Extends `FormHandler` base class
+- Implements `setupSpecificListeners()` for conditional fields
+- Overrides `collectFormData()` to structure form-specific data
+- Overrides `submitForm()` for custom submission logic
 
 ### Key Development Patterns
 
-1. **Form Submission Flow**:
-   - Real-time validation → PDF/JSON generation → FormData creation → API submission
-   - Auto-saves drafts every 2 seconds to LocalStorage
-   
-2. **Error Handling**:
-   ```javascript
-   // Always use try-catch with proper user feedback
-   try {
-     await submitForm(data);
-   } catch (error) {
-     showNotification(error.message, 'error');
-   }
-   ```
+**Conditional Field Management**:
+```javascript
+// Pattern used across all forms
+selectField.addEventListener('change', (e) => {
+  const showOther = e.target.value === 'Other';
+  toggleElement(otherGroup, showOther);
+  if (showOther) {
+    otherField.setAttribute('required', 'required');
+  } else {
+    otherField.removeAttribute('required');
+    otherField.value = '';
+    this.showFieldValidation(otherField, null);
+  }
+});
+```
 
-3. **Security Requirements**:
-   - Use `textContent` not `innerHTML`
-   - Validate @peelpolice.ca emails
-   - Session verification in production
+**Error Handling Pattern**:
+```javascript
+// Always use try-catch with user feedback
+try {
+  await submitForm(data);
+} catch (error) {
+  showToast(error.message, 'error');
+  // Auto-save draft on error
+  this.saveDraftAuto();
+}
+```
+
+**Security Requirements**:
+- Always use `textContent` not `innerHTML` for user data
+- Validate `@peelpolice.ca` emails strictly
+- Phone numbers must be exactly 10 digits
+- Occurrence numbers must match `/^PR\d+$/i`
 
 ### Production Deployment
 
-1. Convert `.html` to `.php`:
+**For PHP endpoint deployment**:
+1. Convert `.html` files to `.php`:
    ```php
    <?php session_start(); ?>
    <input type="hidden" name="session_verify" value="<?php echo session_id(); ?>">
    ```
-2. Update `API_ENDPOINT` in config.js to production URL
+2. Update `CONFIG.API_ENDPOINT` to production URL
 3. Deploy via SFTP to `homicidefvu.fatsystems.ca`
 
+**For Supabase deployment**:
+1. Ensure `CONFIG.USE_SUPABASE = true`
+2. Deploy as static site (Netlify, Vercel, etc.)
+3. Dashboard requires no authentication (uses Supabase Row Level Security if needed)
+
+### Dashboard System
+
+The admin dashboard (`dashboard/fvu-admin-dashboard.html`) provides:
+- Real-time submission viewing from Supabase
+- Filter by request type, date range, status
+- View full form data and attachments
+- Download PDF/JSON artifacts
+- Update submission status
+
+Dashboard implementation in `assets/js/dashboard-supabase.js` uses:
+- Supabase client for data fetching
+- Real-time subscription to form_submissions table
+- Base64 decoding for attachment preview/download
+
+### LocalStorage Keys
+
+```
+fvu-theme                          # User's theme preference (dark/light)
+fvu_draft_upload                   # Upload form draft
+fvu_draft_analysis                 # Analysis form draft
+fvu_draft_recovery                 # Recovery form draft
+fvu_officer_info                   # Investigator info (name, badge, phone, email)
+fvu_officer_storage_acknowledged   # First-time storage notice shown
+fvu_session_start                  # Session start timestamp
+```
+
 ### Browser Support
+
 ES6 modules required: Chrome 60+, Firefox 60+, Safari 11+, Edge 79+
+
+### File Size Constraints
+
+When editing existing files, respect these limits to maintain code organization:
+- JavaScript: Max 450 lines per file
+- CSS: Max 550 lines per file
+- Functions: Target ~30-50 lines, use early returns
+
+If a file exceeds limits, consider extracting utilities to a new module.
+
+## Common Tasks
+
+### Adding a New Form Field
+
+1. Add field to HTML form with proper `name` attribute
+2. If conditional, add listener in form handler's `setupSpecificListeners()`
+3. Add validation rule to `validators.js` if needed
+4. Update `collectFormData()` if field needs transformation
+5. Update PDF template in `pdf-templates.js`
+6. Update JSON structure in `json-generator.js`
+
+### Modifying PDF Output
+
+PDF templates are in `assets/js/pdf-templates.js`:
+- `generateUploadPDF()` - Upload form template
+- `generateAnalysisPDF()` - Analysis form template
+- `generateRecoveryPDF()` - Recovery form template
+
+Each template uses PDFMake's document definition format.
+
+### Changing Theme Styles
+
+Theme variables are in `assets/css/forms.css`:
+```css
+[data-theme="dark"] {
+  --color-primary: #1B3A6B;
+  --color-secondary: #FFD100;
+  /* ... */
+}
+
+[data-theme="light"] {
+  --color-primary: #2B5AA8;
+  /* ... */
+}
+```
+
+### Testing Supabase Integration
+
+1. Ensure `.mcp.json` has correct project reference
+2. Use dashboard to verify submissions appear
+3. Check browser console for Supabase client errors
+4. Verify `form_submissions` table structure matches schema
+
+### Debugging Form Validation
+
+1. Check browser console for validation errors
+2. Inspect `CONFIG.VALIDATION_PATTERNS` in config.js
+3. Test `validateField()` in validators.js
+4. Look for `.is-invalid` classes on fields
+5. Check `.invalid-feedback` elements for error messages
