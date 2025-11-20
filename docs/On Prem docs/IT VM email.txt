@@ -1,0 +1,37 @@
+Hi,
+
+ 
+
+Apologies for the delay.
+
+ 
+
+We could have hosted externally though we already have/had a solution in place for servers/desktops for several PRP bureaus similar to DFS/Cyber and a DLO remote access via PRP browser as I mentioned before.
+
+ 
+
+You may not need the webgui to the VM but we can expand to that if needed.
+
+ 
+
+Please externally (not within PRP firewall) ssh using your favorite app or cli (like I do on my macbook) using ssh -p 2211 fvuadmin@72.142.23.10
+
+ 
+
+Note from within the VM, ssh outbound works as normal unfortunately the firewall already had port 22 used so I had to choose a different port inbound, this would also be the same for SFTP but nothing is setup yet, the VM is yours and you can install nginx which I did briefly just to test the VM but you can remove re-add it etc…
+
+ 
+
+I’ll share the password with you over the phone or I can send a secure link via our corporate 1password.
+
+ 
+
+Try logging in… but basically if your going to send sftp files to that OTHER site you can automate this VM to do it or host it on this VM, I can validate sizing later with you.
+
+ 
+
+This will give us more freedom since we own the compute plus the pipeline.
+
+ 
+
+Regards,
