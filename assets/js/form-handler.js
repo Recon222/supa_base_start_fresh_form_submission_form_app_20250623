@@ -13,6 +13,7 @@ import { generatePDF } from './pdf-generator.js';
 import { generateJSON } from './json-generator.js';
 import { showConfirmModal } from './notifications.js';
 import { submitForm } from './api-client.js';
+import { ConditionalFieldHandler } from './form-handlers/conditional-field-handler.js';
 
 /**
  * Base FormHandler class
@@ -545,25 +546,12 @@ export class UploadFormHandler extends FormHandler {
   }
   
   setupUploadSpecificListeners() {
-    // Media type change
-    const mediaTypeField = this.form.querySelector('#mediaType');
-    if (mediaTypeField) {
-      mediaTypeField.addEventListener('change', (e) => {
-        const otherGroup = document.getElementById('mediaTypeOtherGroup');
-        const otherField = document.getElementById('mediaTypeOther');
-        const showOther = e.target.value === 'Other';
-        
-        toggleElement(otherGroup, showOther);
-        if (showOther) {
-          otherField.setAttribute('required', 'required');
-        } else {
-          otherField.removeAttribute('required');
-          otherField.value = '';
-          this.showFieldValidation(otherField, null);
-        }
-      });
-    }
-    
+    // Initialize conditional field handler
+    const conditionalHandler = new ConditionalFieldHandler(this);
+
+    // Media type "Other" field
+    conditionalHandler.setupOtherField('mediaType', 'mediaTypeOtherGroup', 'mediaTypeOther');
+
     // Setup listeners for the first location-video group
     this.setupLocationVideoListeners(0);
     
@@ -740,27 +728,14 @@ export class UploadFormHandler extends FormHandler {
   }
   
   setupLocationVideoListeners(index) {
-    // City change handler
+    // Initialize conditional field handler
+    const conditionalHandler = new ConditionalFieldHandler(this);
+
+    // City "Other" field
     const cityId = index === 0 ? 'city' : `city_${index}`;
-    const cityField = this.form.querySelector(`#${cityId}`);
-    if (cityField) {
-      cityField.addEventListener('change', (e) => {
-        const otherGroupId = index === 0 ? 'cityOtherGroup' : `cityOtherGroup_${index}`;
-        const otherFieldId = index === 0 ? 'cityOther' : `cityOther_${index}`;
-        const otherGroup = document.getElementById(otherGroupId);
-        const otherField = document.getElementById(otherFieldId);
-        const showOther = e.target.value === 'Other';
-        
-        toggleElement(otherGroup, showOther);
-        if (showOther) {
-          otherField.setAttribute('required', 'required');
-        } else {
-          otherField.removeAttribute('required');
-          otherField.value = '';
-          this.showFieldValidation(otherField, null);
-        }
-      });
-    }
+    const otherGroupId = index === 0 ? 'cityOtherGroup' : `cityOtherGroup_${index}`;
+    const otherFieldId = index === 0 ? 'cityOther' : `cityOther_${index}`;
+    conditionalHandler.setupOtherField(cityId, otherGroupId, otherFieldId);
     
     // Time sync radio buttons
     const timeCorrectName = index === 0 ? 'isTimeDateCorrect' : `isTimeDateCorrect_${index}`;
@@ -1197,81 +1172,14 @@ export class AnalysisFormHandler extends FormHandler {
   }
   
   setupAnalysisSpecificListeners() {
-    // Offence Type conditional
-    const offenceTypeField = this.form.querySelector('#offenceType');
-    if (offenceTypeField) {
-      offenceTypeField.addEventListener('change', (e) => {
-        const otherGroup = document.getElementById('offenceTypeOtherGroup');
-        const otherField = document.getElementById('offenceTypeOther');
-        const showOther = e.target.value === 'Other';
-        
-        toggleElement(otherGroup, showOther);
-        if (showOther) {
-          otherField.setAttribute('required', 'required');
-        } else {
-          otherField.removeAttribute('required');
-          otherField.value = '';
-          this.showFieldValidation(otherField, null);
-        }
-      });
-    }
-    
-    // Video Location conditional
-    const videoLocationField = this.form.querySelector('#videoLocation');
-    if (videoLocationField) {
-      videoLocationField.addEventListener('change', (e) => {
-        const otherGroup = document.getElementById('videoLocationOtherGroup');
-        const otherField = document.getElementById('videoLocationOther');
-        const showOther = e.target.value === 'Other';
-        
-        toggleElement(otherGroup, showOther);
-        if (showOther) {
-          otherField.setAttribute('required', 'required');
-        } else {
-          otherField.removeAttribute('required');
-          otherField.value = '';
-          this.showFieldValidation(otherField, null);
-        }
-      });
-    }
-    
-    // City conditional
-    const cityField = this.form.querySelector('#city');
-    if (cityField) {
-      cityField.addEventListener('change', (e) => {
-        const otherGroup = document.getElementById('cityOtherGroup');
-        const otherField = document.getElementById('cityOther');
-        const showOther = e.target.value === 'Other';
-        
-        toggleElement(otherGroup, showOther);
-        if (showOther) {
-          otherField.setAttribute('required', 'required');
-        } else {
-          otherField.removeAttribute('required');
-          otherField.value = '';
-          this.showFieldValidation(otherField, null);
-        }
-      });
-    }
-    
-    // Service Required conditional
-    const serviceRequiredField = this.form.querySelector('#serviceRequired');
-    if (serviceRequiredField) {
-      serviceRequiredField.addEventListener('change', (e) => {
-        const otherGroup = document.getElementById('serviceRequiredOtherGroup');
-        const otherField = document.getElementById('serviceRequiredOther');
-        const showOther = e.target.value === 'Other';
-        
-        toggleElement(otherGroup, showOther);
-        if (showOther) {
-          otherField.setAttribute('required', 'required');
-        } else {
-          otherField.removeAttribute('required');
-          otherField.value = '';
-          this.showFieldValidation(otherField, null);
-        }
-      });
-    }
+    // Initialize conditional field handler
+    const conditionalHandler = new ConditionalFieldHandler(this);
+
+    // Setup all "Other" fields
+    conditionalHandler.setupOtherField('offenceType', 'offenceTypeOtherGroup', 'offenceTypeOther');
+    conditionalHandler.setupOtherField('videoLocation', 'videoLocationOtherGroup', 'videoLocationOther');
+    conditionalHandler.setupOtherField('city', 'cityOtherGroup', 'cityOther');
+    conditionalHandler.setupOtherField('serviceRequired', 'serviceRequiredOtherGroup', 'serviceRequiredOther');
     
     // Set occurrence date from recording date
     const recordingDateField = this.form.querySelector('#recordingDate');
@@ -1280,26 +1188,6 @@ export class AnalysisFormHandler extends FormHandler {
         const occDateField = this.form.querySelector('#occDate');
         if (occDateField && e.target.value) {
           occDateField.value = e.target.value;
-        }
-      });
-    }
-  }
-  
-  setupConditionalField(selectId, groupId, inputId, triggerValue) {
-    const selectField = this.form.querySelector(`#${selectId}`);
-    if (selectField) {
-      selectField.addEventListener('change', (e) => {
-        const group = document.getElementById(groupId);
-        const input = document.getElementById(inputId);
-        const show = e.target.value === triggerValue;
-        
-        toggleElement(group, show);
-        if (show) {
-          input.setAttribute('required', 'required');
-        } else {
-          input.removeAttribute('required');
-          input.value = '';
-          this.showFieldValidation(input, null);
         }
       });
     }
@@ -1418,43 +1306,12 @@ export class RecoveryFormHandler extends FormHandler {
   }
   
   setupRecoverySpecificListeners() {
-    // Offence Type conditional (optional field)
-    const offenceTypeField = this.form.querySelector('#offenceType');
-    if (offenceTypeField) {
-      offenceTypeField.addEventListener('change', (e) => {
-        const otherGroup = document.getElementById('offenceTypeOtherGroup');
-        const otherField = document.getElementById('offenceTypeOther');
-        const showOther = e.target.value === 'Other';
-        
-        toggleElement(otherGroup, showOther);
-        if (showOther) {
-          otherField.setAttribute('required', 'required');
-        } else {
-          otherField.removeAttribute('required');
-          otherField.value = '';
-          this.showFieldValidation(otherField, null);
-        }
-      });
-    }
-    
-    // City conditional
-    const cityField = this.form.querySelector('#city');
-    if (cityField) {
-      cityField.addEventListener('change', (e) => {
-        const otherGroup = document.getElementById('cityOtherGroup');
-        const otherField = document.getElementById('cityOther');
-        const showOther = e.target.value === 'Other';
-        
-        toggleElement(otherGroup, showOther);
-        if (showOther) {
-          otherField.setAttribute('required', 'required');
-        } else {
-          otherField.removeAttribute('required');
-          otherField.value = '';
-          this.showFieldValidation(otherField, null);
-        }
-      });
-    }
+    // Initialize conditional field handler
+    const conditionalHandler = new ConditionalFieldHandler(this);
+
+    // Setup "Other" fields
+    conditionalHandler.setupOtherField('offenceType', 'offenceTypeOtherGroup', 'offenceTypeOther');
+    conditionalHandler.setupOtherField('city', 'cityOtherGroup', 'cityOther');
     
     // Time & Date correct - special handling (no warning, optional offset)
     const timeSyncRadios = this.form.querySelectorAll('[name="isTimeDateCorrect"]');
