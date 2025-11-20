@@ -262,3 +262,19 @@ export function isInViewport(element) {
     rect.right <= (window.innerWidth || document.documentElement.clientWidth)
   );
 }
+
+/**
+ * Download blob as file
+ * @param {Blob} blob - Blob to download
+ * @param {string} filename - Name for downloaded file
+ */
+export function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}

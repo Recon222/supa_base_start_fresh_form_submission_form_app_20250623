@@ -10,7 +10,7 @@ import { debounce, toggleElement } from '../utils.js';
 import { generatePDF } from '../pdf-generator.js';
 import { generateJSON } from '../json-generator.js';
 import { submitForm } from '../api-client.js';
-import { showToast } from '../utils.js';
+import { showToast, downloadBlob } from '../utils.js';
 import { CONFIG } from '../config.js';
 
 /**
@@ -197,6 +197,10 @@ export class RecoveryFormHandler extends FormHandler {
       const result = await submitForm(formData, pdfBlob, jsonBlob);
 
       if (result.success) {
+        // Download PDF locally
+        const pdfFilename = `FVU_Recovery_Request_${formData.occNumber || 'NoOccNum'}.pdf`;
+        downloadBlob(pdfBlob, pdfFilename);
+
         showToast(`${CONFIG.MESSAGES.SUBMISSION_SUCCESS}. ID: ${result.submissionId || result.ticketNumber}`, 'success');
 
         // Clear the form after successful submission
