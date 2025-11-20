@@ -5,8 +5,8 @@
 
 // Supabase configuration
 export const SUPABASE_CONFIG = {
-  url: 'https://xkovwklvxvuehxpsxvwk.supabase.co',
-  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhrb3Z3a2x2eHZ1ZWh4cHN4dndrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5MjE1OTksImV4cCI6MjA2NjQ5NzU5OX0.cM5mFSMQH_Pd448ZQDR7YfxSTWrD_s4dZYsEX7qHsAs'
+  url: 'https://vkiujivexqeusnrbluak.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZraXVqaXZleHFldXNucmJsdWFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NjA5NTQsImV4cCI6MjA3OTIzNjk1NH0.3ojhQIa14c_8Sx1N1jD8h1LDmLXHElzzaaeQ-hWpj1Q'
 };
 
 // Create Supabase client instance
