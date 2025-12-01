@@ -33,7 +33,7 @@ const PDF_BASE = {
                     image: CONFIG.PDF_LOGO.HOMICIDE,
                     width: CONFIG.PDF_LAYOUT.HEADER.LOGO_WIDTH,
                     height: CONFIG.PDF_LAYOUT.HEADER.LOGO_HEIGHT,
-                    absolutePosition: { x: 40, y: 40 }
+                    absolutePosition: { x: 70, y: 40 }
                   },
                   {
                     // Titles centered on full page width
