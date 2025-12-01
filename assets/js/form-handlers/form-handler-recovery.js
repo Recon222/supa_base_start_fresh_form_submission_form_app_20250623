@@ -5,8 +5,9 @@
 
 import { FormHandler } from './form-handler-base.js';
 import { ConditionalFieldHandler } from './conditional-field-handler.js';
+import { FormFieldBuilder } from './form-field-builder.js';
 import { validateDateRange, formatPhone } from '../validators.js';
-import { debounce, toggleElement } from '../utils.js';
+import { debounce, toggleElement, scrollToElement, createElement } from '../utils.js';
 import { calculateRetentionDays } from '../calculations.js';
 import { generatePDF } from '../pdf-generator.js';
 import { generateJSON } from '../json-generator.js';
@@ -50,28 +51,13 @@ export class RecoveryFormHandler extends FormHandler {
       });
     });
 
-    // Extraction time validation
-    const startTimeField = this.form.querySelector('#extractionStartTime');
-    const endTimeField = this.form.querySelector('#extractionEndTime');
+    // Setup listeners for the first time frame
+    this.setupTimeFrameListeners(0);
 
-    if (startTimeField && endTimeField) {
-      endTimeField.addEventListener('change', () => {
-        const dateError = validateDateRange(startTimeField.value, endTimeField.value);
-        if (dateError) {
-          this.showFieldValidation(endTimeField, dateError);
-        }
-      });
-
-      startTimeField.addEventListener('change', () => {
-        if (endTimeField.value) {
-          const dateError = validateDateRange(startTimeField.value, endTimeField.value);
-          if (dateError) {
-            this.showFieldValidation(endTimeField, dateError);
-          } else {
-            this.showFieldValidation(endTimeField, null);
-          }
-        }
-      });
+    // Add time frame button
+    const addTimeFrameBtn = document.getElementById('addTimeFrameBtn');
+    if (addTimeFrameBtn) {
+      addTimeFrameBtn.addEventListener('click', () => this.addTimeFrame());
     }
 
     // Phone number formatting for location contact
@@ -118,8 +104,134 @@ export class RecoveryFormHandler extends FormHandler {
     }
   }
 
+  setupTimeFrameListeners(index) {
+    // Extraction time validation
+    const startTimeId = index === 0 ? 'extractionStartTime' : `extractionStartTime_${index}`;
+    const endTimeId = index === 0 ? 'extractionEndTime' : `extractionEndTime_${index}`;
+
+    const startTimeField = this.form.querySelector(`#${startTimeId}`);
+    const endTimeField = this.form.querySelector(`#${endTimeId}`);
+
+    if (startTimeField && endTimeField) {
+      endTimeField.addEventListener('change', () => {
+        const dateError = validateDateRange(startTimeField.value, endTimeField.value);
+        if (dateError) {
+          this.showFieldValidation(endTimeField, dateError);
+        }
+      });
+
+      startTimeField.addEventListener('change', () => {
+        if (endTimeField.value) {
+          const dateError = validateDateRange(startTimeField.value, endTimeField.value);
+          if (dateError) {
+            this.showFieldValidation(endTimeField, dateError);
+          } else {
+            this.showFieldValidation(endTimeField, null);
+          }
+        }
+      });
+    }
+  }
+
+  addTimeFrame() {
+    const container = document.getElementById('extraction-timeframe-container');
+    const index = container.children.length;
+
+    const timeFrameGroup = createElement('div', {
+      className: 'extraction-timeframe-group',
+      dataset: { groupIndex: index },
+      style: 'background: var(--glass-bg); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; border: 1px solid var(--border-color); opacity: 0;'
+    });
+
+    // Create section
+    const section = createElement('section', { className: 'form-section' });
+    const heading = createElement('h2', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
+    }, `Video Extraction Details - Time Frame ${index + 1}`);
+    section.appendChild(heading);
+
+    // Create form row for start and end times
+    const formRow = createElement('div', { className: 'form-row' });
+    const startTimeGroup = FormFieldBuilder.createExtractionTimeField('extractionStartTime', index, 'Time Period From', true);
+    const endTimeGroup = FormFieldBuilder.createExtractionTimeField('extractionEndTime', index, 'Time Period To', true);
+    formRow.appendChild(startTimeGroup);
+    formRow.appendChild(endTimeGroup);
+    section.appendChild(formRow);
+
+    // Add time period type field
+    const timePeriodTypeGroup = FormFieldBuilder.createTimePeriodTypeField(index);
+    section.appendChild(timePeriodTypeGroup);
+
+    // Add camera details field
+    const cameraDetailsGroup = FormFieldBuilder.createCameraDetailsField(index);
+    section.appendChild(cameraDetailsGroup);
+
+    timeFrameGroup.appendChild(section);
+
+    // Remove button
+    const removeBtn = createElement('button', {
+      type: 'button',
+      className: 'btn btn-danger',
+      style: 'margin-top: 1rem; width: 100%;',
+      onclick: () => this.removeTimeFrame(timeFrameGroup)
+    }, `× Remove Time Frame ${index + 1}`);
+
+    timeFrameGroup.appendChild(removeBtn);
+    container.appendChild(timeFrameGroup);
+
+    // Setup listeners for the new time frame
+    this.setupTimeFrameListeners(index);
+
+    // Animate in
+    requestAnimationFrame(() => {
+      timeFrameGroup.style.transition = 'all 0.3s ease';
+      timeFrameGroup.style.opacity = '1';
+    });
+
+    // Scroll to new section
+    setTimeout(() => scrollToElement(timeFrameGroup), 300);
+
+    // Update progress
+    this.updateProgress();
+  }
+
+  removeTimeFrame(timeFrameGroup) {
+    timeFrameGroup.style.transition = 'all 0.3s ease';
+    timeFrameGroup.style.opacity = '0';
+    timeFrameGroup.style.transform = 'scale(0.95)';
+
+    setTimeout(() => {
+      timeFrameGroup.remove();
+      this.updateProgress();
+    }, 300);
+  }
+
   collectFormData() {
     const data = super.collectFormData();
+
+    // Collect multiple extraction time frames
+    const timeFrameGroups = this.form.querySelectorAll('.extraction-timeframe-group');
+    data.extractionTimeFrames = [];
+
+    timeFrameGroups.forEach((group, index) => {
+      const timeFrame = {
+        extractionStartTime: group.querySelector(`[name^="extractionStartTime"]`).value,
+        extractionEndTime: group.querySelector(`[name^="extractionEndTime"]`).value,
+        timePeriodType: group.querySelector(`[name^="timePeriodType"]:checked`)?.value || '',
+        cameraDetails: group.querySelector(`[name^="cameraDetails"]`).value
+      };
+
+      data.extractionTimeFrames.push(timeFrame);
+    });
+
+    // Keep first time frame fields at root level for backward compatibility
+    if (data.extractionTimeFrames.length > 0) {
+      const firstFrame = data.extractionTimeFrames[0];
+      data.extractionStartTime = firstFrame.extractionStartTime;
+      data.extractionEndTime = firstFrame.extractionEndTime;
+      data.timePeriodType = firstFrame.timePeriodType;
+      data.cameraDetails = firstFrame.cameraDetails;
+    }
 
     // Set request area
     data[CONFIG.FIELD_NAMES.REQUEST_AREA] = CONFIG.FORM_TYPES.RECOVERY;
@@ -197,21 +309,24 @@ export class RecoveryFormHandler extends FormHandler {
   validateForm() {
     const result = super.validateForm();
 
-    // Additional validation for extraction date range
-    const startTimeField = this.form.querySelector('#extractionStartTime');
-    const endTimeField = this.form.querySelector('#extractionEndTime');
+    // Validate all extraction time frames
+    const timeFrameGroups = this.form.querySelectorAll('.extraction-timeframe-group');
+    timeFrameGroups.forEach((group, index) => {
+      const startTimeField = group.querySelector('[name^="extractionStartTime"]');
+      const endTimeField = group.querySelector('[name^="extractionEndTime"]');
 
-    if (startTimeField && endTimeField && startTimeField.value && endTimeField.value) {
-      const dateError = validateDateRange(startTimeField.value, endTimeField.value);
-      if (dateError) {
-        result.errors.extractionEndTime = dateError;
-        result.isValid = false;
-        this.showFieldValidation(endTimeField, dateError);
-        if (!result.firstErrorField) {
-          result.firstErrorField = endTimeField;
+      if (startTimeField && endTimeField && startTimeField.value && endTimeField.value) {
+        const dateError = validateDateRange(startTimeField.value, endTimeField.value);
+        if (dateError) {
+          result.errors[`extractionEndTime_${index}`] = dateError;
+          result.isValid = false;
+          this.showFieldValidation(endTimeField, dateError);
+          if (!result.firstErrorField) {
+            result.firstErrorField = endTimeField;
+          }
         }
       }
-    }
+    });
 
     // Validate DVR retention date is not in the future
     const dvrRetentionField = this.form.querySelector('#dvrRetention');

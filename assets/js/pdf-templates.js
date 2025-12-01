@@ -511,19 +511,51 @@ export const PDF_TEMPLATES = {
         ['Contact Phone', data.locationContactPhone]
       ]);
       if (locationInfo) content.push(locationInfo);
-      
-      // Video Extraction Details
-      const extractionDuration = data.extractionStartTime && data.extractionEndTime
-        ? calculateVideoDuration(data.extractionStartTime, data.extractionEndTime)
-        : null;
-        
-      const extractionDetails = PDF_BASE.buildStandardSection('Video Extraction Details', [
-        ['Extraction Start Time', formatDateTime(data.extractionStartTime)],
-        ['Extraction End Time', formatDateTime(data.extractionEndTime)],
-        ['Time Period Type', data.timePeriodType],
-        ['Extraction Duration', extractionDuration ? extractionDuration.formatted : null]
-      ]);
-      if (extractionDetails) content.push(extractionDetails);
+
+      // Video Extraction Details - handle multiple time frames
+      if (data.extractionTimeFrames && data.extractionTimeFrames.length > 0) {
+        data.extractionTimeFrames.forEach((timeFrame, index) => {
+          const extractionDuration = timeFrame.extractionStartTime && timeFrame.extractionEndTime
+            ? calculateVideoDuration(timeFrame.extractionStartTime, timeFrame.extractionEndTime)
+            : null;
+
+          const sectionTitle = data.extractionTimeFrames.length > 1
+            ? `Video Extraction Details - Time Frame ${index + 1}`
+            : 'Video Extraction Details';
+
+          const extractionDetails = PDF_BASE.buildStandardSection(sectionTitle, [
+            ['Extraction Start Time', formatDateTime(timeFrame.extractionStartTime)],
+            ['Extraction End Time', formatDateTime(timeFrame.extractionEndTime)],
+            ['Time Period Type', timeFrame.timePeriodType],
+            ['Extraction Duration', extractionDuration ? extractionDuration.formatted : null]
+          ]);
+          if (extractionDetails) content.push(extractionDetails);
+
+          // Camera Details for this time frame
+          const cameraDetails = PDF_BASE.buildTextSection(
+            data.extractionTimeFrames.length > 1 ? `Camera Details - Time Frame ${index + 1}` : 'Camera Details',
+            timeFrame.cameraDetails
+          );
+          if (cameraDetails) content.push(cameraDetails);
+        });
+      } else {
+        // Fallback for old data format (single time frame)
+        const extractionDuration = data.extractionStartTime && data.extractionEndTime
+          ? calculateVideoDuration(data.extractionStartTime, data.extractionEndTime)
+          : null;
+
+        const extractionDetails = PDF_BASE.buildStandardSection('Video Extraction Details', [
+          ['Extraction Start Time', formatDateTime(data.extractionStartTime)],
+          ['Extraction End Time', formatDateTime(data.extractionEndTime)],
+          ['Time Period Type', data.timePeriodType],
+          ['Extraction Duration', extractionDuration ? extractionDuration.formatted : null]
+        ]);
+        if (extractionDetails) content.push(extractionDetails);
+
+        // Camera Details
+        const cameraDetails = PDF_BASE.buildTextSection('Camera Details', data.cameraDetails);
+        if (cameraDetails) content.push(cameraDetails);
+      }
       
       // DVR Information
       let dvrFields = [
@@ -558,11 +590,7 @@ export const PDF_TEMPLATES = {
         ['Video Monitor On-Site', data.hasVideoMonitor]
       ]);
       if (accessInfo) content.push(accessInfo);
-      
-      // Camera Details
-      const cameraDetails = PDF_BASE.buildTextSection('Camera Details', data.cameraDetails);
-      if (cameraDetails) content.push(cameraDetails);
-      
+
       // Incident Description
       const incidentDesc = PDF_BASE.buildTextSection('Incident Description', data.incidentDescription);
       if (incidentDesc) content.push(incidentDesc);

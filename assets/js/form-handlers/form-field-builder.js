@@ -283,4 +283,133 @@ export class FormFieldBuilder {
 
     return group;
   }
+
+  /**
+   * Create extraction time field for recovery form
+   */
+  static createExtractionTimeField(baseName, index, label, required) {
+    const fieldName = index === 0 ? baseName : `${baseName}_${index}`;
+    const fieldId = index === 0 ? baseName : `${baseName}_${index}`;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const labelEl = createElement('label', {
+      htmlFor: fieldId,
+      className: 'form-label'
+    });
+    labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
+
+    const input = createElement('input', {
+      type: 'datetime-local',
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName,
+      required: required ? 'required' : null
+    });
+
+    const small = createElement('small', { className: 'form-text' },
+      baseName.includes('Start') ? 'Start of video period to extract' : 'End of video period to extract'
+    );
+
+    group.appendChild(labelEl);
+    group.appendChild(input);
+    group.appendChild(small);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
+
+  /**
+   * Create time period type radio field for recovery form
+   */
+  static createTimePeriodTypeField(index) {
+    const fieldName = index === 0 ? 'timePeriodType' : `timePeriodType_${index}`;
+    const dvrId = index === 0 ? 'timeDVR' : `timeDVR_${index}`;
+    const actualId = index === 0 ? 'timeActual' : `timeActual_${index}`;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const label = createElement('label', { className: 'form-label' });
+    label.innerHTML = 'Time Period Type <span class="required">*</span>';
+
+    const small = createElement('small', { className: 'form-text mb-2 d-block' },
+      'Are the times above in DVR time or actual time?'
+    );
+
+    const dvrDiv = createElement('div', { className: 'form-check' });
+    const dvrInput = createElement('input', {
+      className: 'form-check-input',
+      type: 'radio',
+      name: fieldName,
+      id: dvrId,
+      value: 'DVR Time',
+      required: 'required'
+    });
+    const dvrLabel = createElement('label', {
+      className: 'form-check-label',
+      htmlFor: dvrId
+    }, 'DVR Time');
+    dvrDiv.appendChild(dvrInput);
+    dvrDiv.appendChild(dvrLabel);
+
+    const actualDiv = createElement('div', { className: 'form-check' });
+    const actualInput = createElement('input', {
+      className: 'form-check-input',
+      type: 'radio',
+      name: fieldName,
+      id: actualId,
+      value: 'Actual Time',
+      required: 'required'
+    });
+    const actualLabel = createElement('label', {
+      className: 'form-check-label',
+      htmlFor: actualId
+    }, 'Actual Time');
+    actualDiv.appendChild(actualInput);
+    actualDiv.appendChild(actualLabel);
+
+    group.appendChild(label);
+    group.appendChild(small);
+    group.appendChild(dvrDiv);
+    group.appendChild(actualDiv);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
+
+  /**
+   * Create camera details field for recovery form
+   */
+  static createCameraDetailsField(index) {
+    const fieldName = index === 0 ? 'cameraDetails' : `cameraDetails_${index}`;
+    const fieldId = index === 0 ? 'cameraDetails' : `cameraDetails_${index}`;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const label = createElement('label', {
+      htmlFor: fieldId,
+      className: 'form-label'
+    });
+    label.innerHTML = 'Camera Details <span class="required">*</span>';
+
+    const textarea = createElement('textarea', {
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName,
+      rows: '4',
+      placeholder: 'List camera locations/angles needed (e.g., Front entrance, Cash register, Parking lot west side)',
+      required: 'required'
+    });
+
+    const small = createElement('small', { className: 'form-text' },
+      'Please list specific cameras or areas to be extracted'
+    );
+
+    group.appendChild(label);
+    group.appendChild(textarea);
+    group.appendChild(small);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
 }
