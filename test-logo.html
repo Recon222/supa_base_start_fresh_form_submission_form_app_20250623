@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDFMake Logo Test</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    button {
+      background-color: #1B3A6B;
+      color: white;
+      padding: 15px 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background-color: #2B5AA8;
+    }
+    #status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    h1 {
+      color: #1B3A6B;
+    }
+    .validation-results {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+    }
+    .validation-results p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>PDFMake Logo Test</h1>
+  <p>This test validates the FVU logo base64 encoding and renders it in a PDF.</p>
+
+  <div class="validation-results" id="validation"></div>
+
+  <button id="validateBtn">Validate Logo Data</button>
+  <button id="testBtn">Generate Test PDF</button>
+
+  <div id="status"></div>
+
+  <script type="module">
+    import { FVU_LOGO_BASE64, FVU_LOGO_WIDTH, FVU_LOGO_HEIGHT, validateLogoData } from './assets/js/logo-data.js';
+
+    const statusDiv = document.getElementById('status');
+    const validationDiv = document.getElementById('validation');
+
+    // Validation function
+    document.getElementById('validateBtn').addEventListener('click', () => {
+      statusDiv.textContent = 'Running validation...';
+      statusDiv.className = 'info';
+
+      const result = validateLogoData();
+
+      // Additional checks
+      const logoLength = FVU_LOGO_BASE64.length;
+      const hasValidPrefix = FVU_LOGO_BASE64.startsWith('data:image/png;base64,');
+      const base64Part = FVU_LOGO_BASE64.split(',')[1];
+      let pngSignatureValid = false;
+
+      try {
+        const decoded = atob(base64Part.substring(0, 20));
+        pngSignatureValid = decoded.charCodeAt(0) === 0x89 &&
+                           decoded.substring(1, 4) === 'PNG';
+      } catch (e) {
+        pngSignatureValid = false;
+      }
+
+      validationDiv.innerHTML = `
+        <h3>Validation Results:</h3>
+        <p><strong>Logo Validation:</strong> ${result.valid ? '✓ PASS' : '✗ FAIL'}</p>
+        <p><strong>Message:</strong> ${result.message}</p>
+        <p><strong>Data URL Length:</strong> ${logoLength.toLocaleString()} characters</p>
+        <p><strong>Valid Prefix:</strong> ${hasValidPrefix ? '✓ YES' : '✗ NO'}</p>
+        <p><strong>PNG Signature:</strong> ${pngSignatureValid ? '✓ VALID' : '✗ INVALID'}</p>
+        <p><strong>Expected Length:</strong> ~329,000 characters (actual: ${logoLength.toLocaleString()})</p>
+        <p><strong>Dimensions:</strong> ${FVU_LOGO_WIDTH}x${FVU_LOGO_HEIGHT} pixels (aspect ratio preserved)</p>
+      `;
+
+      if (result.valid && pngSignatureValid) {
+        statusDiv.textContent = 'SUCCESS: All validation checks passed!';
+        statusDiv.className = 'success';
+      } else {
+        statusDiv.textContent = 'ERROR: Validation failed. Check results above.';
+        statusDiv.className = 'error';
+      }
+    });
+
+    // PDF generation function
+    document.getElementById('testBtn').addEventListener('click', () => {
+      statusDiv.textContent = 'Generating PDF...';
+      statusDiv.className = 'info';
+
+      const docDefinition = {
+        pageSize: 'LETTER',
+        pageMargins: [40, 40, 40, 40],
+        content: [
+          {
+            columns: [
+              {
+                image: FVU_LOGO_BASE64,
+                width: FVU_LOGO_WIDTH,
+                height: FVU_LOGO_HEIGHT
+              },
+              {
+                stack: [
+                  {
+                    text: 'PEEL REGIONAL POLICE',
+                    fontSize: 18,
+                    bold: true,
+                    color: '#1B3A6B'
+                  },
+                  {
+                    text: 'Forensic Video Unit',
+                    fontSize: 16,
+                    color: '#1B3A6B',
+                    margin: [0, 5, 0, 0]
+                  },
+                  {
+                    text: 'Logo Test Document',
+                    fontSize: 14,
+                    bold: true,
+                    margin: [0, 10, 0, 0]
+                  }
+                ],
+                width: '*',
+                margin: [20, 10, 0, 0]
+              }
+            ]
+          },
+          {
+            canvas: [
+              {
+                type: 'line',
+                x1: 0,
+                y1: 0,
+                x2: 515,
+                y2: 0,
+                lineWidth: 2,
+                lineColor: '#1B3A6B'
+              }
+            ],
+            margin: [0, 20, 0, 20]
+          },
+          {
+            text: 'Logo Rendering Test',
+            fontSize: 16,
+            bold: true,
+            color: '#1B3A6B',
+            margin: [0, 0, 0, 10]
+          },
+          {
+            text: 'If you can see the FVU logo above with the Peel Regional Police header, the PDFMake integration is working correctly!',
+            fontSize: 12,
+            margin: [0, 0, 0, 10]
+          },
+          {
+            text: 'Technical Details:',
+            fontSize: 14,
+            bold: true,
+            color: '#1B3A6B',
+            margin: [0, 20, 0, 10]
+          },
+          {
+            ul: [
+              `Logo Data URL Length: ${FVU_LOGO_BASE64.length.toLocaleString()} characters`,
+              'Format: PNG with white background (base64 encoded)',
+              `Dimensions: ${FVU_LOGO_WIDTH}x${FVU_LOGO_HEIGHT} pixels (aspect ratio preserved)`,
+              'Source: assets/images/FVU-logo-white-bg.png',
+              'Generated: ' + new Date().toLocaleString()
+            ]
+          }
+        ]
+      };
+
+      try {
+        pdfMake.createPdf(docDefinition).download('fvu-logo-test.pdf');
+        statusDiv.textContent = 'SUCCESS: PDF generated successfully! Check your downloads folder for fvu-logo-test.pdf';
+        statusDiv.className = 'success';
+      } catch (error) {
+        statusDiv.textContent = `ERROR: ${error.message}`;
+        statusDiv.className = 'error';
+        console.error('PDFMake Error:', error);
+      }
+    });
+
+    // Run automatic validation on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('validateBtn').click();
+    });
+  </script>
+</body>
+</html>
