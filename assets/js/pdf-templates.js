@@ -494,12 +494,11 @@ export const PDF_TEMPLATES = {
       if (caseInfo) content.push(caseInfo);
 
       // Investigator Information
-      const investigatorInfo = PDF_BASE.buildStandardSection('Submitting Investigator', [
+      const investigatorInfo = PDF_BASE.buildStandardSection('Submitting Investigator Information', [
         ['Name', data.rName],
         ['Badge #', data.badge],
         ['Phone', data.requestingPhone],
-        ['Email', data.requestingEmail],
-        ['Unit', data.unit]
+        ['Email', data.requestingEmail]
       ]);
       if (investigatorInfo) content.push(investigatorInfo);
       
