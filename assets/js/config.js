@@ -289,8 +289,8 @@ export const CONFIG = {
 
     // Header layout
     HEADER: {
-      LOGO_WIDTH: 160,
-      LOGO_HEIGHT: 128,  // Correct aspect ratio (1374x1105 = 1.243)
+      LOGO_WIDTH: 120,   // Reduced by 25% from 160
+      LOGO_HEIGHT: 96,   // Reduced by 25% from 128 (maintains aspect ratio)
       COLUMN_GAP: 20,
       TITLE_STACK_TOP_MARGIN: 10,  // Reduced for tighter layout
       SEPARATOR_TOP_MARGIN: 12,
