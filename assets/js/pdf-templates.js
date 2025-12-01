@@ -482,10 +482,17 @@ export const PDF_TEMPLATES = {
   recovery: {
     buildContent(data) {
       const content = [];
-      
+
       // Header
       content.push(...PDF_BASE.buildUnifiedHeader('CCTV Recovery Request Form'));
-      
+
+      // Case Information
+      const caseInfo = PDF_BASE.buildStandardSection('Case Information', [
+        ['Occurrence Number', data.occNumber],
+        ['Type of Offence', data.offenceTypeDisplay || data.offenceType]
+      ]);
+      if (caseInfo) content.push(caseInfo);
+
       // Investigator Information
       const investigatorInfo = PDF_BASE.buildStandardSection('Submitting Investigator', [
         ['Name', data.rName],
@@ -502,8 +509,7 @@ export const PDF_TEMPLATES = {
         ['Location Address', data.locationAddress],
         ['City', data.cityDisplay || data.city],
         ['Location Contact', data.locationContact],
-        ['Contact Phone', data.locationContactPhone],
-        ['Type of Offence', data.offenceTypeDisplay || data.offenceType]
+        ['Contact Phone', data.locationContactPhone]
       ]);
       if (locationInfo) content.push(locationInfo);
       

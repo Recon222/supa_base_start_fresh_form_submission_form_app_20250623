@@ -65,20 +65,71 @@
       <!-- Hidden session field for PHP -->
       <!-- <input type="hidden" name="session_verify" value="<?php echo session_id(); ?>"> -->
       
+      <!-- Case Information Section -->
+      <section class="form-section">
+        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Case Information</h2>
+
+        <!-- Row 1: Occurrence Number + Type of Offence -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="occNumber" class="form-label">
+              Occurrence Number <span class="required">*</span>
+            </label>
+            <input type="text"
+                   class="form-control"
+                   id="occNumber"
+                   name="occNumber"
+                   placeholder="e.g., PR240368708"
+                   required>
+            <small class="form-text">Format: PR followed by numbers</small>
+            <div class="invalid-feedback"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="offenceType" class="form-label">
+              Type of Offence <span class="required">*</span>
+            </label>
+            <select class="form-control" id="offenceType" name="offenceType" required>
+              <option value="">Select offence type</option>
+              <option value="Robbery">Robbery</option>
+              <option value="Shooting">Shooting</option>
+              <option value="Homicide">Homicide</option>
+              <option value="Sexual Assault">Sexual Assault</option>
+              <option value="Missing Person">Missing Person</option>
+              <option value="Other">Other</option>
+            </select>
+            <div class="invalid-feedback"></div>
+          </div>
+        </div>
+
+        <!-- Conditional field for Other offence type - full width -->
+        <div class="form-group d-none" id="offenceTypeOtherGroup">
+          <label for="offenceTypeOther" class="form-label">
+            Specify Offence <span class="required">*</span>
+          </label>
+          <input type="text"
+                 class="form-control"
+                 id="offenceTypeOther"
+                 name="offenceTypeOther"
+                 placeholder="Please specify the offence type">
+          <div class="invalid-feedback"></div>
+        </div>
+      </section>
+
       <!-- Investigator Information Section -->
       <section class="form-section">
         <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Investigator Information</h2>
-        
+
         <!-- Row 1: Investigator Name + Badge -->
         <div class="form-row">
           <div class="form-group">
             <label for="rName" class="form-label">
               Submitting Investigator <span class="required">*</span>
             </label>
-            <input type="text" 
-                   class="form-control" 
-                   id="rName" 
-                   name="rName" 
+            <input type="text"
+                   class="form-control"
+                   id="rName"
+                   name="rName"
                    placeholder="Last name or full name"
                    required>
             <div class="invalid-feedback"></div>
@@ -88,10 +139,10 @@
             <label for="badge" class="form-label">
               Badge Number <span class="required">*</span>
             </label>
-            <input type="text" 
-                   class="form-control" 
-                   id="badge" 
-                   name="badge" 
+            <input type="text"
+                   class="form-control"
+                   id="badge"
+                   name="badge"
                    placeholder="Investigator badge number"
                    required>
             <div class="invalid-feedback"></div>
@@ -128,45 +179,20 @@
           </div>
         </div>
 
-        <!-- Row 3: Unit + Offence -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="unit" class="form-label">
-              Unit <span class="required">*</span>
-            </label>
-            <input type="text" 
-                   class="form-control" 
-                   id="unit" 
-                   name="unit" 
-                   placeholder="e.g., Homicide"
-                   required>
-            <div class="invalid-feedback"></div>
-          </div>
-
-          <div class="form-group">
-            <label for="offenceType" class="form-label">Offence</label>
-            <select class="form-control" id="offenceType" name="offenceType">
-              <option value="">Select offence type</option>
-              <option value="Robbery">Robbery</option>
-              <option value="Shooting">Shooting</option>
-              <option value="Homicide">Homicide</option>
-              <option value="Sexual Assault">Sexual Assault</option>
-              <option value="Missing Person">Missing Person</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
+        <!-- Row 3: Unit (full width) -->
+        <div class="form-group">
+          <label for="unit" class="form-label">
+            Unit <span class="required">*</span>
+          </label>
+          <input type="text"
+                 class="form-control"
+                 id="unit"
+                 name="unit"
+                 placeholder="e.g., Homicide"
+                 required>
+          <div class="invalid-feedback"></div>
         </div>
 
-        <!-- Conditional field for Other offence type - full width -->
-        <div class="form-group d-none" id="offenceTypeOtherGroup">
-          <label for="offenceTypeOther" class="form-label">Specify Offence</label>
-          <input type="text" 
-                 class="form-control" 
-                 id="offenceTypeOther" 
-                 name="offenceTypeOther" 
-                 placeholder="Please specify the offence type">
-        </div>
-        
         <!-- Clear investigator info button -->
         <div class="form-group text-right">
           <button type="button" 
@@ -435,9 +461,6 @@
           </div>
         </div>
       </section>
-
-      <!-- Hidden field for incident date (required by third-party) -->
-      <input type="hidden" id="occDate" name="occDate">
 
       <!-- Additional Information Section -->
       <section class="form-section">
