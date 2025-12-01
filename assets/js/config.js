@@ -4,8 +4,7 @@
  * No business logic - just values
  */
 
-// Simple placeholder logo - 1x1 transparent PNG
-const PLACEHOLDER_LOGO_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+import { FVU_LOGO_BASE64, FVU_LOGO_WIDTH, FVU_LOGO_HEIGHT } from './logo-data.js';
 
 export const CONFIG = {
   // API Configuration
@@ -272,9 +271,9 @@ export const CONFIG = {
   
   // PDF Logo Configuration
   PDF_LOGO: {
-    HOMICIDE: PLACEHOLDER_LOGO_BASE64,
-    WIDTH: 80,
-    HEIGHT: 80
+    HOMICIDE: FVU_LOGO_BASE64,
+    WIDTH: FVU_LOGO_WIDTH,
+    HEIGHT: FVU_LOGO_HEIGHT
   }
 };
 
