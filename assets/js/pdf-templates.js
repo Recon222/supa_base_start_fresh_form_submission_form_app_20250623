@@ -23,40 +23,40 @@ const PDF_BASE = {
           {
             // Logo column
             image: CONFIG.PDF_LOGO.HOMICIDE,
-            width: CONFIG.PDF_LOGO.WIDTH || 80,
-            height: CONFIG.PDF_LOGO.HEIGHT || 80
+            width: CONFIG.PDF_LAYOUT.HEADER.LOGO_WIDTH,
+            height: CONFIG.PDF_LAYOUT.HEADER.LOGO_HEIGHT
           },
           {
             // Title column - centered and stacked
             stack: [
               {
                 text: 'PEEL REGIONAL POLICE',
-                fontSize: 18,
+                fontSize: CONFIG.PDF_LAYOUT.HEADER_FONTS.PRIMARY_TITLE,
                 bold: true,
                 color: CONFIG.PEEL_COLORS.BLUE,
                 alignment: 'center'
               },
               {
                 text: 'Forensic Video Unit',
-                fontSize: 16,
+                fontSize: CONFIG.PDF_LAYOUT.HEADER_FONTS.SECONDARY_TITLE,
                 color: CONFIG.PEEL_COLORS.BLUE,
                 alignment: 'center',
-                margin: [0, 2, 0, 0]
+                margin: [0, CONFIG.PDF_LAYOUT.HEADER_FONTS.PRIMARY_SPACING, 0, 0]
               },
               {
                 text: formTitle,
-                fontSize: 14,
+                fontSize: CONFIG.PDF_LAYOUT.HEADER_FONTS.FORM_TITLE,
                 bold: true,
                 color: '#333333',
                 alignment: 'center',
-                margin: [0, 4, 0, 0]
+                margin: [0, CONFIG.PDF_LAYOUT.HEADER_FONTS.SECONDARY_SPACING, 0, 0]
               }
             ],
             width: '*',
-            margin: [0, 10, 0, 0]
+            margin: [0, CONFIG.PDF_LAYOUT.HEADER.TITLE_STACK_TOP_MARGIN, 0, 0]
           }
         ],
-        columnGap: 20
+        columnGap: CONFIG.PDF_LAYOUT.HEADER.COLUMN_GAP
       },
       // Professional blue line separator
       {
@@ -67,11 +67,16 @@ const PDF_BASE = {
             y1: 0,
             x2: 515,
             y2: 0,
-            lineWidth: 2,
+            lineWidth: CONFIG.PDF_LAYOUT.HEADER.SEPARATOR_WIDTH,
             lineColor: CONFIG.PEEL_COLORS.BLUE
           }
         ],
-        margin: [0, 15, 0, 20]
+        margin: [
+          0,
+          CONFIG.PDF_LAYOUT.HEADER.SEPARATOR_TOP_MARGIN,
+          0,
+          CONFIG.PDF_LAYOUT.HEADER.SEPARATOR_BOTTOM_MARGIN
+        ]
       }
     ];
   },
@@ -562,9 +567,14 @@ export function buildDocumentDefinition(formData, formType) {
   }
   
   return {
-    pageSize: 'LETTER',
-    pageMargins: [40, 100, 40, 60], // Increased top margin for header
-    
+    pageSize: CONFIG.PDF_LAYOUT.PAGE_SIZE,
+    pageMargins: [
+      CONFIG.PDF_LAYOUT.PAGE_MARGINS.LEFT,
+      CONFIG.PDF_LAYOUT.PAGE_MARGINS.TOP,
+      CONFIG.PDF_LAYOUT.PAGE_MARGINS.RIGHT,
+      CONFIG.PDF_LAYOUT.PAGE_MARGINS.BOTTOM
+    ],
+
     // Document metadata
     info: {
       title: `${CONFIG.FORM_TITLES[formType.toUpperCase()]} - ${formData.occNumber || 'No Occurrence #'}`,

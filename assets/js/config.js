@@ -274,6 +274,57 @@ export const CONFIG = {
     HOMICIDE: FVU_LOGO_BASE64,
     WIDTH: FVU_LOGO_WIDTH,
     HEIGHT: FVU_LOGO_HEIGHT
+  },
+
+  // PDF Layout Configuration
+  PDF_LAYOUT: {
+    // Page settings
+    PAGE_SIZE: 'LETTER',
+    PAGE_MARGINS: {
+      LEFT: 40,
+      TOP: 80,        // REDUCED from 100 - fixes top padding issue
+      RIGHT: 40,
+      BOTTOM: 60
+    },
+
+    // Header layout
+    HEADER: {
+      LOGO_WIDTH: 80,
+      LOGO_HEIGHT: 80,
+      COLUMN_GAP: 20,
+      TITLE_STACK_TOP_MARGIN: 15,  // Vertical centering of title column
+      SEPARATOR_TOP_MARGIN: 15,
+      SEPARATOR_BOTTOM_MARGIN: 20,
+      SEPARATOR_WIDTH: 2
+    },
+
+    // Header font sizes
+    HEADER_FONTS: {
+      PRIMARY_TITLE: 18,    // "PEEL REGIONAL POLICE"
+      SECONDARY_TITLE: 16,  // "Forensic Video Unit"
+      FORM_TITLE: 14,       // Form-specific title
+      PRIMARY_SPACING: 2,   // Space after primary title
+      SECONDARY_SPACING: 4  // Space after secondary title
+    },
+
+    // Section layout
+    SECTION: {
+      TOP_MARGIN: 15,
+      HEADER_FONT_SIZE: 14,
+      HEADER_BOTTOM_MARGIN: 8,
+      TABLE_WIDTHS: ['35%', '65%'],
+      ROW_PADDING_TOP: 6,
+      ROW_PADDING_BOTTOM: 6
+    },
+
+    // Typography
+    FONTS: {
+      LABEL: 10,
+      VALUE: 11,
+      FOOTER: 8,
+      URGENT: 12,
+      WARNING: 11
+    }
   }
 };
 
@@ -292,3 +343,9 @@ Object.freeze(CONFIG.SHADOWS);
 Object.freeze(CONFIG.DRAFT_ANIMATIONS);
 Object.freeze(CONFIG.PDF_CONFIG);
 Object.freeze(CONFIG.PDF_LOGO);
+Object.freeze(CONFIG.PDF_LAYOUT);
+Object.freeze(CONFIG.PDF_LAYOUT.PAGE_MARGINS);
+Object.freeze(CONFIG.PDF_LAYOUT.HEADER);
+Object.freeze(CONFIG.PDF_LAYOUT.HEADER_FONTS);
+Object.freeze(CONFIG.PDF_LAYOUT.SECTION);
+Object.freeze(CONFIG.PDF_LAYOUT.FONTS);
