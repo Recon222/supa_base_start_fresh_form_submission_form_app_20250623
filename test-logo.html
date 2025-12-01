@@ -86,16 +86,24 @@
 
       // Additional checks
       const logoLength = FVU_LOGO_BASE64.length;
-      const hasValidPrefix = FVU_LOGO_BASE64.startsWith('data:image/png;base64,');
+      const isPNG = FVU_LOGO_BASE64.startsWith('data:image/png;base64,');
+      const isJPEG = FVU_LOGO_BASE64.startsWith('data:image/jpeg;base64,');
+      const hasValidPrefix = isPNG || isJPEG;
       const base64Part = FVU_LOGO_BASE64.split(',')[1];
-      let pngSignatureValid = false;
+      let formatValid = false;
+      let formatType = 'Unknown';
 
       try {
         const decoded = atob(base64Part.substring(0, 20));
-        pngSignatureValid = decoded.charCodeAt(0) === 0x89 &&
-                           decoded.substring(1, 4) === 'PNG';
+        if (isPNG && decoded.charCodeAt(0) === 0x89 && decoded.substring(1, 4) === 'PNG') {
+          formatValid = true;
+          formatType = 'PNG';
+        } else if (isJPEG && decoded.charCodeAt(0) === 0xFF && decoded.charCodeAt(1) === 0xD8) {
+          formatValid = true;
+          formatType = 'JPEG';
+        }
       } catch (e) {
-        pngSignatureValid = false;
+        formatValid = false;
       }
 
       validationDiv.innerHTML = `
@@ -104,12 +112,13 @@
         <p><strong>Message:</strong> ${result.message}</p>
         <p><strong>Data URL Length:</strong> ${logoLength.toLocaleString()} characters</p>
         <p><strong>Valid Prefix:</strong> ${hasValidPrefix ? '✓ YES' : '✗ NO'}</p>
-        <p><strong>PNG Signature:</strong> ${pngSignatureValid ? '✓ VALID' : '✗ INVALID'}</p>
-        <p><strong>Expected Length:</strong> ~329,000 characters (actual: ${logoLength.toLocaleString()})</p>
+        <p><strong>Format Type:</strong> ${formatType}</p>
+        <p><strong>Format Signature:</strong> ${formatValid ? '✓ VALID' : '✗ INVALID'}</p>
         <p><strong>Dimensions:</strong> ${FVU_LOGO_WIDTH}x${FVU_LOGO_HEIGHT} pixels (aspect ratio preserved)</p>
+        <p><strong>Note:</strong> JPEG format is used to avoid PDFMake black background issues with PNG transparency</p>
       `;
 
-      if (result.valid && pngSignatureValid) {
+      if (result.valid && formatValid) {
         statusDiv.textContent = 'SUCCESS: All validation checks passed!';
         statusDiv.className = 'success';
       } else {
@@ -196,9 +205,10 @@
           {
             ul: [
               `Logo Data URL Length: ${FVU_LOGO_BASE64.length.toLocaleString()} characters`,
-              'Format: PNG with white background (base64 encoded)',
+              'Format: JPEG with white background (base64 encoded)',
+              'JPEG format is used to avoid PDFMake black background issues',
               `Dimensions: ${FVU_LOGO_WIDTH}x${FVU_LOGO_HEIGHT} pixels (aspect ratio preserved)`,
-              'Source: assets/images/FVU-logo-white-bg.png',
+              'Source: assets/images/FVU logo.PNG',
               'Generated: ' + new Date().toLocaleString()
             ]
           }

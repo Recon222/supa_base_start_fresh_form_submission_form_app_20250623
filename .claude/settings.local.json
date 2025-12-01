@@ -11,7 +11,14 @@
       "mcp__supabase__list_tables",
       "mcp__supabase__apply_migration",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "mcp__context7__get-library-docs",
+      "Bash(python:*)",
+      "WebSearch",
+      "mcp__context7__resolve-library-id",
+      "Bash(powershell -Command \"Get-Content ''D:\\Work Coding Projects\\Submission Forms for FAT\\supa_base_start_fresh_form_submission_form_app_20250623\\assets\\js\\logo-data.js'' | Select-Object -Skip 20 -First 20\")",
+      "Bash(powershell -Command \"Get-Content ''D:\\Work Coding Projects\\Submission Forms for FAT\\supa_base_start_fresh_form_submission_form_app_20250623\\assets\\js\\logo-data.js'' | Select-Object -First 40\")",
+      "Bash(start \"D:\\Work Coding Projects\\Submission Forms for FAT\\supa_base_start_fresh_form_submission_form_app_20250623\\test-logo.html\")"
     ],
     "deny": []
   },
