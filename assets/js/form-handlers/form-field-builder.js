@@ -412,4 +412,290 @@ export class FormFieldBuilder {
 
     return group;
   }
+
+  /**
+   * Create DVR make/model field
+   */
+  static createDVRMakeModelField(dvrIndex) {
+    const fieldName = dvrIndex === 0 ? 'dvrMakeModel' : `dvrMakeModel_${dvrIndex}`;
+    const fieldId = dvrIndex === 0 ? 'dvrMakeModel' : `dvrMakeModel_${dvrIndex}`;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const label = createElement('label', {
+      htmlFor: fieldId,
+      className: 'form-label'
+    }, 'DVR Make/Model');
+
+    const input = createElement('input', {
+      type: 'text',
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName,
+      placeholder: 'e.g., Hikvision DS-7216'
+    });
+
+    const small = createElement('small', { className: 'form-text' },
+      'DVR system manufacturer and model number'
+    );
+
+    group.appendChild(label);
+    group.appendChild(input);
+    group.appendChild(small);
+
+    return group;
+  }
+
+  /**
+   * Create DVR time sync radio field (Is Time & Date correct?)
+   */
+  static createDVRTimeSyncField(dvrIndex, onChangeCallback) {
+    const fieldName = dvrIndex === 0 ? 'isTimeDateCorrect' : `isTimeDateCorrect_${dvrIndex}`;
+    const yesId = dvrIndex === 0 ? 'timeCorrectYes' : `timeCorrectYes_${dvrIndex}`;
+    const noId = dvrIndex === 0 ? 'timeCorrectNo' : `timeCorrectNo_${dvrIndex}`;
+    const offsetGroupId = dvrIndex === 0 ? 'timeOffsetGroup' : `timeOffsetGroup_${dvrIndex}`;
+    const offsetFieldId = dvrIndex === 0 ? 'timeOffset' : `timeOffset_${dvrIndex}`;
+    const offsetFieldName = dvrIndex === 0 ? 'timeOffset' : `timeOffset_${dvrIndex}`;
+
+    const container = createElement('div');
+
+    // Radio group
+    const group = createElement('div', { className: 'form-group' });
+    const label = createElement('label', { className: 'form-label' },
+      'Is the Time & Date correct?'
+    );
+    const small = createElement('small', { className: 'form-text mb-2 d-block' },
+      'Is the DVR time synchronized with actual time?'
+    );
+
+    const yesDiv = createElement('div', { className: 'form-check' });
+    const yesInput = createElement('input', {
+      className: 'form-check-input',
+      type: 'radio',
+      name: fieldName,
+      id: yesId,
+      value: 'Yes',
+      required: 'required'
+    });
+    const yesLabel = createElement('label', {
+      className: 'form-check-label',
+      htmlFor: yesId
+    }, 'Yes');
+    yesDiv.appendChild(yesInput);
+    yesDiv.appendChild(yesLabel);
+
+    const noDiv = createElement('div', { className: 'form-check' });
+    const noInput = createElement('input', {
+      className: 'form-check-input',
+      type: 'radio',
+      name: fieldName,
+      id: noId,
+      value: 'No',
+      required: 'required'
+    });
+    const noLabel = createElement('label', {
+      className: 'form-check-label',
+      htmlFor: noId
+    }, 'No');
+    noDiv.appendChild(noInput);
+    noDiv.appendChild(noLabel);
+
+    group.appendChild(label);
+    group.appendChild(small);
+    group.appendChild(yesDiv);
+    group.appendChild(noDiv);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    // Time offset field (conditional)
+    const offsetGroup = createElement('div', {
+      className: 'form-group d-none',
+      id: offsetGroupId
+    });
+    const offsetLabel = createElement('label', {
+      htmlFor: offsetFieldId,
+      className: 'form-label'
+    }, 'Time Offset');
+    const offsetInput = createElement('input', {
+      type: 'text',
+      className: 'form-control',
+      id: offsetFieldId,
+      name: offsetFieldName,
+      placeholder: 'e.g., DVR is 1hr 5min 30sec AHEAD of real time'
+    });
+    const offsetSmall = createElement('small', { className: 'form-text' },
+      'Describe how the DVR time differs from actual time'
+    );
+
+    offsetGroup.appendChild(offsetLabel);
+    offsetGroup.appendChild(offsetInput);
+    offsetGroup.appendChild(offsetSmall);
+
+    container.appendChild(group);
+    container.appendChild(offsetGroup);
+
+    return container;
+  }
+
+  /**
+   * Create DVR retention field with calculation display
+   */
+  static createDVRRetentionField(dvrIndex, onChangeCallback) {
+    const fieldName = dvrIndex === 0 ? 'dvrRetention' : `dvrRetention_${dvrIndex}`;
+    const fieldId = dvrIndex === 0 ? 'dvrRetention' : `dvrRetention_${dvrIndex}`;
+    const calcId = dvrIndex === 0 ? 'retentionCalculation' : `retentionCalculation_${dvrIndex}`;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const label = createElement('label', {
+      htmlFor: fieldId,
+      className: 'form-label'
+    }, 'DVR Retention');
+
+    const input = createElement('input', {
+      type: 'date',
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName
+    });
+
+    const small = createElement('small', { className: 'form-text' },
+      'The earliest date available on the DVR system'
+    );
+
+    const calcDiv = createElement('div', {
+      id: calcId,
+      className: 'text-info mt-2'
+    });
+
+    if (onChangeCallback) {
+      input.addEventListener('change', onChangeCallback);
+    }
+
+    group.appendChild(label);
+    group.appendChild(input);
+    group.appendChild(small);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+    group.appendChild(calcDiv);
+
+    return group;
+  }
+
+  /**
+   * Create DVR video monitor radio field
+   */
+  static createDVRVideoMonitorField(dvrIndex) {
+    const fieldName = dvrIndex === 0 ? 'hasVideoMonitor' : `hasVideoMonitor_${dvrIndex}`;
+    const yesId = dvrIndex === 0 ? 'monitorYes' : `monitorYes_${dvrIndex}`;
+    const noId = dvrIndex === 0 ? 'monitorNo' : `monitorNo_${dvrIndex}`;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const label = createElement('label', { className: 'form-label' },
+      'Has Video Monitor?'
+    );
+    const small = createElement('small', { className: 'form-text mb-2 d-block' },
+      'Is there a monitor connected to view video?'
+    );
+
+    const yesDiv = createElement('div', { className: 'form-check' });
+    const yesInput = createElement('input', {
+      className: 'form-check-input',
+      type: 'radio',
+      name: fieldName,
+      id: yesId,
+      value: 'Yes'
+    });
+    const yesLabel = createElement('label', {
+      className: 'form-check-label',
+      htmlFor: yesId
+    }, 'Yes');
+    yesDiv.appendChild(yesInput);
+    yesDiv.appendChild(yesLabel);
+
+    const noDiv = createElement('div', { className: 'form-check' });
+    const noInput = createElement('input', {
+      className: 'form-check-input',
+      type: 'radio',
+      name: fieldName,
+      id: noId,
+      value: 'No'
+    });
+    const noLabel = createElement('label', {
+      className: 'form-check-label',
+      htmlFor: noId
+    }, 'No');
+    noDiv.appendChild(noInput);
+    noDiv.appendChild(noLabel);
+
+    group.appendChild(label);
+    group.appendChild(small);
+    group.appendChild(yesDiv);
+    group.appendChild(noDiv);
+
+    return group;
+  }
+
+  /**
+   * Create DVR username field
+   */
+  static createDVRUsernameField(dvrIndex) {
+    const fieldName = dvrIndex === 0 ? 'dvrUsername' : `dvrUsername_${dvrIndex}`;
+    const fieldId = dvrIndex === 0 ? 'dvrUsername' : `dvrUsername_${dvrIndex}`;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const label = createElement('label', {
+      htmlFor: fieldId,
+      className: 'form-label'
+    }, 'Username');
+
+    const input = createElement('input', {
+      type: 'text',
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName,
+      placeholder: 'DVR login username'
+    });
+
+    group.appendChild(label);
+    group.appendChild(input);
+
+    return group;
+  }
+
+  /**
+   * Create DVR password field
+   */
+  static createDVRPasswordField(dvrIndex) {
+    const fieldName = dvrIndex === 0 ? 'dvrPassword' : `dvrPassword_${dvrIndex}`;
+    const fieldId = dvrIndex === 0 ? 'dvrPassword' : `dvrPassword_${dvrIndex}`;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const label = createElement('label', {
+      htmlFor: fieldId,
+      className: 'form-label'
+    });
+    label.innerHTML = 'Password <span class="required">*</span>';
+
+    const input = createElement('input', {
+      type: 'text',
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName,
+      placeholder: 'DVR login password',
+      required: 'required'
+    });
+
+    const small = createElement('small', { className: 'form-text' },
+      'DVR access password (plain text)'
+    );
+
+    group.appendChild(label);
+    group.appendChild(input);
+    group.appendChild(small);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
 }

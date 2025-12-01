@@ -512,86 +512,181 @@ export const PDF_TEMPLATES = {
       ]);
       if (locationInfo) content.push(locationInfo);
 
-      // DVR Information
-      let dvrFields = [
-        ['DVR Make/Model', data.dvrMakeModel],
-        ['Time & Date Correct', data.isTimeDateCorrect]
-      ];
+      // Handle multiple DVR groups
+      if (data.dvrGroups && data.dvrGroups.length > 0) {
+        data.dvrGroups.forEach((dvr, dvrIndex) => {
+          // DVR header for multiple DVRs
+          if (data.dvrGroups.length > 1) {
+            content.push({
+              text: `DVR ${dvrIndex + 1}`,
+              fontSize: 14,
+              bold: true,
+              color: 'white',
+              background: CONFIG.PEEL_COLORS.BLUE,
+              margin: [0, 20, 0, 10],
+              padding: [8, 5, 8, 5],
+              alignment: 'center'
+            });
+          }
 
-      // Add time offset if applicable
-      if (data.isTimeDateCorrect === 'No' && data.timeOffset) {
-        const parsed = parseTimeOffset(data.timeOffset);
-        dvrFields.push(['Time Offset', parsed.formatted]);
-      }
+          // DVR Information
+          let dvrFields = [
+            ['DVR Make/Model', dvr.dvrMakeModel],
+            ['Time & Date Correct', dvr.isTimeDateCorrect]
+          ];
 
-      // Add retention info if available
-      if (data.dvrRetention) {
-        const retention = calculateRetentionDays(data.dvrRetention);
-        dvrFields.push(['DVR Retention', retention.message]);
+          // Add time offset if applicable
+          if (dvr.isTimeDateCorrect === 'No' && dvr.timeOffset) {
+            const parsed = parseTimeOffset(dvr.timeOffset);
+            dvrFields.push(['Time Offset', parsed.formatted]);
+          }
 
-        // Add urgent banner if retention is low
-        if (retention.days <= 4) {
-          content.push(PDF_BASE.buildUrgentBanner(`DVR DATA AT RISK - ${retention.message}`));
+          // Add retention info if available
+          if (dvr.dvrRetention) {
+            const retention = calculateRetentionDays(dvr.dvrRetention);
+            dvrFields.push(['DVR Retention', retention.message]);
+
+            // Add urgent banner if retention is low
+            if (retention.days <= 4) {
+              content.push(PDF_BASE.buildUrgentBanner(`DVR ${dvrIndex + 1} DATA AT RISK - ${retention.message}`));
+            }
+          }
+
+          // Add hasVideoMonitor field
+          dvrFields.push(['Video Monitor On-Site', dvr.hasVideoMonitor]);
+
+          const dvrInfoTitle = data.dvrGroups.length > 1
+            ? `DVR ${dvrIndex + 1} Information`
+            : 'DVR Information';
+          const dvrInfo = PDF_BASE.buildStandardSection(dvrInfoTitle, dvrFields);
+          if (dvrInfo) content.push(dvrInfo);
+
+          // Video Extraction Details - handle multiple time frames for this DVR
+          if (dvr.extractionTimeFrames && dvr.extractionTimeFrames.length > 0) {
+            dvr.extractionTimeFrames.forEach((timeFrame, tfIndex) => {
+              const extractionDuration = timeFrame.extractionStartTime && timeFrame.extractionEndTime
+                ? calculateVideoDuration(timeFrame.extractionStartTime, timeFrame.extractionEndTime)
+                : null;
+
+              let sectionTitle;
+              if (data.dvrGroups.length > 1 && dvr.extractionTimeFrames.length > 1) {
+                sectionTitle = `DVR ${dvrIndex + 1} - Video Extraction Details - Time Frame ${tfIndex + 1}`;
+              } else if (data.dvrGroups.length > 1) {
+                sectionTitle = `DVR ${dvrIndex + 1} - Video Extraction Details`;
+              } else if (dvr.extractionTimeFrames.length > 1) {
+                sectionTitle = `Video Extraction Details - Time Frame ${tfIndex + 1}`;
+              } else {
+                sectionTitle = 'Video Extraction Details';
+              }
+
+              const extractionDetails = PDF_BASE.buildStandardSection(sectionTitle, [
+                ['Extraction Start Time', formatDateTime(timeFrame.extractionStartTime)],
+                ['Extraction End Time', formatDateTime(timeFrame.extractionEndTime)],
+                ['Time Period Type', timeFrame.timePeriodType],
+                ['Extraction Duration', extractionDuration ? extractionDuration.formatted : null]
+              ]);
+              if (extractionDetails) content.push(extractionDetails);
+
+              // Camera Details for this time frame
+              let cameraTitle;
+              if (data.dvrGroups.length > 1 && dvr.extractionTimeFrames.length > 1) {
+                cameraTitle = `DVR ${dvrIndex + 1} - Camera Details - Time Frame ${tfIndex + 1}`;
+              } else if (data.dvrGroups.length > 1) {
+                cameraTitle = `DVR ${dvrIndex + 1} - Camera Details`;
+              } else if (dvr.extractionTimeFrames.length > 1) {
+                cameraTitle = `Camera Details - Time Frame ${tfIndex + 1}`;
+              } else {
+                cameraTitle = 'Camera Details';
+              }
+
+              const cameraDetails = PDF_BASE.buildTextSection(cameraTitle, timeFrame.cameraDetails);
+              if (cameraDetails) content.push(cameraDetails);
+            });
+          }
+
+          // Access Information for this DVR
+          const accessInfoTitle = data.dvrGroups.length > 1
+            ? `DVR ${dvrIndex + 1} Access Information`
+            : 'Access Information';
+          const accessInfo = PDF_BASE.buildStandardSection(accessInfoTitle, [
+            ['DVR Username', dvr.dvrUsername],
+            ['DVR Password', dvr.dvrPassword]
+          ]);
+          if (accessInfo) content.push(accessInfo);
+        });
+      } else {
+        // Fallback for old data format (single DVR, single/multiple time frames)
+        let dvrFields = [
+          ['DVR Make/Model', data.dvrMakeModel],
+          ['Time & Date Correct', data.isTimeDateCorrect]
+        ];
+
+        if (data.isTimeDateCorrect === 'No' && data.timeOffset) {
+          const parsed = parseTimeOffset(data.timeOffset);
+          dvrFields.push(['Time Offset', parsed.formatted]);
         }
-      }
 
-      // Add hasVideoMonitor field
-      dvrFields.push(['Video Monitor On-Site', data.hasVideoMonitor]);
+        if (data.dvrRetention) {
+          const retention = calculateRetentionDays(data.dvrRetention);
+          dvrFields.push(['DVR Retention', retention.message]);
 
-      const dvrInfo = PDF_BASE.buildStandardSection('DVR Information', dvrFields);
-      if (dvrInfo) content.push(dvrInfo);
+          if (retention.days <= 4) {
+            content.push(PDF_BASE.buildUrgentBanner(`DVR DATA AT RISK - ${retention.message}`));
+          }
+        }
 
-      // Video Extraction Details - handle multiple time frames
-      if (data.extractionTimeFrames && data.extractionTimeFrames.length > 0) {
-        data.extractionTimeFrames.forEach((timeFrame, index) => {
-          const extractionDuration = timeFrame.extractionStartTime && timeFrame.extractionEndTime
-            ? calculateVideoDuration(timeFrame.extractionStartTime, timeFrame.extractionEndTime)
+        dvrFields.push(['Video Monitor On-Site', data.hasVideoMonitor]);
+
+        const dvrInfo = PDF_BASE.buildStandardSection('DVR Information', dvrFields);
+        if (dvrInfo) content.push(dvrInfo);
+
+        if (data.extractionTimeFrames && data.extractionTimeFrames.length > 0) {
+          data.extractionTimeFrames.forEach((timeFrame, index) => {
+            const extractionDuration = timeFrame.extractionStartTime && timeFrame.extractionEndTime
+              ? calculateVideoDuration(timeFrame.extractionStartTime, timeFrame.extractionEndTime)
+              : null;
+
+            const sectionTitle = data.extractionTimeFrames.length > 1
+              ? `Video Extraction Details - Time Frame ${index + 1}`
+              : 'Video Extraction Details';
+
+            const extractionDetails = PDF_BASE.buildStandardSection(sectionTitle, [
+              ['Extraction Start Time', formatDateTime(timeFrame.extractionStartTime)],
+              ['Extraction End Time', formatDateTime(timeFrame.extractionEndTime)],
+              ['Time Period Type', timeFrame.timePeriodType],
+              ['Extraction Duration', extractionDuration ? extractionDuration.formatted : null]
+            ]);
+            if (extractionDetails) content.push(extractionDetails);
+
+            const cameraDetails = PDF_BASE.buildTextSection(
+              data.extractionTimeFrames.length > 1 ? `Camera Details - Time Frame ${index + 1}` : 'Camera Details',
+              timeFrame.cameraDetails
+            );
+            if (cameraDetails) content.push(cameraDetails);
+          });
+        } else {
+          const extractionDuration = data.extractionStartTime && data.extractionEndTime
+            ? calculateVideoDuration(data.extractionStartTime, data.extractionEndTime)
             : null;
 
-          const sectionTitle = data.extractionTimeFrames.length > 1
-            ? `Video Extraction Details - Time Frame ${index + 1}`
-            : 'Video Extraction Details';
-
-          const extractionDetails = PDF_BASE.buildStandardSection(sectionTitle, [
-            ['Extraction Start Time', formatDateTime(timeFrame.extractionStartTime)],
-            ['Extraction End Time', formatDateTime(timeFrame.extractionEndTime)],
-            ['Time Period Type', timeFrame.timePeriodType],
+          const extractionDetails = PDF_BASE.buildStandardSection('Video Extraction Details', [
+            ['Extraction Start Time', formatDateTime(data.extractionStartTime)],
+            ['Extraction End Time', formatDateTime(data.extractionEndTime)],
+            ['Time Period Type', data.timePeriodType],
             ['Extraction Duration', extractionDuration ? extractionDuration.formatted : null]
           ]);
           if (extractionDetails) content.push(extractionDetails);
 
-          // Camera Details for this time frame
-          const cameraDetails = PDF_BASE.buildTextSection(
-            data.extractionTimeFrames.length > 1 ? `Camera Details - Time Frame ${index + 1}` : 'Camera Details',
-            timeFrame.cameraDetails
-          );
+          const cameraDetails = PDF_BASE.buildTextSection('Camera Details', data.cameraDetails);
           if (cameraDetails) content.push(cameraDetails);
-        });
-      } else {
-        // Fallback for old data format (single time frame)
-        const extractionDuration = data.extractionStartTime && data.extractionEndTime
-          ? calculateVideoDuration(data.extractionStartTime, data.extractionEndTime)
-          : null;
+        }
 
-        const extractionDetails = PDF_BASE.buildStandardSection('Video Extraction Details', [
-          ['Extraction Start Time', formatDateTime(data.extractionStartTime)],
-          ['Extraction End Time', formatDateTime(data.extractionEndTime)],
-          ['Time Period Type', data.timePeriodType],
-          ['Extraction Duration', extractionDuration ? extractionDuration.formatted : null]
+        const accessInfo = PDF_BASE.buildStandardSection('Access Information', [
+          ['DVR Username', data.dvrUsername],
+          ['DVR Password', data.dvrPassword]
         ]);
-        if (extractionDetails) content.push(extractionDetails);
-
-        // Camera Details
-        const cameraDetails = PDF_BASE.buildTextSection('Camera Details', data.cameraDetails);
-        if (cameraDetails) content.push(cameraDetails);
+        if (accessInfo) content.push(accessInfo);
       }
-
-      // Access Information
-      const accessInfo = PDF_BASE.buildStandardSection('Access Information', [
-        ['DVR Username', data.dvrUsername],
-        ['DVR Password', data.dvrPassword]
-      ]);
-      if (accessInfo) content.push(accessInfo);
 
       // Incident Description
       const incidentDesc = PDF_BASE.buildTextSection('Incident Description', data.incidentDescription);

@@ -278,191 +278,209 @@
         </div>
       </section>
 
-      <!-- DVR Information Section -->
-      <section class="form-section">
-        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">DVR Information</h2>
+      <!-- DVR Groups Container -->
+      <div id="dvr-group-container">
+        <!-- First DVR Group (always present) -->
+        <div class="dvr-group" data-dvr-index="0" style="background: var(--glass-bg); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; border: 2px solid var(--color-primary);">
+          <h2 style="color: var(--color-primary); margin-bottom: 1.5rem; text-align: center; font-size: 1.5rem;">DVR 1</h2>
 
-        <div class="form-group">
-          <label for="dvrMakeModel" class="form-label">DVR Make/Model</label>
-          <input type="text"
-                 class="form-control"
-                 id="dvrMakeModel"
-                 name="dvrMakeModel"
-                 placeholder="e.g., Hikvision DS-7216">
-          <small class="form-text">DVR system manufacturer and model number</small>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Is the Time & Date correct?</label>
-          <small class="form-text mb-2 d-block">Is the DVR time synchronized with actual time?</small>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectYes" value="Yes" required>
-            <label class="form-check-label" for="timeCorrectYes">
-              Yes
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectNo" value="No" required>
-            <label class="form-check-label" for="timeCorrectNo">
-              No
-            </label>
-          </div>
-          <div class="invalid-feedback"></div>
-        </div>
-
-        <!-- Time offset field (conditional, NOT required) -->
-        <div class="form-group d-none" id="timeOffsetGroup">
-          <label for="timeOffset" class="form-label">Time Offset</label>
-          <input type="text"
-                 class="form-control"
-                 id="timeOffset"
-                 name="timeOffset"
-                 placeholder="e.g., DVR is 1hr 5min 30sec AHEAD of real time">
-          <small class="form-text">Describe how the DVR time differs from actual time</small>
-        </div>
-
-        <div class="form-group">
-          <label for="dvrRetention" class="form-label">DVR Retention</label>
-          <input type="date"
-                 class="form-control"
-                 id="dvrRetention"
-                 name="dvrRetention">
-          <small class="form-text">The earliest date available on the DVR system</small>
-          <div class="invalid-feedback"></div>
-          <div id="retentionCalculation" class="text-info mt-2"></div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Has Video Monitor?</label>
-          <small class="form-text mb-2 d-block">Is there a monitor connected to view video?</small>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="hasVideoMonitor" id="monitorYes" value="Yes">
-            <label class="form-check-label" for="monitorYes">
-              Yes
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="hasVideoMonitor" id="monitorNo" value="No">
-            <label class="form-check-label" for="monitorNo">
-              No
-            </label>
-          </div>
-        </div>
-      </section>
-
-      <!-- Video Extraction Details Container -->
-      <div id="extraction-timeframe-container">
-        <!-- First time frame (always present) -->
-        <div class="extraction-timeframe-group" data-group-index="0" style="background: var(--glass-bg); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; border: 1px solid var(--border-color);">
+          <!-- DVR Information Section -->
           <section class="form-section">
-            <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Video Extraction Details</h2>
+            <h3 style="color: var(--color-primary); margin-bottom: 1.5rem;">DVR Information</h3>
 
-            <!-- Row: Start Time + End Time -->
+            <div class="form-group">
+              <label for="dvrMakeModel" class="form-label">DVR Make/Model</label>
+              <input type="text"
+                     class="form-control"
+                     id="dvrMakeModel"
+                     name="dvrMakeModel"
+                     placeholder="e.g., Hikvision DS-7216">
+              <small class="form-text">DVR system manufacturer and model number</small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Is the Time & Date correct?</label>
+              <small class="form-text mb-2 d-block">Is the DVR time synchronized with actual time?</small>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectYes" value="Yes" required>
+                <label class="form-check-label" for="timeCorrectYes">
+                  Yes
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectNo" value="No" required>
+                <label class="form-check-label" for="timeCorrectNo">
+                  No
+                </label>
+              </div>
+              <div class="invalid-feedback"></div>
+            </div>
+
+            <!-- Time offset field (conditional, NOT required) -->
+            <div class="form-group d-none" id="timeOffsetGroup">
+              <label for="timeOffset" class="form-label">Time Offset</label>
+              <input type="text"
+                     class="form-control"
+                     id="timeOffset"
+                     name="timeOffset"
+                     placeholder="e.g., DVR is 1hr 5min 30sec AHEAD of real time">
+              <small class="form-text">Describe how the DVR time differs from actual time</small>
+            </div>
+
+            <div class="form-group">
+              <label for="dvrRetention" class="form-label">DVR Retention</label>
+              <input type="date"
+                     class="form-control"
+                     id="dvrRetention"
+                     name="dvrRetention">
+              <small class="form-text">The earliest date available on the DVR system</small>
+              <div class="invalid-feedback"></div>
+              <div id="retentionCalculation" class="text-info mt-2"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Has Video Monitor?</label>
+              <small class="form-text mb-2 d-block">Is there a monitor connected to view video?</small>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="hasVideoMonitor" id="monitorYes" value="Yes">
+                <label class="form-check-label" for="monitorYes">
+                  Yes
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="hasVideoMonitor" id="monitorNo" value="No">
+                <label class="form-check-label" for="monitorNo">
+                  No
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <!-- Video Extraction Details Container for this DVR -->
+          <div class="extraction-timeframe-container" data-dvr-index="0">
+            <!-- First time frame (always present) -->
+            <div class="extraction-timeframe-group" data-group-index="0" data-dvr-index="0" style="background: rgba(255,255,255,0.05); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
+              <section class="form-section">
+                <h4 style="color: var(--color-secondary); margin-bottom: 1.5rem;">Video Extraction Details</h4>
+
+                <!-- Row: Start Time + End Time -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="extractionStartTime" class="form-label">
+                      Time Period From <span class="required">*</span>
+                    </label>
+                    <input type="datetime-local"
+                           class="form-control"
+                           id="extractionStartTime"
+                           name="extractionStartTime"
+                           required>
+                    <small class="form-text">Start of video period to extract</small>
+                    <div class="invalid-feedback"></div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="extractionEndTime" class="form-label">
+                      Time Period To <span class="required">*</span>
+                    </label>
+                    <input type="datetime-local"
+                           class="form-control"
+                           id="extractionEndTime"
+                           name="extractionEndTime"
+                           required>
+                    <small class="form-text">End of video period to extract</small>
+                    <div class="invalid-feedback"></div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">
+                    Time Period Type <span class="required">*</span>
+                  </label>
+                  <small class="form-text mb-2 d-block">Are the times above in DVR time or actual time?</small>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="timePeriodType" id="timeDVR" value="DVR Time" required>
+                    <label class="form-check-label" for="timeDVR">
+                      DVR Time
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="timePeriodType" id="timeActual" value="Actual Time" required>
+                    <label class="form-check-label" for="timeActual">
+                      Actual Time
+                    </label>
+                  </div>
+                  <div class="invalid-feedback"></div>
+                </div>
+
+                <div class="form-group">
+                  <label for="cameraDetails" class="form-label">
+                    Camera Details <span class="required">*</span>
+                  </label>
+                  <textarea class="form-control"
+                            id="cameraDetails"
+                            name="cameraDetails"
+                            rows="4"
+                            placeholder="List camera locations/angles needed (e.g., Front entrance, Cash register, Parking lot west side)"
+                            required></textarea>
+                  <small class="form-text">Please list specific cameras or areas to be extracted</small>
+                  <div class="invalid-feedback"></div>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <!-- Add Time Frame Button for this DVR -->
+          <div style="text-align: center; margin: 1.5rem 0;">
+            <button type="button" class="btn btn-secondary add-timeframe-btn" data-dvr-index="0" style="min-width: 200px;">
+              + Add Additional Time Frame
+            </button>
+            <small class="form-text d-block mt-2">
+              Add if you need to extract video from multiple time periods for this DVR
+            </small>
+          </div>
+
+          <!-- Access Information Section -->
+          <section class="form-section">
+            <h3 style="color: var(--color-primary); margin-bottom: 1.5rem;">Access Information</h3>
+
+            <!-- Row: Username + Password -->
             <div class="form-row">
               <div class="form-group">
-                <label for="extractionStartTime" class="form-label">
-                  Time Period From <span class="required">*</span>
-                </label>
-                <input type="datetime-local"
+                <label for="dvrUsername" class="form-label">Username</label>
+                <input type="text"
                        class="form-control"
-                       id="extractionStartTime"
-                       name="extractionStartTime"
-                       required>
-                <small class="form-text">Start of video period to extract</small>
-                <div class="invalid-feedback"></div>
+                       id="dvrUsername"
+                       name="dvrUsername"
+                       placeholder="DVR login username">
               </div>
 
               <div class="form-group">
-                <label for="extractionEndTime" class="form-label">
-                  Time Period To <span class="required">*</span>
+                <label for="dvrPassword" class="form-label">
+                  Password <span class="required">*</span>
                 </label>
-                <input type="datetime-local"
+                <input type="text"
                        class="form-control"
-                       id="extractionEndTime"
-                       name="extractionEndTime"
+                       id="dvrPassword"
+                       name="dvrPassword"
+                       placeholder="DVR login password"
                        required>
-                <small class="form-text">End of video period to extract</small>
+                <small class="form-text">DVR access password (plain text)</small>
                 <div class="invalid-feedback"></div>
               </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">
-                Time Period Type <span class="required">*</span>
-              </label>
-              <small class="form-text mb-2 d-block">Are the times above in DVR time or actual time?</small>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="timePeriodType" id="timeDVR" value="DVR Time" required>
-                <label class="form-check-label" for="timeDVR">
-                  DVR Time
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="timePeriodType" id="timeActual" value="Actual Time" required>
-                <label class="form-check-label" for="timeActual">
-                  Actual Time
-                </label>
-              </div>
-              <div class="invalid-feedback"></div>
-            </div>
-
-            <div class="form-group">
-              <label for="cameraDetails" class="form-label">
-                Camera Details <span class="required">*</span>
-              </label>
-              <textarea class="form-control"
-                        id="cameraDetails"
-                        name="cameraDetails"
-                        rows="4"
-                        placeholder="List camera locations/angles needed (e.g., Front entrance, Cash register, Parking lot west side)"
-                        required></textarea>
-              <small class="form-text">Please list specific cameras or areas to be extracted</small>
-              <div class="invalid-feedback"></div>
             </div>
           </section>
         </div>
       </div>
 
-      <!-- Add Time Frame Button -->
+      <!-- Add DVR Button -->
       <div style="text-align: center; margin: 2rem 0;">
-        <button type="button" class="btn btn-secondary" id="addTimeFrameBtn" style="min-width: 200px;">
-          + Add Additional Time Frame
+        <button type="button" class="btn btn-primary" id="addDVRBtn" style="min-width: 250px; font-size: 1.1rem; padding: 0.75rem 2rem;">
+          + Add Another DVR System
         </button>
         <small class="form-text d-block mt-2">
-          Add if you need to extract video from multiple time periods
+          Add if you need to recover from multiple DVR systems
         </small>
       </div>
-
-      <!-- Access Information Section -->
-      <section class="form-section">
-        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Access Information</h2>
-
-        <!-- Row: Username + Password -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="dvrUsername" class="form-label">Username</label>
-            <input type="text"
-                   class="form-control"
-                   id="dvrUsername"
-                   name="dvrUsername"
-                   placeholder="DVR login username">
-          </div>
-
-          <div class="form-group">
-            <label for="dvrPassword" class="form-label">
-              Password <span class="required">*</span>
-            </label>
-            <input type="text"
-                   class="form-control"
-                   id="dvrPassword"
-                   name="dvrPassword"
-                   placeholder="DVR login password"
-                   required>
-            <small class="form-text">DVR access password (plain text)</small>
-            <div class="invalid-feedback"></div>
-          </div>
-        </div>
-      </section>
 
       <!-- Additional Information Section -->
       <section class="form-section">
