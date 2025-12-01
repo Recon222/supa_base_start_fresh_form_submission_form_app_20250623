@@ -13,50 +13,63 @@ import { CONFIG } from './config.js';
 const PDF_BASE = {
   /**
    * Build unified header with logo and stacked title
+   * Uses a table layout with absolute positioning to center title on full page width
    * @param {string} formTitle - Specific form title
    * @returns {Array} Header content
    */
   buildUnifiedHeader(formTitle) {
     return [
       {
-        columns: [
-          {
-            // Logo column
-            image: CONFIG.PDF_LOGO.HOMICIDE,
-            width: CONFIG.PDF_LAYOUT.HEADER.LOGO_WIDTH,
-            height: CONFIG.PDF_LAYOUT.HEADER.LOGO_HEIGHT
-          },
-          {
-            // Title column - centered and stacked
-            stack: [
+        // Use table layout for true centering across page
+        table: {
+          widths: ['*'],
+          body: [
+            [
               {
-                text: 'PEEL REGIONAL POLICE',
-                fontSize: CONFIG.PDF_LAYOUT.HEADER_FONTS.PRIMARY_TITLE,
-                bold: true,
-                color: CONFIG.PEEL_COLORS.BLUE,
-                alignment: 'center'
-              },
-              {
-                text: 'Forensic Video Unit',
-                fontSize: CONFIG.PDF_LAYOUT.HEADER_FONTS.SECONDARY_TITLE,
-                color: CONFIG.PEEL_COLORS.BLUE,
-                alignment: 'center',
-                margin: [0, CONFIG.PDF_LAYOUT.HEADER_FONTS.PRIMARY_SPACING, 0, 0]
-              },
-              {
-                text: formTitle,
-                fontSize: CONFIG.PDF_LAYOUT.HEADER_FONTS.FORM_TITLE,
-                bold: true,
-                color: '#333333',
-                alignment: 'center',
-                margin: [0, CONFIG.PDF_LAYOUT.HEADER_FONTS.SECONDARY_SPACING, 0, 0]
+                // Stack contains logo and centered titles
+                stack: [
+                  {
+                    // Logo positioned absolutely on left
+                    image: CONFIG.PDF_LOGO.HOMICIDE,
+                    width: CONFIG.PDF_LAYOUT.HEADER.LOGO_WIDTH,
+                    height: CONFIG.PDF_LAYOUT.HEADER.LOGO_HEIGHT,
+                    absolutePosition: { x: 40, y: 40 }
+                  },
+                  {
+                    // Titles centered on full page width
+                    stack: [
+                      {
+                        text: 'PEEL REGIONAL POLICE',
+                        fontSize: CONFIG.PDF_LAYOUT.HEADER_FONTS.PRIMARY_TITLE,
+                        bold: true,
+                        color: CONFIG.PEEL_COLORS.BLUE,
+                        alignment: 'center'
+                      },
+                      {
+                        text: 'Forensic Video Unit',
+                        fontSize: CONFIG.PDF_LAYOUT.HEADER_FONTS.SECONDARY_TITLE,
+                        color: CONFIG.PEEL_COLORS.BLUE,
+                        alignment: 'center',
+                        margin: [0, CONFIG.PDF_LAYOUT.HEADER_FONTS.PRIMARY_SPACING, 0, 0]
+                      },
+                      {
+                        text: formTitle,
+                        fontSize: CONFIG.PDF_LAYOUT.HEADER_FONTS.FORM_TITLE,
+                        bold: true,
+                        color: '#333333',
+                        alignment: 'center',
+                        margin: [0, CONFIG.PDF_LAYOUT.HEADER_FONTS.SECONDARY_SPACING, 0, 0]
+                      }
+                    ],
+                    margin: [0, CONFIG.PDF_LAYOUT.HEADER.TITLE_STACK_TOP_MARGIN, 0, 0]
+                  }
+                ],
+                border: [false, false, false, false]
               }
-            ],
-            width: '*',
-            margin: [0, CONFIG.PDF_LAYOUT.HEADER.TITLE_STACK_TOP_MARGIN, 0, 0]
-          }
-        ],
-        columnGap: CONFIG.PDF_LAYOUT.HEADER.COLUMN_GAP
+            ]
+          ]
+        },
+        layout: 'noBorders'
       },
       // Professional blue line separator
       {

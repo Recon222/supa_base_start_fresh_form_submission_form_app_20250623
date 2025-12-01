@@ -282,7 +282,7 @@ export const CONFIG = {
     PAGE_SIZE: 'LETTER',
     PAGE_MARGINS: {
       LEFT: 40,
-      TOP: 80,        // REDUCED from 100 - fixes top padding issue
+      TOP: 40,        // REDUCED from 80 - minimizes top padding
       RIGHT: 40,
       BOTTOM: 60
     },
@@ -290,10 +290,10 @@ export const CONFIG = {
     // Header layout
     HEADER: {
       LOGO_WIDTH: 80,
-      LOGO_HEIGHT: 80,
+      LOGO_HEIGHT: 64,  // Correct aspect ratio (1374x1105 = 1.243)
       COLUMN_GAP: 20,
-      TITLE_STACK_TOP_MARGIN: 15,  // Vertical centering of title column
-      SEPARATOR_TOP_MARGIN: 15,
+      TITLE_STACK_TOP_MARGIN: 10,  // Reduced for tighter layout
+      SEPARATOR_TOP_MARGIN: 12,
       SEPARATOR_BOTTOM_MARGIN: 20,
       SEPARATOR_WIDTH: 2
     },
