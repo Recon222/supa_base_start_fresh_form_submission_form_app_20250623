@@ -512,6 +512,35 @@ export const PDF_TEMPLATES = {
       ]);
       if (locationInfo) content.push(locationInfo);
 
+      // DVR Information
+      let dvrFields = [
+        ['DVR Make/Model', data.dvrMakeModel],
+        ['Time & Date Correct', data.isTimeDateCorrect]
+      ];
+
+      // Add time offset if applicable
+      if (data.isTimeDateCorrect === 'No' && data.timeOffset) {
+        const parsed = parseTimeOffset(data.timeOffset);
+        dvrFields.push(['Time Offset', parsed.formatted]);
+      }
+
+      // Add retention info if available
+      if (data.dvrRetention) {
+        const retention = calculateRetentionDays(data.dvrRetention);
+        dvrFields.push(['DVR Retention', retention.message]);
+
+        // Add urgent banner if retention is low
+        if (retention.days <= 4) {
+          content.push(PDF_BASE.buildUrgentBanner(`DVR DATA AT RISK - ${retention.message}`));
+        }
+      }
+
+      // Add hasVideoMonitor field
+      dvrFields.push(['Video Monitor On-Site', data.hasVideoMonitor]);
+
+      const dvrInfo = PDF_BASE.buildStandardSection('DVR Information', dvrFields);
+      if (dvrInfo) content.push(dvrInfo);
+
       // Video Extraction Details - handle multiple time frames
       if (data.extractionTimeFrames && data.extractionTimeFrames.length > 0) {
         data.extractionTimeFrames.forEach((timeFrame, index) => {
@@ -556,38 +585,11 @@ export const PDF_TEMPLATES = {
         const cameraDetails = PDF_BASE.buildTextSection('Camera Details', data.cameraDetails);
         if (cameraDetails) content.push(cameraDetails);
       }
-      
-      // DVR Information
-      let dvrFields = [
-        ['DVR Make/Model', data.dvrMakeModel],
-        ['Time & Date Correct', data.isTimeDateCorrect]
-      ];
-      
-      // Add time offset if applicable
-      if (data.isTimeDateCorrect === 'No' && data.timeOffset) {
-        const parsed = parseTimeOffset(data.timeOffset);
-        dvrFields.push(['Time Offset', parsed.formatted]);
-      }
-      
-      // Add retention info if available
-      if (data.dvrRetention) {
-        const retention = calculateRetentionDays(data.dvrRetention);
-        dvrFields.push(['DVR Retention', retention.message]);
 
-        // Add urgent banner if retention is low
-        if (retention.days <= 4) {
-          content.push(PDF_BASE.buildUrgentBanner(`DVR DATA AT RISK - ${retention.message}`));
-        }
-      }
-      
-      const dvrInfo = PDF_BASE.buildStandardSection('DVR Information', dvrFields);
-      if (dvrInfo) content.push(dvrInfo);
-      
       // Access Information
       const accessInfo = PDF_BASE.buildStandardSection('Access Information', [
         ['DVR Username', data.dvrUsername],
-        ['DVR Password', data.dvrPassword],
-        ['Video Monitor On-Site', data.hasVideoMonitor]
+        ['DVR Password', data.dvrPassword]
       ]);
       if (accessInfo) content.push(accessInfo);
 

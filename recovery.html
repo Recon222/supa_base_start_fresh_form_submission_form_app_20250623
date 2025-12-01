@@ -278,6 +278,78 @@
         </div>
       </section>
 
+      <!-- DVR Information Section -->
+      <section class="form-section">
+        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">DVR Information</h2>
+
+        <div class="form-group">
+          <label for="dvrMakeModel" class="form-label">DVR Make/Model</label>
+          <input type="text"
+                 class="form-control"
+                 id="dvrMakeModel"
+                 name="dvrMakeModel"
+                 placeholder="e.g., Hikvision DS-7216">
+          <small class="form-text">DVR system manufacturer and model number</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Is the Time & Date correct?</label>
+          <small class="form-text mb-2 d-block">Is the DVR time synchronized with actual time?</small>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectYes" value="Yes" required>
+            <label class="form-check-label" for="timeCorrectYes">
+              Yes
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectNo" value="No" required>
+            <label class="form-check-label" for="timeCorrectNo">
+              No
+            </label>
+          </div>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <!-- Time offset field (conditional, NOT required) -->
+        <div class="form-group d-none" id="timeOffsetGroup">
+          <label for="timeOffset" class="form-label">Time Offset</label>
+          <input type="text"
+                 class="form-control"
+                 id="timeOffset"
+                 name="timeOffset"
+                 placeholder="e.g., DVR is 1hr 5min 30sec AHEAD of real time">
+          <small class="form-text">Describe how the DVR time differs from actual time</small>
+        </div>
+
+        <div class="form-group">
+          <label for="dvrRetention" class="form-label">DVR Retention</label>
+          <input type="date"
+                 class="form-control"
+                 id="dvrRetention"
+                 name="dvrRetention">
+          <small class="form-text">The earliest date available on the DVR system</small>
+          <div class="invalid-feedback"></div>
+          <div id="retentionCalculation" class="text-info mt-2"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Has Video Monitor?</label>
+          <small class="form-text mb-2 d-block">Is there a monitor connected to view video?</small>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="hasVideoMonitor" id="monitorYes" value="Yes">
+            <label class="form-check-label" for="monitorYes">
+              Yes
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="hasVideoMonitor" id="monitorNo" value="No">
+            <label class="form-check-label" for="monitorNo">
+              No
+            </label>
+          </div>
+        </div>
+      </section>
+
       <!-- Video Extraction Details Container -->
       <div id="extraction-timeframe-container">
         <!-- First time frame (always present) -->
@@ -361,73 +433,18 @@
         </small>
       </div>
 
-      <!-- DVR Information Section -->
-      <section class="form-section">
-        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">DVR Information</h2>
-        
-        <div class="form-group">
-          <label for="dvrMakeModel" class="form-label">DVR Make/Model</label>
-          <input type="text" 
-                 class="form-control" 
-                 id="dvrMakeModel" 
-                 name="dvrMakeModel" 
-                 placeholder="e.g., Hikvision DS-7216">
-          <small class="form-text">DVR system manufacturer and model number</small>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Is the Time & Date correct?</label>
-          <small class="form-text mb-2 d-block">Is the DVR time synchronized with actual time?</small>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectYes" value="Yes" required>
-            <label class="form-check-label" for="timeCorrectYes">
-              Yes
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectNo" value="No" required>
-            <label class="form-check-label" for="timeCorrectNo">
-              No
-            </label>
-          </div>
-          <div class="invalid-feedback"></div>
-        </div>
-
-        <!-- Time offset field (conditional, NOT required) -->
-        <div class="form-group d-none" id="timeOffsetGroup">
-          <label for="timeOffset" class="form-label">Time Offset</label>
-          <input type="text"
-                 class="form-control"
-                 id="timeOffset"
-                 name="timeOffset"
-                 placeholder="e.g., DVR is 1hr 5min 30sec AHEAD of real time">
-          <small class="form-text">Describe how the DVR time differs from actual time</small>
-        </div>
-
-        <div class="form-group">
-          <label for="dvrRetention" class="form-label">DVR Retention</label>
-          <input type="date"
-                 class="form-control"
-                 id="dvrRetention"
-                 name="dvrRetention">
-          <small class="form-text">The earliest date available on the DVR system</small>
-          <div class="invalid-feedback"></div>
-          <div id="retentionCalculation" class="text-info mt-2"></div>
-        </div>
-      </section>
-
       <!-- Access Information Section -->
       <section class="form-section">
         <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Access Information</h2>
-        
+
         <!-- Row: Username + Password -->
         <div class="form-row">
           <div class="form-group">
             <label for="dvrUsername" class="form-label">Username</label>
-            <input type="text" 
-                   class="form-control" 
-                   id="dvrUsername" 
-                   name="dvrUsername" 
+            <input type="text"
+                   class="form-control"
+                   id="dvrUsername"
+                   name="dvrUsername"
                    placeholder="DVR login username">
           </div>
 
@@ -435,31 +452,14 @@
             <label for="dvrPassword" class="form-label">
               Password <span class="required">*</span>
             </label>
-            <input type="text" 
-                   class="form-control" 
-                   id="dvrPassword" 
-                   name="dvrPassword" 
+            <input type="text"
+                   class="form-control"
+                   id="dvrPassword"
+                   name="dvrPassword"
                    placeholder="DVR login password"
                    required>
             <small class="form-text">DVR access password (plain text)</small>
             <div class="invalid-feedback"></div>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Has Video Monitor?</label>
-          <small class="form-text mb-2 d-block">Is there a monitor connected to view video?</small>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="hasVideoMonitor" id="monitorYes" value="Yes">
-            <label class="form-check-label" for="monitorYes">
-              Yes
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="hasVideoMonitor" id="monitorNo" value="No">
-            <label class="form-check-label" for="monitorNo">
-              No
-            </label>
           </div>
         </div>
       </section>
