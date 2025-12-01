@@ -97,28 +97,28 @@ const PDF_BASE = {
     }
 
     return {
-      margin: [0, 15, 0, 0],
+      margin: [0, CONFIG.PDF_LAYOUT.SECTION.TOP_MARGIN, 0, 0],
       stack: [
         {
           text: title,
-          fontSize: 14,
+          fontSize: CONFIG.PDF_LAYOUT.SECTION.HEADER_FONT_SIZE,
           bold: true,
           color: CONFIG.PEEL_COLORS.BLUE,
-          margin: [0, 0, 0, 8]
+          margin: [0, 0, 0, CONFIG.PDF_LAYOUT.SECTION.HEADER_BOTTOM_MARGIN]
         },
         {
           table: {
-            widths: ['35%', '65%'],
+            widths: CONFIG.PDF_LAYOUT.SECTION.TABLE_WIDTHS,
             body: nonEmptyFields.map(([label, value]) => [
               {
                 text: label,
-                fontSize: 10,
+                fontSize: CONFIG.PDF_LAYOUT.FONTS.LABEL,
                 bold: true,
                 color: '#666666'
               },
               {
                 text: value || 'N/A',
-                fontSize: 11,
+                fontSize: CONFIG.PDF_LAYOUT.FONTS.VALUE,
                 color: '#000000'
               }
             ])
@@ -134,10 +134,10 @@ const PDF_BASE = {
               return '#E0E0E0';
             },
             paddingTop: function() {
-              return 6;
+              return CONFIG.PDF_LAYOUT.SECTION.ROW_PADDING_TOP;
             },
             paddingBottom: function() {
-              return 6;
+              return CONFIG.PDF_LAYOUT.SECTION.ROW_PADDING_BOTTOM;
             }
           }
         }
@@ -157,21 +157,21 @@ const PDF_BASE = {
     }
 
     return {
-      margin: [0, 15, 0, 0],
+      margin: [0, CONFIG.PDF_LAYOUT.SECTION.TOP_MARGIN, 0, 0],
       stack: [
         {
           text: title,
-          fontSize: 14,
+          fontSize: CONFIG.PDF_LAYOUT.SECTION.HEADER_FONT_SIZE,
           bold: true,
           color: CONFIG.PEEL_COLORS.BLUE,
-          margin: [0, 0, 0, 8]
+          margin: [0, 0, 0, CONFIG.PDF_LAYOUT.SECTION.HEADER_BOTTOM_MARGIN]
         },
         {
           table: {
             widths: ['*'],
             body: [[{
               text: content,
-              fontSize: 11,
+              fontSize: CONFIG.PDF_LAYOUT.FONTS.VALUE,
               margin: [8, 8, 8, 8]
             }]]
           },
@@ -208,20 +208,20 @@ const PDF_BASE = {
       columns: [
         {
           text: `Generated: ${new Date().toLocaleString()}`,
-          fontSize: 8,
+          fontSize: CONFIG.PDF_LAYOUT.FONTS.FOOTER,
           color: '#666666',
           alignment: 'left'
         },
         {
           text: 'OFFICIAL REQUEST DOCUMENT',
-          fontSize: 8,
+          fontSize: CONFIG.PDF_LAYOUT.FONTS.FOOTER,
           bold: true,
           color: CONFIG.PEEL_COLORS.BLUE,
           alignment: 'center'
         },
         {
           text: `Page ${currentPage} of ${pageCount}`,
-          fontSize: 8,
+          fontSize: CONFIG.PDF_LAYOUT.FONTS.FOOTER,
           color: '#666666',
           alignment: 'right'
         }
@@ -237,14 +237,14 @@ const PDF_BASE = {
    */
   buildUrgentBanner(message) {
     return {
-      margin: [0, 0, 0, 15],
+      margin: [0, 0, 0, CONFIG.PDF_LAYOUT.SECTION.TOP_MARGIN],
       table: {
         widths: ['*'],
         body: [[{
           text: `⚠ ${message.toUpperCase()}`,
           color: 'white',
           bold: true,
-          fontSize: 12,
+          fontSize: CONFIG.PDF_LAYOUT.FONTS.URGENT,
           margin: [10, 8, 10, 8],
           alignment: 'center'
         }]]
@@ -339,7 +339,7 @@ export const PDF_TEMPLATES = {
                   text: `⚠ TIME OFFSET: ${parsed.formatted}`,
                   color: CONFIG.PEEL_COLORS.YELLOW,
                   bold: true,
-                  fontSize: 11,
+                  fontSize: CONFIG.PDF_LAYOUT.FONTS.WARNING,
                   margin: [8, 6, 8, 6],
                   alignment: 'center'
                 }]]
@@ -424,19 +424,19 @@ export const PDF_TEMPLATES = {
         const files = data.fileNames.split('\n').filter(f => f.trim());
         if (files.length > 0) {
           content.push({
-            margin: [0, 15, 0, 0],
+            margin: [0, CONFIG.PDF_LAYOUT.SECTION.TOP_MARGIN, 0, 0],
             stack: [
               {
                 text: 'File Names',
-                fontSize: 14,
+                fontSize: CONFIG.PDF_LAYOUT.SECTION.HEADER_FONT_SIZE,
                 bold: true,
                 color: CONFIG.PEEL_COLORS.BLUE,
-                margin: [0, 0, 0, 8]
+                margin: [0, 0, 0, CONFIG.PDF_LAYOUT.SECTION.HEADER_BOTTOM_MARGIN]
               },
               {
-                ul: files.map(file => ({ 
-                  text: file.trim(), 
-                  fontSize: 10,
+                ul: files.map(file => ({
+                  text: file.trim(),
+                  fontSize: CONFIG.PDF_LAYOUT.FONTS.LABEL,
                   margin: [0, 2, 0, 2]
                 }))
               }
