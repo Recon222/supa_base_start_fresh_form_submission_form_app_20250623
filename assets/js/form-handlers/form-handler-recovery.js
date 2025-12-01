@@ -7,6 +7,7 @@ import { FormHandler } from './form-handler-base.js';
 import { ConditionalFieldHandler } from './conditional-field-handler.js';
 import { validateDateRange, formatPhone } from '../validators.js';
 import { debounce, toggleElement } from '../utils.js';
+import { calculateRetentionDays } from '../calculations.js';
 import { generatePDF } from '../pdf-generator.js';
 import { generateJSON } from '../json-generator.js';
 import { submitForm } from '../api-client.js';
@@ -77,6 +78,43 @@ export class RecoveryFormHandler extends FormHandler {
     const locationPhoneField = this.form.querySelector('#locationContactPhone');
     if (locationPhoneField) {
       locationPhoneField.addEventListener('input', debounce(() => this.validateSingleField(locationPhoneField), 500));
+    }
+
+    // DVR retention calculation and future date validation
+    const dvrRetentionField = this.form.querySelector('#dvrRetention');
+    if (dvrRetentionField) {
+      dvrRetentionField.addEventListener('change', (e) => {
+        const retentionEl = document.getElementById('retentionCalculation');
+        if (e.target.value) {
+          const retention = calculateRetentionDays(e.target.value);
+
+          // Check for future date
+          if (retention.days < 0) {
+            this.showFieldValidation(dvrRetentionField, 'DVR retention date cannot be in the future');
+            retentionEl.textContent = '';
+            retentionEl.className = 'text-info mt-2';
+          } else {
+            // Clear any validation error
+            this.showFieldValidation(dvrRetentionField, null);
+
+            // Display calculation with urgency styling if needed
+            retentionEl.textContent = retention.message;
+
+            // Apply urgent styling if 4 days or less
+            if (retention.days <= 4) {
+              retentionEl.className = 'text-danger mt-2';
+              retentionEl.style.fontWeight = 'bold';
+            } else {
+              retentionEl.className = 'text-info mt-2';
+              retentionEl.style.fontWeight = 'normal';
+            }
+          }
+        } else {
+          retentionEl.textContent = '';
+          retentionEl.className = 'text-info mt-2';
+          this.showFieldValidation(dvrRetentionField, null);
+        }
+      });
     }
   }
 
@@ -171,6 +209,21 @@ export class RecoveryFormHandler extends FormHandler {
         this.showFieldValidation(endTimeField, dateError);
         if (!result.firstErrorField) {
           result.firstErrorField = endTimeField;
+        }
+      }
+    }
+
+    // Validate DVR retention date is not in the future
+    const dvrRetentionField = this.form.querySelector('#dvrRetention');
+    if (dvrRetentionField && dvrRetentionField.value) {
+      const retention = calculateRetentionDays(dvrRetentionField.value);
+      if (retention.days < 0) {
+        const error = 'DVR retention date cannot be in the future';
+        result.errors.dvrRetention = error;
+        result.isValid = false;
+        this.showFieldValidation(dvrRetentionField, error);
+        if (!result.firstErrorField) {
+          result.firstErrorField = dvrRetentionField;
         }
       }
     }

@@ -31,21 +31,24 @@ export function calculateRetentionDays(earliestDate) {
   // Determine urgency
   let message = '';
   let isUrgent = false;
-  
+
   if (diffDays < 0) {
     message = 'Invalid date: Earliest date cannot be in the future';
     isUrgent = false;
   } else if (diffDays === 0) {
-    message = 'DVR retention: Less than 1 day';
-    isUrgent = false;
+    message = 'DVR retention: Less than 1 day - URGENT';
+    isUrgent = true;
   } else if (diffDays === 1) {
-    message = 'DVR retention: 1 day';
-    isUrgent = false;
+    message = 'DVR retention: 1 day - URGENT';
+    isUrgent = true;
+  } else if (diffDays <= 4) {
+    message = `DVR retention: ${diffDays} days - URGENT`;
+    isUrgent = true;
   } else {
     message = `DVR retention: ${diffDays} days`;
     isUrgent = false;
   }
-  
+
   return {
     days: diffDays >= 0 ? diffDays : null,
     message,

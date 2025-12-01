@@ -368,7 +368,7 @@ export const PDF_TEMPLATES = {
           // DVR retention warning if applicable
           if (location.dvrEarliestDate) {
             const retention = calculateRetentionDays(location.dvrEarliestDate);
-            if (retention.days < 30) {
+            if (retention.days <= 4) {
               content.push(PDF_BASE.buildUrgentBanner(retention.message));
             }
           }
@@ -542,9 +542,9 @@ export const PDF_TEMPLATES = {
       if (data.dvrRetention) {
         const retention = calculateRetentionDays(data.dvrRetention);
         dvrFields.push(['DVR Retention', retention.message]);
-        
+
         // Add urgent banner if retention is low
-        if (retention.days < 30) {
+        if (retention.days <= 4) {
           content.push(PDF_BASE.buildUrgentBanner(`DVR DATA AT RISK - ${retention.message}`));
         }
       }
