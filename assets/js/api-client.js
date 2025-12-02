@@ -21,13 +21,47 @@ async function blobToBase64(blob) {
 }
 
 /**
- * Submit form data to the API
+ * Submit form data with retry logic
+ * @param {Object} formData - Form data object
+ * @param {Blob} pdfBlob - Generated PDF file
+ * @param {Blob} jsonBlob - Generated JSON file
+ * @param {number} maxRetries - Maximum retry attempts (default: 3)
+ * @returns {Promise<Object>} API response
+ */
+export async function submitWithRetry(formData, pdfBlob, jsonBlob, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await submitForm(formData, pdfBlob, jsonBlob);
+    } catch (error) {
+      // Don't retry client errors (4xx) - these are validation failures
+      if (error.status >= 400 && error.status < 500) {
+        throw error;
+      }
+
+      // If this was the last attempt, throw the error
+      if (attempt === maxRetries) {
+        throw error;
+      }
+
+      // Exponential backoff: 1s, 2s, 4s
+      const delay = Math.pow(2, attempt - 1) * 1000;
+      console.log(`Submission attempt ${attempt} failed. Retrying in ${delay/1000}s...`);
+      console.log('Error details:', error.message);
+
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
+/**
+ * Submit form data to the API (internal function)
  * @param {Object} formData - Form data object
  * @param {Blob} pdfBlob - Generated PDF file
  * @param {Blob} jsonBlob - Generated JSON file
  * @returns {Promise<Object>} API response
  */
-export async function submitForm(formData, pdfBlob, jsonBlob) {
+async function submitForm(formData, pdfBlob, jsonBlob) {
   // If Supabase is enabled, use Supabase submission
   if (CONFIG.USE_SUPABASE) {
     try {
@@ -101,26 +135,40 @@ export async function submitForm(formData, pdfBlob, jsonBlob) {
     // Try to parse as JSON
     try {
       const data = JSON.parse(responseText);
-      
+
       if (!response.ok) {
-        throw new APIError(data.message || 'Server error', data);
+        throw new APIError(
+          data.message || 'Server error',
+          { ...data, status: response.status }
+        );
       }
-      
+
       return data;
     } catch (jsonError) {
       // Non-JSON response
-      throw new APIError('Invalid response format', { responseText });
+      throw new APIError('Invalid response format', {
+        responseText,
+        status: response.status
+      });
     }
-    
+
   } catch (error) {
     if (error.name === 'AbortError') {
-      throw new APIError('Request timeout', { timeout: true });
+      throw new APIError('Request timeout', { timeout: true, code: 'ETIMEDOUT' });
     }
-    
+
     if (error instanceof APIError) {
       throw error;
     }
-    
+
+    // Network error - check if offline
+    if (!navigator.onLine) {
+      throw new APIError('Network offline', {
+        originalError: error,
+        offline: true
+      });
+    }
+
     throw new APIError('Network error', { originalError: error });
   }
 }
@@ -169,6 +217,7 @@ export class APIError extends Error {
     super(message);
     this.name = 'APIError';
     this.details = details;
+    this.status = details.status || null;
   }
 }
 
