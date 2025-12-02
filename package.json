@@ -1,0 +1,39 @@
+{
+  "name": "supa_base_start_fresh_form_submission_form_app_20250623",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:chrome": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:safari": "playwright test --project=webkit",
+    "test:upload": "playwright test upload-form.spec.js",
+    "test:analysis": "playwright test analysis-form.spec.js",
+    "test:recovery": "playwright test recovery-form.spec.js",
+    "test:cross": "playwright test cross-form.spec.js",
+    "serve": "npx serve -l 3000 -s .",
+    "report": "playwright show-report"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Recon222/supa_base_start_fresh_form_submission_form_app_20250623.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Recon222/supa_base_start_fresh_form_submission_form_app_20250623/issues"
+  },
+  "homepage": "https://github.com/Recon222/supa_base_start_fresh_form_submission_form_app_20250623#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
+}
