@@ -138,7 +138,16 @@ export const CONFIG = {
     OFFICER_INFO_LOADED: 'Investigator information loaded',
     OFFICER_INFO_SAVED: 'Investigator information saved',
     OFFICER_INFO_CLEARED: 'Investigator information cleared',
-    OFFICER_STORAGE_NOTICE: 'Your investigator information will be saved locally for convenience'
+    OFFICER_STORAGE_NOTICE: 'Your investigator information will be saved locally for convenience',
+
+    // Error messages for improved error handling
+    ERROR_TIMEOUT: 'Request timed out. Please check your connection and try again.',
+    ERROR_OFFLINE: 'You appear to be offline. Your draft has been saved.',
+    ERROR_SERVER: 'Server error. Please try again in a few minutes.',
+    ERROR_RATE_LIMITED: 'Too many requests. Please wait a moment and try again.',
+    ERROR_PDF_GENERATION: 'Failed to generate PDF. Please try again.',
+    ERROR_UNKNOWN: 'Submission failed. Your draft has been saved.',
+    RETRY_ATTEMPT: 'Connection issue. Retrying... (attempt {attempt} of {max})'
   },
   
   // City Options
