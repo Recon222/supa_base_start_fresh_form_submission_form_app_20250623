@@ -11,7 +11,7 @@ import { debounce, scrollToElement, showToast } from '../utils.js';
 import { generatePDF } from '../pdf-generator.js';
 import { generateJSON } from '../json-generator.js';
 import { showConfirmModal } from '../notifications.js';
-import { submitForm } from '../api-client.js';
+import { submitWithRetry } from '../api-client.js';
 
 /**
  * Base FormHandler class
@@ -309,7 +309,7 @@ export class FormHandler {
         generateJSON(formData, this.formType)
       ]);
 
-      const result = await submitForm(formData, pdfBlob, jsonBlob);
+      const result = await submitWithRetry(formData, pdfBlob, jsonBlob);
 
       if (result.success) {
         showToast(`${CONFIG.MESSAGES.SUBMISSION_SUCCESS}. ID: ${result.submissionId || result.ticketNumber}`, 'success');
@@ -319,9 +319,49 @@ export class FormHandler {
       }
     } catch (error) {
       console.error('Error during submission:', error);
-      showToast(error.message || CONFIG.MESSAGES.SUBMISSION_ERROR, 'error');
+
+      // Determine specific error type and show appropriate message
+      const errorMessage = this.getErrorMessage(error);
+      showToast(errorMessage, 'error');
+
+      // Always save draft on error
       this.saveDraftAuto();
     }
+  }
+
+  /**
+   * Get user-friendly error message based on error type
+   * @param {Error} error - The error object
+   * @returns {string} User-friendly error message
+   */
+  getErrorMessage(error) {
+    // Check for specific error types
+    if (error.name === 'AbortError' || error.details?.code === 'ETIMEDOUT') {
+      return CONFIG.MESSAGES.ERROR_TIMEOUT;
+    }
+
+    if (!navigator.onLine || error.details?.offline) {
+      return CONFIG.MESSAGES.ERROR_OFFLINE;
+    }
+
+    if (error.status >= 500 && error.status < 600) {
+      return CONFIG.MESSAGES.ERROR_SERVER;
+    }
+
+    if (error.status === 429) {
+      return CONFIG.MESSAGES.ERROR_RATE_LIMITED;
+    }
+
+    if (error.message?.toLowerCase().includes('pdf')) {
+      return CONFIG.MESSAGES.ERROR_PDF_GENERATION;
+    }
+
+    // Default error message with details if available
+    if (error.message && error.message !== 'Network error') {
+      return `${CONFIG.MESSAGES.ERROR_UNKNOWN} Details: ${error.message}`;
+    }
+
+    return CONFIG.MESSAGES.ERROR_UNKNOWN;
   }
 
   async handleReset(e) {

@@ -11,7 +11,7 @@ import { debounce, toggleElement, scrollToElement, createElement } from '../util
 import { calculateRetentionDays } from '../calculations.js';
 import { generatePDF } from '../pdf-generator.js';
 import { generateJSON } from '../json-generator.js';
-import { submitForm } from '../api-client.js';
+import { submitWithRetry } from '../api-client.js';
 import { showToast, downloadBlob } from '../utils.js';
 import { CONFIG } from '../config.js';
 
@@ -687,8 +687,8 @@ export class RecoveryFormHandler extends FormHandler {
       console.log('PDF generated:', pdfBlob.size, 'bytes');
       console.log('JSON generated:', jsonBlob.size, 'bytes');
 
-      // Submit to API (Supabase or PHP)
-      const result = await submitForm(formData, pdfBlob, jsonBlob);
+      // Submit to API with retry logic (Supabase or PHP)
+      const result = await submitWithRetry(formData, pdfBlob, jsonBlob);
 
       if (result.success) {
         // Download PDF locally
@@ -705,7 +705,10 @@ export class RecoveryFormHandler extends FormHandler {
 
     } catch (error) {
       console.error('Error during submission:', error);
-      showToast(error.message || CONFIG.MESSAGES.SUBMISSION_ERROR, 'error');
+
+      // Determine specific error type and show appropriate message
+      const errorMessage = this.getErrorMessage(error);
+      showToast(errorMessage, 'error');
 
       // Save draft on error
       this.saveDraftAuto();
