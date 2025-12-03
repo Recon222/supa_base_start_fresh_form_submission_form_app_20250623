@@ -64,6 +64,22 @@ $AssetsDest = Join-Path $DeployDir "assets"
 if (Test-Path $AssetsSource) {
     Copy-Item -Path $AssetsSource -Destination $AssetsDest -Recurse
     Write-Host "  [OK] assets/ copied" -ForegroundColor Green
+
+    # Remove files not needed in production
+    $FilesToExclude = @(
+        "js\dashboard-supabase.js",
+        "js\supabase.js"
+    )
+
+    Write-Host ""
+    Write-Host "Removing development-only files..." -ForegroundColor White
+    foreach ($excludeFile in $FilesToExclude) {
+        $excludePath = Join-Path $AssetsDest $excludeFile
+        if (Test-Path $excludePath) {
+            Remove-Item -Path $excludePath -Force
+            Write-Host "  [OK] Removed $excludeFile" -ForegroundColor Green
+        }
+    }
 }
 
 # Update config.js for production
