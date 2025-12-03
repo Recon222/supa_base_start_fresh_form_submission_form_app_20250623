@@ -79,7 +79,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
       const submitButton = page.locator('button[type="submit"]');
       await submitButton.click();
 
-      const errorMsg = page.locator('[id="occType"], [name="occType"]').locator('~ .invalid-feedback');
+      const errorMsg = page.locator('[id="offenceType"], [name="offenceType"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
     });
 
@@ -179,7 +179,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
       const submitButton = page.locator('button[type="submit"]');
       await submitButton.click();
 
-      const errorMsg = page.locator('[name="rfsDetails"]').locator('~ .invalid-feedback');
+      const errorMsg = page.locator('[name="requestDetails"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
     });
   });
@@ -188,7 +188,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.3.1 Specify Offence field does NOT appear for Homicide', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      await page.selectOption('[name="occType"]', 'Homicide');
+      await page.selectOption('[name="offenceType"]', 'Homicide');
 
       const otherField = page.locator('[name="offenceTypeOther"]');
       await expect(otherField).not.toBeVisible();
@@ -197,7 +197,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.3.2 Specify Offence field appears for Other', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      await page.selectOption('[name="occType"]', 'Other');
+      await page.selectOption('[name="offenceType"]', 'Other');
 
       const otherField = page.locator('[name="offenceTypeOther"]');
       await expect(otherField).toBeVisible();
@@ -207,7 +207,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
       await page.goto('/analysis.html');
 
       await fillAnalysisForm(page, analysisFormValidData);
-      await page.selectOption('[name="occType"]', 'Other');
+      await page.selectOption('[name="offenceType"]', 'Other');
 
       const submitButton = page.locator('button[type="submit"]');
       await submitButton.click();
@@ -232,10 +232,10 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.3.5 Field clears when changing back to standard offence', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      await page.selectOption('[name="occType"]', 'Other');
+      await page.selectOption('[name="offenceType"]', 'Other');
       await page.fill('[name="offenceTypeOther"]', 'Assault');
 
-      await page.selectOption('[name="occType"]', 'Missing Person');
+      await page.selectOption('[name="offenceType"]', 'Missing Person');
 
       const otherField = page.locator('[name="offenceTypeOther"]');
       const value = await otherField.inputValue();

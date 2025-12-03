@@ -94,7 +94,7 @@ export async function fillAnalysisForm(page, data) {
 
   // Offence type
   if (data.offenceType) {
-    await page.selectOption('[name="occType"]', data.offenceType);
+    await page.selectOption('[name="offenceType"]', data.offenceType);
     if (data.offenceType === 'Other' && data.offenceTypeOther) {
       await page.fill('[name="offenceTypeOther"]', data.offenceTypeOther);
     }
@@ -134,7 +134,7 @@ export async function fillAnalysisForm(page, data) {
   if (data.fileNames) await page.fill('[name="fileNames"]', data.fileNames);
 
   // Request details
-  if (data.rfsDetails) await page.fill('[name="rfsDetails"]', data.rfsDetails);
+  if (data.rfsDetails) await page.fill('[name="requestDetails"]', data.rfsDetails);
 }
 
 /**
