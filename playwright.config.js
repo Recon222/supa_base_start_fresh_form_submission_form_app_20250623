@@ -76,8 +76,9 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
+  /* NOTE: Using http-server instead of serve to avoid .html extension stripping */
   webServer: {
-    command: 'npx serve -l 3000 -s .',
+    command: 'npx http-server -p 3000 -g',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

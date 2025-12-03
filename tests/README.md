@@ -236,9 +236,11 @@ Key settings:
 
 ```javascript
 baseURL: 'http://localhost:3000'           // Base URL for tests
-webServer: 'npx serve -l 3000 -s .'       // Auto-starts static server
+webServer: 'npx serve -l 3000 .'           // Auto-starts static server (without -s flag!)
 timeout: 30000                             // Test timeout
 ```
+
+**IMPORTANT:** The `-s` flag should NOT be used. This flag makes serve behave like a Single Page Application server, always returning index.html for non-existent routes. Your application has multiple HTML files (upload.html, analysis.html, recovery.html) that need to be served directly.
 
 ### Modifying Configuration
 
@@ -248,6 +250,14 @@ Edit `playwright.config.js` to:
 - Adjust timeouts for slower CI/CD environments
 - Modify browser list or add mobile testing
 - Change reporter output format
+
+### Server Requirements
+
+The tests automatically start a serve server on `http://localhost:3000` before running. The server:
+- Serves static HTML files directly
+- Does NOT use SPA routing (no `-s` flag)
+- Requires Node.js and npm installed
+- Uses `npx serve` for simple HTTP serving
 
 ## Debugging Failed Tests
 
@@ -296,6 +306,23 @@ After test failure, check:
 - HTML report: `npm run report`
 
 ## Common Issues and Solutions
+
+### Tests see index.html (welcome page) instead of form pages
+
+**Cause:** The server is using the `-s` (SPA mode) flag, which always returns index.html for unmapped routes.
+
+**Solution:**
+1. Check `playwright.config.js` webServer command
+2. Ensure it reads: `command: 'npx serve -l 3000 .'` (NO `-s` flag)
+3. Also check `package.json` serve script: `"serve": "npx serve -l 3000 ."`
+4. After fixing, clear any cached data: `rm -rf node_modules/.serve-cache`
+5. Run tests again: `npm test`
+
+**Why this happens:**
+- The `-s` flag is for Single Page Applications with client-side routing
+- Your app has multiple static HTML files that need direct serving
+- With `-s`, any request to a non-existent file returns index.html
+- Tests navigate to `/upload.html` but get `/` (index.html) instead
 
 ### Tests timeout waiting for elements
 

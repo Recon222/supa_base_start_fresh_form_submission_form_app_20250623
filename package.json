@@ -19,7 +19,7 @@
     "test:analysis": "playwright test analysis-form.spec.js",
     "test:recovery": "playwright test recovery-form.spec.js",
     "test:cross": "playwright test cross-form.spec.js",
-    "serve": "npx serve -l 3000 -s .",
+    "serve": "npx http-server -p 3000 -g",
     "report": "playwright show-report"
   },
   "repository": {
