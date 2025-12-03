@@ -163,30 +163,97 @@ function updateRequestsTable(submissions) {
  */
 function createRequestRow(submission) {
   const row = document.createElement('tr');
-  
+
   // Format submission data
   const formData = submission.form_data;
   const submittedDate = new Date(submission.submitted_at);
   const timeAgo = getTimeAgo(submittedDate);
-  
-  row.innerHTML = `
-    <td><strong>${submission.occurrence_number || submission.id.slice(0, 8)}</strong></td>
-    <td><span class="request-type">${submission.request_type.toUpperCase()}</span></td>
-    <td>${formData.rName || 'Unknown'}</td>
-    <td>${timeAgo}</td>
-    <td><span class="status-badge status-${submission.status.toLowerCase()}">${formatStatus(submission.status)}</span></td>
-    <td>${formData.assignedTo || 'Unassigned'}</td>
-    <td>${getPriorityIcon(submission)} ${getPriorityLevel(submission)}</td>
-    <td>
-      <div class="action-buttons">
-        <button class="btn-icon" onclick="viewDetails('${submission.id}')" title="View Details">👁️</button>
-        <button class="btn-icon" onclick="downloadPDF('${submission.id}')" title="Download PDF">📄</button>
-        <button class="btn-icon" onclick="downloadJSON('${submission.id}')" title="Download JSON">{ }</button>
-        <button class="btn-icon" onclick="assignRequest('${submission.id}')" title="Assign">👤</button>
-      </div>
-    </td>
-  `;
-  
+
+  // Cell 1: Occurrence Number (with strong tag)
+  const occCell = document.createElement('td');
+  const occStrong = document.createElement('strong');
+  occStrong.textContent = submission.occurrence_number || submission.id.slice(0, 8);
+  occCell.appendChild(occStrong);
+
+  // Cell 2: Request Type (with span)
+  const typeCell = document.createElement('td');
+  const typeSpan = document.createElement('span');
+  typeSpan.className = 'request-type';
+  typeSpan.textContent = submission.request_type.toUpperCase();
+  typeCell.appendChild(typeSpan);
+
+  // Cell 3: Investigator Name (user-controlled data - SECURE)
+  const nameCell = document.createElement('td');
+  nameCell.textContent = formData.rName || 'Unknown';
+
+  // Cell 4: Time Ago
+  const timeCell = document.createElement('td');
+  timeCell.textContent = timeAgo;
+
+  // Cell 5: Status Badge (with span)
+  const statusCell = document.createElement('td');
+  const statusSpan = document.createElement('span');
+  statusSpan.className = `status-badge status-${submission.status.toLowerCase()}`;
+  statusSpan.textContent = formatStatus(submission.status);
+  statusCell.appendChild(statusSpan);
+
+  // Cell 6: Assigned To (user-controlled data - SECURE)
+  const assignedCell = document.createElement('td');
+  assignedCell.textContent = formData.assignedTo || 'Unassigned';
+
+  // Cell 7: Priority
+  const priorityCell = document.createElement('td');
+  priorityCell.textContent = `${getPriorityIcon(submission)} ${getPriorityLevel(submission)}`;
+
+  // Cell 8: Action Buttons
+  const actionCell = document.createElement('td');
+  const actionDiv = document.createElement('div');
+  actionDiv.className = 'action-buttons';
+
+  // View Details Button
+  const viewBtn = document.createElement('button');
+  viewBtn.className = 'btn-icon';
+  viewBtn.title = 'View Details';
+  viewBtn.textContent = '👁️';
+  viewBtn.addEventListener('click', () => viewDetails(submission.id));
+
+  // Download PDF Button
+  const pdfBtn = document.createElement('button');
+  pdfBtn.className = 'btn-icon';
+  pdfBtn.title = 'Download PDF';
+  pdfBtn.textContent = '📄';
+  pdfBtn.addEventListener('click', () => downloadPDF(submission.id));
+
+  // Download JSON Button
+  const jsonBtn = document.createElement('button');
+  jsonBtn.className = 'btn-icon';
+  jsonBtn.title = 'Download JSON';
+  jsonBtn.textContent = '{ }';
+  jsonBtn.addEventListener('click', () => downloadJSON(submission.id));
+
+  // Assign Button
+  const assignBtn = document.createElement('button');
+  assignBtn.className = 'btn-icon';
+  assignBtn.title = 'Assign';
+  assignBtn.textContent = '👤';
+  assignBtn.addEventListener('click', () => assignRequest(submission.id));
+
+  actionDiv.appendChild(viewBtn);
+  actionDiv.appendChild(pdfBtn);
+  actionDiv.appendChild(jsonBtn);
+  actionDiv.appendChild(assignBtn);
+  actionCell.appendChild(actionDiv);
+
+  // Append all cells to row
+  row.appendChild(occCell);
+  row.appendChild(typeCell);
+  row.appendChild(nameCell);
+  row.appendChild(timeCell);
+  row.appendChild(statusCell);
+  row.appendChild(assignedCell);
+  row.appendChild(priorityCell);
+  row.appendChild(actionCell);
+
   return row;
 }
 
@@ -460,7 +527,7 @@ function showDetailsModal(submission) {
     z-index: 1000;
     animation: fadeIn 0.3s ease;
   `;
-  
+
   // Create modal content
   const modal = document.createElement('div');
   modal.style.cssText = `
@@ -473,31 +540,90 @@ function showDetailsModal(submission) {
     overflow-y: auto;
     position: relative;
   `;
-  
+
   const formData = submission.form_data;
-  
-  modal.innerHTML = `
-    <button onclick="this.closest('div').parentElement.remove()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
-    <h2 style="color: var(--peel-yellow); margin-bottom: 1.5rem;">Submission Details</h2>
-    <div style="display: grid; gap: 1rem;">
-      <div><strong>ID:</strong> ${submission.id}</div>
-      <div><strong>Type:</strong> ${submission.request_type}</div>
-      <div><strong>Status:</strong> <span class="status-badge status-${submission.status.toLowerCase()}">${formatStatus(submission.status)}</span></div>
-      <div><strong>Submitted:</strong> ${new Date(submission.submitted_at).toLocaleString()}</div>
-      <div><strong>Officer:</strong> ${formData.rName}</div>
-      <div><strong>Email:</strong> ${formData.requestingEmail}</div>
-      <div><strong>Phone:</strong> ${formData.requestingPhone}</div>
-      <div><strong>Badge:</strong> ${formData.badge}</div>
-      <div><strong>Occurrence #:</strong> ${submission.occurrence_number || 'N/A'}</div>
-      <hr style="border-color: var(--border-color);">
-      <h3 style="color: var(--peel-yellow);">Form Data</h3>
-      <pre style="background: var(--glass-bg); padding: 1rem; border-radius: 8px; overflow-x: auto;">${JSON.stringify(formData, null, 2)}</pre>
-    </div>
+
+  // Create close button
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '×';
+  closeBtn.style.cssText = `
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
   `;
-  
+  closeBtn.addEventListener('click', () => overlay.remove());
+
+  // Create heading
+  const heading = document.createElement('h2');
+  heading.style.cssText = 'color: var(--peel-yellow); margin-bottom: 1.5rem;';
+  heading.textContent = 'Submission Details';
+
+  // Create details container
+  const detailsContainer = document.createElement('div');
+  detailsContainer.style.cssText = 'display: grid; gap: 1rem;';
+
+  // Helper function to create detail rows
+  const createDetailRow = (label, value) => {
+    const div = document.createElement('div');
+    const strong = document.createElement('strong');
+    strong.textContent = `${label}: `;
+    div.appendChild(strong);
+
+    if (typeof value === 'string') {
+      const textNode = document.createTextNode(value);
+      div.appendChild(textNode);
+    } else {
+      div.appendChild(value);
+    }
+    return div;
+  };
+
+  // Add detail rows (all user data safely escaped via textContent)
+  detailsContainer.appendChild(createDetailRow('ID', submission.id));
+  detailsContainer.appendChild(createDetailRow('Type', submission.request_type));
+
+  // Status with badge
+  const statusSpan = document.createElement('span');
+  statusSpan.className = `status-badge status-${submission.status.toLowerCase()}`;
+  statusSpan.textContent = formatStatus(submission.status);
+  detailsContainer.appendChild(createDetailRow('Status', statusSpan));
+
+  detailsContainer.appendChild(createDetailRow('Submitted', new Date(submission.submitted_at).toLocaleString()));
+  detailsContainer.appendChild(createDetailRow('Officer', formData.rName || 'N/A'));
+  detailsContainer.appendChild(createDetailRow('Email', formData.requestingEmail || 'N/A'));
+  detailsContainer.appendChild(createDetailRow('Phone', formData.requestingPhone || 'N/A'));
+  detailsContainer.appendChild(createDetailRow('Badge', formData.badge || 'N/A'));
+  detailsContainer.appendChild(createDetailRow('Occurrence #', submission.occurrence_number || 'N/A'));
+
+  // Add separator
+  const hr = document.createElement('hr');
+  hr.style.borderColor = 'var(--border-color)';
+  detailsContainer.appendChild(hr);
+
+  // Add form data section
+  const formDataHeading = document.createElement('h3');
+  formDataHeading.style.color = 'var(--peel-yellow)';
+  formDataHeading.textContent = 'Form Data';
+  detailsContainer.appendChild(formDataHeading);
+
+  // Add form data as pre-formatted JSON (textContent escapes everything)
+  const pre = document.createElement('pre');
+  pre.style.cssText = 'background: var(--glass-bg); padding: 1rem; border-radius: 8px; overflow-x: auto;';
+  pre.textContent = JSON.stringify(formData, null, 2);
+  detailsContainer.appendChild(pre);
+
+  // Assemble modal
+  modal.appendChild(closeBtn);
+  modal.appendChild(heading);
+  modal.appendChild(detailsContainer);
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
-  
+
   // Close on overlay click
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) {
