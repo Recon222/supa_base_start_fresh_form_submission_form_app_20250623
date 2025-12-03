@@ -235,8 +235,11 @@ export class UploadFormHandler extends FormHandler {
     const summaries = generateFieldSummaries(data);
     Object.assign(data, summaries);
 
-    // Set request area
-    data[CONFIG.FIELD_NAMES.REQUEST_AREA] = CONFIG.FORM_TYPES.UPLOAD;
+    // Add fileNr mapping for PHP system
+    data.fileNr = data.occNumber || '';
+
+    // Set request area to city value for PHP system
+    data[CONFIG.FIELD_NAMES.REQUEST_AREA] = data.city || '';
 
     return data;
   }

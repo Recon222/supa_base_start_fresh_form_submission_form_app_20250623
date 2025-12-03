@@ -559,8 +559,11 @@ export class RecoveryFormHandler extends FormHandler {
       }
     }
 
-    // Set request area
-    data[CONFIG.FIELD_NAMES.REQUEST_AREA] = CONFIG.FORM_TYPES.RECOVERY;
+    // Add fileNr mapping for PHP system
+    data.fileNr = data.occNumber || '';
+
+    // Set request area to city value for PHP system
+    data[CONFIG.FIELD_NAMES.REQUEST_AREA] = data.city || '';
 
     // Set occurrence type
     if (data.offenceType === 'Other' && data.offenceTypeOther) {

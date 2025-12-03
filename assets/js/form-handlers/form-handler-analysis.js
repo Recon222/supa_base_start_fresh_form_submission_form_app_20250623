@@ -46,8 +46,11 @@ export class AnalysisFormHandler extends FormHandler {
   collectFormData() {
     const data = super.collectFormData();
 
-    // Set request area
-    data[CONFIG.FIELD_NAMES.REQUEST_AREA] = CONFIG.FORM_TYPES.ANALYSIS;
+    // Add fileNr mapping for PHP system
+    data.fileNr = data.occNumber || '';
+
+    // Set request area to city value for PHP system
+    data[CONFIG.FIELD_NAMES.REQUEST_AREA] = data.city || '';
 
     // Map occurrence type
     data[CONFIG.FIELD_NAMES.OCCURRENCE_TYPE] = data.offenceType === 'Other' ?
