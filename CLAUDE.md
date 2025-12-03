@@ -8,10 +8,10 @@ Forensic Video Unit (FVU) Request System for Peel Regional Police - a vanilla Ja
 
 ## Development Commands
 
-**No build process** - This is a vanilla JS project with zero npm dependencies:
+**No build process for development** - This is a vanilla JS project with zero npm dependencies:
 - **Run locally**: VS Code Live Server or any static HTTP server
-- **Testing**: Manual browser testing only
-- **No commands**: No `npm install`, `build`, `test`, or `lint`
+- **Testing**: `npx playwright test` (Playwright tests available)
+- **Build for production**: `.\scripts\build-php.ps1` (see Production Deployment below)
 
 ## Architecture Overview
 
@@ -61,19 +61,19 @@ assets/js/
 
 ### Critical Integration Requirements
 
-**Field Names** (must match third-party system exactly):
-```javascript
-// From CONFIG.FIELD_NAMES - DO NOT change these
-rName                // Requesting investigator
-requestingEmail      // Must be @peelpolice.ca
-requestingPhone      // 10 digits
-reqArea              // Request type: analysis/upload/recovery
-occNumber            // Occurrence number (must start with "PR")
-occDate              // Occurrence date
-occType              // Occurrence type
-fileDetails          // File summary string
-rfsDetails           // Request details/description
-```
+**PHP Ticketing System Field Mapping** (must match third-party system exactly):
+
+| PHP Field | Our Form Field | Value |
+|-----------|----------------|-------|
+| `fileNr` | `occNumber` | Mapped in collectFormData() |
+| `rName` | `rName` | Direct field |
+| `requestingEmail` | `requestingEmail` | Direct field, must be @peelpolice.ca |
+| `requestingPhone` | `requestingPhone` | Direct field, 10 digits |
+| `reqArea` | `city` | City dropdown value (Brampton, Mississauga, etc.) |
+| `fileDetails` | Generated | Summary string from generateFieldSummaries() |
+| `rfsDetails` | Generated | Request details from form data |
+
+**Note**: The JavaScript `collectFormData()` in each form handler maps our field names to the PHP system's expected names. Do NOT change the mapping without coordinating with the third-party system.
 
 **Supabase Schema**:
 ```sql
@@ -154,19 +154,43 @@ try {
 
 ### Production Deployment
 
-**For PHP endpoint deployment**:
-1. Convert `.html` files to `.php`:
-   ```php
-   <?php session_start(); ?>
-   <input type="hidden" name="session_verify" value="<?php echo session_id(); ?>">
-   ```
-2. Update `CONFIG.API_ENDPOINT` to production URL
-3. Deploy via SFTP to `homicidefvu.fatsystems.ca`
+**For PHP endpoint deployment** (use the build script):
 
-**For Supabase deployment**:
-1. Ensure `CONFIG.USE_SUPABASE = true`
-2. Deploy as static site (Netlify, Vercel, etc.)
-3. Dashboard requires no authentication (uses Supabase Row Level Security if needed)
+```powershell
+# From project root:
+.\scripts\build-php.ps1
+```
+
+The build script automatically:
+1. Converts `.html` files to `.php` in `deploy/` folder
+2. Adds `<?php session_start(); ?>` to top of each file
+3. Adds `session_verify` hidden field to each form
+4. Sets `CONFIG.USE_SUPABASE = false` in config.js
+5. Excludes development files (dashboard-supabase.js, supabase.js)
+6. Creates `DEPLOY_INFO.txt` with build details
+
+**Deployment workflow**:
+```
+Development:  Edit .html → Test in browser → Commit changes
+Production:   Run build script → SFTP deploy/ folder → Test on server
+```
+
+**Deploy folder structure**:
+```
+deploy/
+├── index.php
+├── upload.php
+├── analysis.php
+├── recovery.php
+├── assets/css/
+├── assets/js/    (no Supabase files)
+└── DEPLOY_INFO.txt
+```
+
+**For Supabase deployment** (development/testing only):
+1. Ensure `CONFIG.USE_SUPABASE = true` in source config.js
+2. Deploy HTML files as static site
+3. Dashboard at `dashboard/fvu-admin-dashboard.html`
 
 ### Dashboard System
 

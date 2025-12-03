@@ -29,9 +29,10 @@ npm-debug.log*
 .env.local
 .env.*.local
 
-# Build artifacts (if ever needed)
+# Build artifacts
 dist/
 build/
+deploy/
 
 # Package lock (optional - some teams prefer to commit this)
 # package-lock.json
