@@ -15,7 +15,8 @@ import {
   waitForAutoSave,
   loadDraft,
   setOfflineMode,
-  getLocalStorage
+  getLocalStorage,
+  submitFormAndConfirm
 } from './fixtures/form-helpers.js';
 
 test.describe('Cross-Form Tests', () => {
@@ -270,8 +271,7 @@ test.describe('Cross-Form Tests', () => {
       // Go offline
       await setOfflineMode(page, true);
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       // Should show offline message
       const offlineToast = page.locator('[class*="toast"]').filter({ hasText: /offline/i });

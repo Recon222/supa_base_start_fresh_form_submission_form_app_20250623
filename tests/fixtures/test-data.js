@@ -21,7 +21,7 @@ export const invalidOfficerData = {
 export const validOccurrenceData = {
   occNumber: 'PR2024123456',
   occDate: '2024-01-15',
-  occType: 'Robbery'
+  offenceType: 'Robbery'
 };
 
 export const invalidOccurrenceData = {
@@ -80,7 +80,7 @@ export const analysisFormValidData = {
   city: 'Brampton',
   recordingDate: '2024-01-08',
   serviceRequired: 'Video/Image Clarification',
-  rfsDetails: 'Need enhancement of vehicle registration plate',
+  requestDetails: 'Need enhancement of vehicle registration plate',
   fileNames: 'evidence_video_1.mp4\nevidence_video_2.avi'
 };
 
@@ -94,7 +94,7 @@ export const analysisFormWithOtherOffence = {
   city: 'Toronto',
   recordingDate: '2024-01-05',
   serviceRequired: 'Timeline Creation',
-  rfsDetails: 'Create detailed timeline of events'
+  requestDetails: 'Create detailed timeline of events'
 };
 
 export const analysisFormWithOtherCity = {
@@ -109,7 +109,7 @@ export const analysisFormWithOtherCity = {
   recordingDate: '2024-01-03',
   serviceRequired: 'Other',
   serviceRequiredOther: 'Custom Analysis',
-  rfsDetails: 'Perform custom analysis'
+  requestDetails: 'Perform custom analysis'
 };
 
 export const recoveryFormValidData = {

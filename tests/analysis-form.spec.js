@@ -14,7 +14,8 @@ import {
   waitForAutoSave,
   getProgressPercentage,
   loadDraft,
-  getAllFormValues
+  getAllFormValues,
+  submitFormAndConfirm
 } from './fixtures/form-helpers.js';
 
 test.describe('Analysis Form Tests (analysis.html)', () => {
@@ -66,8 +67,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.2.1 Occurrence Number is required', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[id="occNumber"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -76,8 +76,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.2.2 Type of Offence is required', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[id="offenceType"], [name="offenceType"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -86,8 +85,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.2.3 Location of Video is required', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="videoLocation"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -96,8 +94,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.2.4 Video Seized From is required', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="videoSeizedFrom"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -106,8 +103,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.2.5 City is required', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="city"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -116,8 +112,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.2.6 Recording Date is required', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="recordingDate"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -126,8 +121,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.2.7 Service Required is required', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="serviceRequired"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -136,8 +130,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.2.8 Submitting Investigator is required', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="rName"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -146,8 +139,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.2.9 Badge Number is required', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="badge"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -156,8 +148,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.2.10 Contact Number is required', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="requestingPhone"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -166,8 +157,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.2.11 Email Address is required', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="requestingEmail"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -176,8 +166,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
     test('2.2.12 Request Details is required', async ({ page }) => {
       await page.goto('/analysis.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="requestDetails"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -209,8 +198,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
       await fillAnalysisForm(page, analysisFormValidData);
       await page.selectOption('[name="offenceType"]', 'Other');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="offenceTypeOther"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('specify');
@@ -221,8 +209,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
 
       await fillAnalysisForm(page, analysisFormWithOtherOffence);
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       // Should not have error on this field
       const errorMsg = page.locator('[name="offenceTypeOther"]').locator('~ .invalid-feedback');
@@ -268,8 +255,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
       await fillAnalysisForm(page, analysisFormValidData);
       await page.selectOption('[name="videoLocation"]', 'Other');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="videoLocationOther"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('specify');
@@ -324,8 +310,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
       await fillAnalysisForm(page, analysisFormValidData);
       await page.selectOption('[name="city"]', 'Other');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="cityOther"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('specify');
@@ -366,8 +351,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
       await fillAnalysisForm(page, analysisFormValidData);
       await page.selectOption('[name="serviceRequired"]', 'Other');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="serviceRequiredOther"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('specify');
@@ -450,8 +434,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
       // Leave file names empty
       await page.fill('[name="fileNames"]', '');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="fileNames"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toHaveText('');
@@ -546,8 +529,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
 
       await fillAnalysisForm(page, analysisFormValidData);
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       // Wait for submission and check for success indicator
       const successToast = page.locator('[class*="success"], .toast').first();
@@ -559,8 +541,7 @@ test.describe('Analysis Form Tests (analysis.html)', () => {
 
       await fillAnalysisForm(page, analysisFormValidData);
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const toast = page.locator('[class*="toast"]').filter({ hasText: /success|submitted/i });
       await expect(toast).toBeVisible({ timeout: 5000 });

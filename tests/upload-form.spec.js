@@ -23,6 +23,7 @@ import {
   expectFieldValid,
   clearForm,
   submitAndVerifySuccess,
+  submitFormAndConfirm,
   setOfflineMode,
   getAllFormValues
 } from './fixtures/form-helpers.js';
@@ -52,7 +53,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
       await expect(form).toBeVisible();
 
       // Check key sections exist
-      await expect(page.locator('h2')).toContainText('Evidence Information');
+      await expect(page.locator('#upload-form h2').first()).toContainText('Evidence Information');
     });
 
     test('1.1.3 Progress bar shows 0% Complete initially', async ({ page }) => {
@@ -83,8 +84,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
   test.describe('1.2 Required Field Validation', () => {
     test('1.2.1 Occurrence Number is required', async ({ page }) => {
       await page.goto('/upload.html');
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[id="occNumber"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -92,8 +92,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
 
     test('1.2.2 Media Type is required', async ({ page }) => {
       await page.goto('/upload.html');
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[id="mediaType"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -101,8 +100,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
 
     test('1.2.3 Submitting Investigator is required', async ({ page }) => {
       await page.goto('/upload.html');
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[id="rName"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -110,8 +108,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
 
     test('1.2.4 Badge Number is required', async ({ page }) => {
       await page.goto('/upload.html');
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[id="badge"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -119,8 +116,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
 
     test('1.2.5 Contact Number is required', async ({ page }) => {
       await page.goto('/upload.html');
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[id="requestingPhone"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -128,8 +124,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
 
     test('1.2.6 Email Address is required', async ({ page }) => {
       await page.goto('/upload.html');
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[id="requestingEmail"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -137,8 +132,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
 
     test('1.2.7 Location Address is required', async ({ page }) => {
       await page.goto('/upload.html');
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[id="locationAddress"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -146,8 +140,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
 
     test('1.2.8 City is required', async ({ page }) => {
       await page.goto('/upload.html');
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[id="city"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -155,8 +148,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
 
     test('1.2.9 Video Start Time is required', async ({ page }) => {
       await page.goto('/upload.html');
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[id="videoStartTime"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -164,8 +156,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
 
     test('1.2.10 Video End Time is required', async ({ page }) => {
       await page.goto('/upload.html');
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[id="videoEndTime"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -181,8 +172,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
         inputs.forEach(input => input.checked = false);
       });
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[id="timeCorrect"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -334,8 +324,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
       await fillUploadForm(page, uploadFormValidData);
       await page.selectOption('[name="mediaType"]', 'Other');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="mediaTypeOther"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -386,8 +375,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
       await fillUploadForm(page, uploadFormValidData);
       await page.selectOption('[name="city"]', 'Other');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="cityOther"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('specify');
@@ -455,8 +443,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
       await fillUploadForm(page, uploadFormValidData);
       await page.click('input[name="timeCorrect"][value="No"]');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="timeOffset"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('specify');
@@ -894,8 +881,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
 
       await fillUploadForm(page, uploadFormValidData);
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       // Check for success indicator (toast or redirect)
       const successToast = page.locator('[class*="success"], .toast').first();
@@ -917,8 +903,7 @@ test.describe('Upload Form Tests (upload.html)', () => {
       const submissionData = uploadFormValidData;
       await fillUploadForm(page, submissionData);
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       // Wait for submission to complete
       await page.waitForTimeout(2000);

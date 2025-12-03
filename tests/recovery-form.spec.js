@@ -16,7 +16,8 @@ import {
   loadDraft,
   addDVRSystem,
   addTimeFrame,
-  getAllFormValues
+  getAllFormValues,
+  submitFormAndConfirm
 } from './fixtures/form-helpers.js';
 
 test.describe('Recovery Form Tests (recovery.html)', () => {
@@ -73,8 +74,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.1 Occurrence Number is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="occNumber"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -83,18 +83,16 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.2 Type of Offence is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
-      const errorMsg = page.locator('[name="occType"]').locator('~ .invalid-feedback');
+      const errorMsg = page.locator('[name="offenceType"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
     });
 
     test('3.2.3 Submitting Investigator is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="rName"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -103,8 +101,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.4 Badge Number is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="badge"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -113,8 +110,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.5 Contact Number is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="requestingPhone"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -123,8 +119,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.6 Email Address is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="requestingEmail"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -133,8 +128,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.7 Location Address is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="locationAddress"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -143,8 +137,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.8 City is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="city"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -153,8 +146,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.9 Location Contact is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="locationContact"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -163,8 +155,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.10 Location Contact Phone is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="locationContactPhone"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -173,8 +164,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.11 Password is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="dvrPassword"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -183,8 +173,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.12 Time Period From is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="timePeriodFrom"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -193,8 +182,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.13 Time Period To is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="timePeriodTo"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -203,8 +191,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.14 Time Period Type radio is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="timePeriodType"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -213,8 +200,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.15 Camera Details is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="cameraDetails"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -223,8 +209,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.2.16 Incident Description is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="incidentDescription"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -235,7 +220,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.3.1 Specify Offence field does NOT appear for Robbery', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      await page.selectOption('[name="occType"]', 'Robbery');
+      await page.selectOption('[name="offenceType"]', 'Robbery');
 
       const otherField = page.locator('[name="offenceTypeOther"]');
       await expect(otherField).not.toBeVisible();
@@ -244,7 +229,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.3.2 Specify Offence field appears for Other', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      await page.selectOption('[name="occType"]', 'Other');
+      await page.selectOption('[name="offenceType"]', 'Other');
 
       const otherField = page.locator('[name="offenceTypeOther"]');
       await expect(otherField).toBeVisible();
@@ -254,10 +239,9 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
       await page.goto('/recovery.html');
 
       await fillRecoveryForm(page, recoveryFormValidData);
-      await page.selectOption('[name="occType"]', 'Other');
+      await page.selectOption('[name="offenceType"]', 'Other');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="offenceTypeOther"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('specify');
@@ -356,8 +340,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
       await page.check('input[name="dvrTimeCorrect"][value="No"]');
       await page.fill('[name="dvrTimeOffset"]', '');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       // Should not have error since it's optional
       const errorMsg = page.locator('[name="dvrTimeOffset"]').locator('~ .invalid-feedback');
@@ -595,8 +578,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
       const count = await timeFrameGroups.count();
 
       // Verify we can submit with properly filled form
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       // Should not have validation errors on filled fields
       const errorMsg = page.locator('[name="timePeriodFrom"]').locator('~ .invalid-feedback');
@@ -611,8 +593,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
       await fillRecoveryForm(page, recoveryFormValidData);
       await page.fill('[name="dvrMakeModel"]', '');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="dvrMakeModel"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toHaveText('');
@@ -624,8 +605,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
       await fillRecoveryForm(page, recoveryFormValidData);
       await page.fill('[name="dvrRetentionDate"]', '');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="dvrRetentionDate"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toHaveText('');
@@ -634,8 +614,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.13.3 Password is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="dvrPassword"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -644,8 +623,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.13.4 Camera Details is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="cameraDetails"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -668,8 +646,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
     test('3.15.1 Incident Description is required', async ({ page }) => {
       await page.goto('/recovery.html');
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       const errorMsg = page.locator('[name="incidentDescription"]').locator('~ .invalid-feedback');
       await expect(errorMsg).toContainText('required');
@@ -779,8 +756,7 @@ test.describe('Recovery Form Tests (recovery.html)', () => {
 
       await fillRecoveryForm(page, recoveryFormValidData);
 
-      const submitButton = page.locator('button[type="submit"]');
-      await submitButton.click();
+      await submitFormAndConfirm(page);
 
       // Wait for submission
       await page.waitForTimeout(2000);

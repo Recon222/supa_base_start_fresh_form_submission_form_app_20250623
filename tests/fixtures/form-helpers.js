@@ -21,7 +21,7 @@ export async function fillOfficerInfo(page, data) {
 export async function fillOccurrenceInfo(page, data) {
   if (data.occNumber) await page.fill('[name="occNumber"]', data.occNumber);
   if (data.occDate) await page.fill('[name="occDate"]', data.occDate);
-  if (data.occType) await page.fill('[name="occType"]', data.occType);
+  if (data.offenceType) await page.fill('[name="offenceType"]', data.offenceType);
 }
 
 /**
@@ -152,7 +152,7 @@ export async function fillRecoveryForm(page, data) {
 
   // Offence type
   if (data.offenceType) {
-    await page.selectOption('[name="occType"]', data.offenceType);
+    await page.selectOption('[name="offenceType"]', data.offenceType);
     if (data.offenceType === 'Other' && data.offenceTypeOther) {
       await page.fill('[name="offenceTypeOther"]', data.offenceTypeOther);
     }
@@ -327,11 +327,42 @@ export async function getLocalStorage(page, key) {
 }
 
 /**
+ * Click submit button and handle confirmation modal
+ * This is the primary helper for ALL submit interactions
+ * @param {Page} page - Playwright page object
+ * @param {boolean} confirm - Whether to confirm (true) or cancel (false) the modal
+ */
+export async function submitFormAndConfirm(page, confirm = true) {
+  // Click the submit button
+  const submitButton = page.locator('button[type="submit"]');
+  await submitButton.click();
+
+  // Wait for confirmation modal to appear
+  const modal = page.locator('.modal-overlay');
+  await expect(modal).toBeVisible({ timeout: 2000 });
+
+  if (confirm) {
+    // Click the "Submit Request" button (or whatever confirmText is)
+    const confirmButton = page.locator('button.modal-confirm');
+    await expect(confirmButton).toBeVisible();
+    await confirmButton.click();
+  } else {
+    // Click the "Cancel" button
+    const cancelButton = page.locator('button.modal-cancel');
+    await expect(cancelButton).toBeVisible();
+    await cancelButton.click();
+  }
+
+  // Wait for modal to disappear (modal has 300ms animation from notifications.js)
+  await expect(modal).not.toBeVisible({ timeout: 2000 });
+}
+
+/**
  * Submit form and check for success toast
  */
 export async function submitAndVerifySuccess(page, timeoutMs = 10000) {
-  const submitButton = page.locator('button[type="submit"]');
-  await submitButton.click();
+  // Use the new helper to submit and confirm
+  await submitFormAndConfirm(page, true);
 
   // Look for success toast
   const successToast = page.locator('.toast.success, .toast-success, [class*="success"]').first();
