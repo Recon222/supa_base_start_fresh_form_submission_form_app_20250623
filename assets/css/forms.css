@@ -1,4 +1,4 @@
-/* 
+/*
  * Forensic Video Unit - Forms CSS
  * Clean, organized, and maintainable
  * Location: /css/forms.css
@@ -21,7 +21,7 @@
   --color-light: #f8f9fa;
   --color-white: #ffffff;
   --color-black: #000000;
-  
+
   /* Dark Theme Colors */
   --bg-dark: #0a0a0a;
   --surface-dark: #1a1a1a;
@@ -29,13 +29,13 @@
   --text-primary: #ffffff;
   --text-secondary: #b0b0b0;
   --border-color: rgba(255, 255, 255, 0.1);
-  
+
   /* Glass Morphism */
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-bg-hover: rgba(255, 255, 255, 0.08);
   --glass-blur: blur(20px);
   --shape-blur: blur(100px);
-  
+
   /* Spacing System */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
@@ -44,7 +44,7 @@
   --space-xl: 2rem;
   --space-2xl: 3rem;
   --space-3xl: 4rem;
-  
+
   /* Typography */
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-size-sm: 0.875rem;
@@ -54,7 +54,7 @@
   --font-size-2xl: 1.5rem;
   --font-size-3xl: 2rem;
   --font-size-4xl: 3rem;
-  
+
   /* Line height and typography spacing */
   --line-height-tight: 1.2;
   --line-height-normal: 1.5;
@@ -62,23 +62,23 @@
   --input-line-height: 1.4;
   --select-arrow-size: 0.5rem;
   --select-arrow-spacing: 2.5rem;
-  
+
   /* Note: SVG data URIs don't support CSS variables, so arrow colors are hardcoded
      but documented here for maintenance:
      Dark mode arrow: #9ca3af (improved contrast)
      Light mode arrow: #6c757d */
-  
+
   /* Layout */
   --container-max-width: 1200px;
   --border-radius: 12px;
   --border-radius-lg: 20px;
   --border-radius-sm: 6px;
-  
+
   /* Animations */
   --transition-fast: 0.2s ease;
   --transition-base: 0.3s ease;
   --transition-slow: 0.5s ease;
-  
+
   /* Form Specific */
   --input-height: 48px;
   --input-padding-x: var(--space-lg);
@@ -87,7 +87,7 @@
   --input-focus-lift: -2px;
   --input-checkmark-size: 20px;
   --textarea-min-height: 120px;
-  
+
   /* Validation Specific */
   --input-autofill-shadow-depth: 1000px;
   --input-autofill-transition-duration: 5000s;
@@ -95,7 +95,7 @@
   --input-valid-focus-shadow-alpha: 0.15;
   --input-success-shadow-rgb: 40, 167, 69;
   --input-danger-shadow-rgb: 220, 53, 69;
-  
+
   /* Z-Index Scale */
   --z-behind: -1;
   --z-base: 0;
@@ -104,7 +104,7 @@
   --z-overlay: 30;
   --z-modal: 40;
   --z-toast: 50;
-  
+
   /* Animation Values */
   --anim-grid-size: 50px;
   --anim-grid-move: 10s;
@@ -129,7 +129,7 @@
   --anim-scale-hover: 1.2;
   --anim-shake-distance: 10px;
   --anim-fade-distance: 20px;
-  
+
   /* Layout Values */
   --card-min-width: 350px;
   --card-perspective: 1000px;
@@ -141,10 +141,10 @@
   --btn-3d-depth-active: 2px;
   --btn-hover-lift: -2px;
   --btn-active-push: 2px;
-  
+
   /* Breakpoints */
   --breakpoint-mobile: 768px;
-  
+
   /* Light mode background opacity values */
   --light-grid-opacity: 0.08;
   --light-shape-opacity: 0.02;
@@ -165,7 +165,7 @@
 
 /* Light theme validation overrides */
 [data-theme="light"] .form-control.is-valid {
-  background: 
+  background:
     url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16.667 5L7.5 14.167 3.333 10' stroke='%2328a745' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right var(--input-padding-x) center no-repeat,
     var(--glass-bg);
   backdrop-filter: var(--glass-blur);
@@ -259,7 +259,7 @@ a:hover {
 .grid-overlay {
   position: absolute;
   inset: 0;
-  background-image: 
+  background-image:
     linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
   background-size: var(--anim-grid-size) var(--anim-grid-size);
@@ -267,7 +267,7 @@ a:hover {
 }
 
 [data-theme="light"] .grid-overlay {
-  background-image: 
+  background-image:
     linear-gradient(var(--light-grid-color) 1px, transparent 1px),
     linear-gradient(90deg, var(--light-grid-color) 1px, transparent 1px);
   background-size: var(--anim-grid-size) var(--anim-grid-size);
@@ -370,11 +370,14 @@ a:hover {
   gap: var(--space-2xl);
   max-width: var(--container-max-width);
   margin: var(--space-3xl) auto 0;
+  align-items: stretch; /* Ensure all cards stretch to same height */
 }
 
 .form-card {
   perspective: var(--card-perspective);
   transition: transform var(--transition-base);
+  display: flex; /* Make card container flex to enable stretching */
+  flex-direction: column; /* Stack children vertically */
 }
 
 .form-card:hover {
@@ -384,6 +387,9 @@ a:hover {
 .card-3d {
   transform-style: preserve-3d;
   transition: transform var(--transition-slow);
+  flex: 1; /* Take up full height of parent */
+  display: flex; /* Make card-3d flex to pass stretching down */
+  flex-direction: column; /* Stack children vertically */
 }
 
 .form-card:hover .card-3d {
@@ -397,6 +403,22 @@ a:hover {
   border-radius: var(--border-radius-lg);
   padding: var(--space-2xl);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  flex: 1; /* Take up full height of parent */
+  display: flex; /* Make card-face flex to control content layout */
+  flex-direction: column; /* Stack content vertically */
+}
+
+.card-face h3 {
+  margin-bottom: var(--space-md);
+}
+
+.card-face p {
+  flex: 1; /* Push button to bottom by taking available space */
+  margin-bottom: var(--space-md);
+}
+
+.card-face .btn {
+  margin-top: auto; /* Ensure button stays at bottom */
 }
 
 /* ========================================
@@ -421,21 +443,21 @@ a:hover {
 .btn-primary {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
   color: var(--color-white);
-  box-shadow: 
+  box-shadow:
     0 var(--btn-3d-depth) 0 var(--color-primary-dark),
     0 8px 16px rgba(0, 102, 255, 0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(var(--btn-hover-lift));
-  box-shadow: 
+  box-shadow:
     0 var(--btn-3d-depth-hover) 0 var(--color-primary-dark),
     0 12px 20px rgba(0, 102, 255, 0.4);
 }
 
 .btn-primary:active {
   transform: translateY(var(--btn-active-push));
-  box-shadow: 
+  box-shadow:
     0 var(--btn-3d-depth-active) 0 var(--color-primary-dark),
     0 4px 8px rgba(0, 102, 255, 0.3);
 }
@@ -499,7 +521,7 @@ a:hover {
 
 /* Focus state for valid fields */
 .form-control.is-valid:focus {
-  background: 
+  background:
     url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16.667 5L7.5 14.167 3.333 10' stroke='%2328a745' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right var(--input-padding-x) center no-repeat,
     var(--glass-bg-hover);
   border-color: var(--color-success);
@@ -587,7 +609,7 @@ input[type="number"].form-control::-webkit-inner-spin-button {
   border-color: var(--color-success);
   padding-right: calc(var(--input-padding-x) + var(--space-xl));
   /* Preserve glass background while adding checkmark */
-  background: 
+  background:
     url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16.667 5L7.5 14.167 3.333 10' stroke='%2328a745' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right var(--input-padding-x) center no-repeat,
     var(--glass-bg);
   background-size: var(--input-checkmark-size), auto;
@@ -623,14 +645,14 @@ select.form-control.is-valid {
   background-color: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   /* Dual backgrounds: arrow and checkmark */
-  background-image: 
+  background-image:
     url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16.667 5L7.5 14.167 3.333 10' stroke='%2328a745' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-position: 
+  background-position:
     right var(--input-padding-x) center,
     right calc(var(--input-padding-x) + var(--select-arrow-spacing)) center;
   background-repeat: no-repeat;
-  background-size: 
+  background-size:
     var(--select-arrow-size),
     var(--input-checkmark-size);
   padding-right: calc(var(--select-arrow-spacing) + var(--space-xl));
@@ -853,12 +875,12 @@ select.form-control.is-valid {
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   /* Restore margin on mobile since fields stack */
   .form-row .form-group {
     margin-bottom: var(--space-lg);
   }
-  
+
   .form-row .form-group:last-child {
     margin-bottom: 0;
   }
@@ -911,7 +933,7 @@ select.form-control.is-valid {
     padding-top: calc(var(--input-padding-y) + 4px);
     padding-bottom: calc(var(--input-padding-y) + 4px);
   }
-  
+
   select.form-control option {
     background-color: var(--surface-dark) !important;
     color: var(--text-primary) !important;
@@ -923,7 +945,7 @@ select.form-control.is-valid {
   select.form-control {
     background-color: var(--glass-bg) !important;
   }
-  
+
   select.form-control option {
     background-color: var(--surface-dark) !important;
     color: var(--text-primary) !important;
@@ -939,12 +961,12 @@ select.form-control.is-valid {
   .hero-title {
     font-size: var(--font-size-3xl);
   }
-  
+
   .form-cards {
     grid-template-columns: 1fr;
     gap: var(--space-lg);
   }
-  
+
   .container {
     padding: 0 var(--space-md);
   }
