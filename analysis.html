@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Analysis Request Form - Forensic Video Unit">
   <title>Analysis Request - Forensic Video Unit</title>
-  
+
   <!-- CSS Files -->
   <link rel="stylesheet" href="assets/css/forms.css">
   <link rel="stylesheet" href="assets/css/header.css">
   <link rel="stylesheet" href="assets/css/notifications.css">
-  
+
   <!-- Early theme initialization to prevent FOUC -->
   <script>
     // Prevent flash of unstyled content by setting theme before body renders
-    document.documentElement.setAttribute('data-theme', 
+    document.documentElement.setAttribute('data-theme',
       localStorage.getItem('fvu-theme') || 'dark');
   </script>
-  
+
   <!-- Libraries -->
   <script src="lib/pdfmake.min.js"></script>
   <script src="lib/vfs_fonts.js"></script>
@@ -33,52 +33,28 @@
     </div>
   </div>
 
-  <!-- Header -->
-  <header class="main-header">
-    <div class="container">
-      <div class="header-content">
-        <div class="header-left">
-          <a href="index.html" class="btn btn-secondary btn-sm">← Back</a>
-          <div class="header-divider"></div>
-          <h1 class="form-title">Forensic Analysis Request Form</h1>
-        </div>
-        <div class="header-right">
-          <button class="draft-button" id="draft-button" aria-label="Draft options">
-            <svg class="draft-icon" viewBox="0 0 20 20" fill="none">
-              <path d="M3 3C3 2.44772 3.44772 2 4 2H13L17 6V17C17 17.5523 16.5523 18 16 18H4C3.44772 18 3 17.5523 3 17V3Z" stroke="currentColor" stroke-width="2"/>
-              <rect x="6" y="2" width="8" height="5" fill="currentColor"/>
-              <rect x="6" y="11" width="8" height="3" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
-            <span class="draft-text">Auto-save active</span>
-          </button>
-          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-            🌓
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
+  <!-- Header injected by header-component.js -->
 
   <!-- Main Form Content -->
   <main class="container" style="padding: 2rem 1rem; max-width: 800px;">
     <form id="analysis-form" novalidate>
       <!-- Hidden session field for PHP -->
       <!-- <input type="hidden" name="session_verify" value="<?php echo session_id(); ?>"> -->
-      
+
       <!-- Case Information Section -->
       <section class="form-section">
         <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Case Information</h2>
-        
+
         <!-- Row 1: Occurrence Number + Type of Offence -->
         <div class="form-row">
           <div class="form-group">
             <label for="occNumber" class="form-label">
               Occurrence Number <span class="required">*</span>
             </label>
-            <input type="text" 
-                   class="form-control" 
-                   id="occNumber" 
-                   name="occNumber" 
+            <input type="text"
+                   class="form-control"
+                   id="occNumber"
+                   name="occNumber"
                    placeholder="e.g., PR240368708"
                    required>
             <small class="form-text">Format: PR followed by numbers</small>
@@ -104,10 +80,10 @@
           <label for="offenceTypeOther" class="form-label">
             Specify Offence Type <span class="required">*</span>
           </label>
-          <input type="text" 
-                 class="form-control" 
-                 id="offenceTypeOther" 
-                 name="offenceTypeOther" 
+          <input type="text"
+                 class="form-control"
+                 id="offenceTypeOther"
+                 name="offenceTypeOther"
                  placeholder="Please specify the offence type">
           <div class="invalid-feedback"></div>
         </div>
@@ -136,10 +112,10 @@
           <label for="videoLocationOther" class="form-label">
             Specify Storage Location <span class="required">*</span>
           </label>
-          <input type="text" 
-                 class="form-control" 
-                 id="videoLocationOther" 
-                 name="videoLocationOther" 
+          <input type="text"
+                 class="form-control"
+                 id="videoLocationOther"
+                 name="videoLocationOther"
                  placeholder="Please specify the storage location">
           <div class="invalid-feedback"></div>
         </div>
@@ -148,21 +124,21 @@
         <div class="form-row">
           <div class="form-group">
             <label for="bagNumber" class="form-label">Bag Number</label>
-            <input type="text" 
-                   class="form-control" 
-                   id="bagNumber" 
-                   name="bagNumber" 
+            <input type="text"
+                   class="form-control"
+                   id="bagNumber"
+                   name="bagNumber"
                    placeholder="Evidence bag identification">
           </div>
 
           <div class="form-group">
             <label for="lockerNumber" class="form-label">Locker Number</label>
-            <input type="number" 
-                   class="form-control" 
-                   id="lockerNumber" 
-                   name="lockerNumber" 
-                   min="1" 
-                   max="15" 
+            <input type="number"
+                   class="form-control"
+                   id="lockerNumber"
+                   name="lockerNumber"
+                   min="1"
+                   max="15"
                    placeholder="1-15">
             <small class="form-text">Evidence locker number (1-15)</small>
           </div>
@@ -172,17 +148,17 @@
       <!-- Submitting Investigator Information Section -->
       <section class="form-section">
         <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Submitting Investigator Information</h2>
-        
+
         <!-- Row 1: Investigator Name + Badge -->
         <div class="form-row">
           <div class="form-group">
             <label for="rName" class="form-label">
               Submitting Investigator <span class="required">*</span>
             </label>
-            <input type="text" 
-                   class="form-control" 
-                   id="rName" 
-                   name="rName" 
+            <input type="text"
+                   class="form-control"
+                   id="rName"
+                   name="rName"
                    placeholder="Last name or full name"
                    required>
             <div class="invalid-feedback"></div>
@@ -192,10 +168,10 @@
             <label for="badge" class="form-label">
               Badge Number <span class="required">*</span>
             </label>
-            <input type="text" 
-                   class="form-control" 
-                   id="badge" 
-                   name="badge" 
+            <input type="text"
+                   class="form-control"
+                   id="badge"
+                   name="badge"
                    placeholder="Investigator badge number"
                    required>
             <div class="invalid-feedback"></div>
@@ -208,10 +184,10 @@
             <label for="requestingPhone" class="form-label">
               Contact Number <span class="required">*</span>
             </label>
-            <input type="tel" 
-                   class="form-control" 
-                   id="requestingPhone" 
-                   name="requestingPhone" 
+            <input type="tel"
+                   class="form-control"
+                   id="requestingPhone"
+                   name="requestingPhone"
                    placeholder="XXX-XXX-XXXX"
                    required>
             <small class="form-text">10 digits required (dashes optional)</small>
@@ -222,20 +198,20 @@
             <label for="requestingEmail" class="form-label">
               Email Address <span class="required">*</span>
             </label>
-            <input type="email" 
-                   class="form-control" 
-                   id="requestingEmail" 
-                   name="requestingEmail" 
+            <input type="email"
+                   class="form-control"
+                   id="requestingEmail"
+                   name="requestingEmail"
                    placeholder="investigator@peelpolice.ca"
                    required>
             <div class="invalid-feedback"></div>
           </div>
         </div>
-        
+
         <!-- Clear investigator info button -->
         <div class="form-group text-right">
-          <button type="button" 
-                  class="btn btn-sm btn-secondary" 
+          <button type="button"
+                  class="btn btn-sm btn-secondary"
                   id="clearOfficerInfo">
             Clear Investigator Info
           </button>
@@ -248,16 +224,16 @@
       <!-- Evidence Details Section -->
       <section class="form-section">
         <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Evidence Details</h2>
-        
+
         <!-- Video Seized From - full width -->
         <div class="form-group">
           <label for="videoSeizedFrom" class="form-label">
             Video Seized From <span class="required">*</span>
           </label>
-          <input type="text" 
-                 class="form-control" 
-                 id="videoSeizedFrom" 
-                 name="videoSeizedFrom" 
+          <input type="text"
+                 class="form-control"
+                 id="videoSeizedFrom"
+                 name="videoSeizedFrom"
                  placeholder="Address where video was recovered"
                  required>
           <div class="invalid-feedback"></div>
@@ -266,10 +242,10 @@
         <!-- Business Name - full width -->
         <div class="form-group">
           <label for="businessName" class="form-label">Business Name</label>
-          <input type="text" 
-                 class="form-control" 
-                 id="businessName" 
-                 name="businessName" 
+          <input type="text"
+                 class="form-control"
+                 id="businessName"
+                 name="businessName"
                  placeholder="Leave blank if none">
           <small class="form-text">Name of business at the address above</small>
         </div>
@@ -294,10 +270,10 @@
           <label for="cityOther" class="form-label">
             Specify City <span class="required">*</span>
           </label>
-          <input type="text" 
-                 class="form-control" 
-                 id="cityOther" 
-                 name="cityOther" 
+          <input type="text"
+                 class="form-control"
+                 id="cityOther"
+                 name="cityOther"
                  placeholder="Enter city name">
           <small class="form-text">Please enter the city name</small>
           <div class="invalid-feedback"></div>
@@ -309,9 +285,9 @@
             <label for="recordingDate" class="form-label">
               Recording Date <span class="required">*</span>
             </label>
-            <input type="date" 
-                   class="form-control" 
-                   id="recordingDate" 
+            <input type="date"
+                   class="form-control"
+                   id="recordingDate"
                    name="recordingDate"
                    required>
             <small class="form-text">Date the video was recorded</small>
@@ -341,10 +317,10 @@
           <label for="serviceRequiredOther" class="form-label">
             Specify Service Required <span class="required">*</span>
           </label>
-          <input type="text" 
-                 class="form-control" 
-                 id="serviceRequiredOther" 
-                 name="serviceRequiredOther" 
+          <input type="text"
+                 class="form-control"
+                 id="serviceRequiredOther"
+                 name="serviceRequiredOther"
                  placeholder="Please specify the service required">
           <div class="invalid-feedback"></div>
         </div>
@@ -352,10 +328,10 @@
         <!-- File Names - full width -->
         <div class="form-group">
           <label for="fileNames" class="form-label">File Names</label>
-          <textarea class="form-control" 
-                    id="fileNames" 
-                    name="fileNames" 
-                    rows="3" 
+          <textarea class="form-control"
+                    id="fileNames"
+                    name="fileNames"
+                    rows="3"
                     placeholder="List all file names (one per line)"></textarea>
           <small class="form-text">Enter each file name on a separate line</small>
         </div>
@@ -367,17 +343,17 @@
       <!-- Request Details Section -->
       <section class="form-section">
         <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Request Details</h2>
-        
+
 
         <!-- Request Details - large textarea -->
         <div class="form-group">
           <label for="requestDetails" class="form-label">
             Request Details <span class="required">*</span>
           </label>
-          <textarea class="form-control" 
-                    id="requestDetails" 
-                    name="requestDetails" 
-                    rows="6" 
+          <textarea class="form-control"
+                    id="requestDetails"
+                    name="requestDetails"
+                    rows="6"
                     placeholder="Provide detailed information about your request..."
                     required></textarea>
           <div class="invalid-feedback"></div>
@@ -386,10 +362,10 @@
         <!-- Additional Information -->
         <div class="form-group">
           <label for="additionalInfo" class="form-label">Additional Information</label>
-          <textarea class="form-control" 
-                    id="additionalInfo" 
-                    name="additionalInfo" 
-                    rows="4" 
+          <textarea class="form-control"
+                    id="additionalInfo"
+                    name="additionalInfo"
+                    rows="4"
                     placeholder="Any additional information relevant to this request"></textarea>
         </div>
       </section>
@@ -420,12 +396,11 @@
   <script type="module">
     import { CONFIG } from './assets/js/config.js';
     import { AnalysisFormHandler } from './assets/js/form-handlers/form-handler-analysis.js';
-    import { initTheme, setupThemeToggle } from './assets/js/theme-manager.js';
-    
-    // Initialize theme system
-    initTheme();
-    setupThemeToggle();
-    
+    import { initHeader } from './assets/js/header-component.js';
+
+    // Initialize header with form title
+    initHeader('Forensic Analysis Request Form');
+
     // Initialize form handler
     const formHandler = new AnalysisFormHandler('analysis-form');
   </script>
