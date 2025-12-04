@@ -10,23 +10,23 @@ export const CONFIG = {
   // API Configuration
   API_ENDPOINT: 'rfs_request_process.php',
   API_TIMEOUT: 30000, // 30 seconds
-  
+
   // Supabase Configuration
   USE_SUPABASE: true, // Toggle between Supabase and PHP endpoint
   SUPABASE_ENABLED: true,
-  
+
   // File Configuration
   MAX_FILE_SIZE: 10485760, // 10MB
   ALLOWED_FILE_TYPES: ['application/pdf', 'application/json'],
-  
+
   // Draft Configuration
   DRAFT_EXPIRY_DAYS: 7,
   DRAFT_KEY_PREFIX: 'fvu_draft_',
-  
+
   // Session Configuration
   SESSION_WARNING_MINUTES: 20,
   SESSION_TIMEOUT_MINUTES: 24,
-  
+
   // Validation Patterns
   VALIDATION_PATTERNS: {
     PHONE: /^\d{10}$/, // 10 digits, formatting handled separately
@@ -35,19 +35,19 @@ export const CONFIG = {
     BADGE: /^.+$/, // Any non-empty value
     TIME_OFFSET: /\d+/, // Must contain at least one number
   },
-  
+
   // Field Names (Third-party mapping)
   FIELD_NAMES: {
     // Required by third-party
     OFFICER_NAME: 'rName',
-    OFFICER_EMAIL: 'requestingEmail', 
+    OFFICER_EMAIL: 'requestingEmail',
     OFFICER_PHONE: 'requestingPhone',
     REQUEST_AREA: 'reqArea',
     FILE_DETAILS: 'fileDetails',
     REQUEST_DETAILS: 'rfsDetails',
     OCCURRENCE_TYPE: 'occType',
     OCCURRENCE_DATE: 'occDate',
-    
+
     // Our form fields
     OCCURRENCE_NUMBER: 'occNumber',
     EVIDENCE_BAG: 'evidenceBag',
@@ -63,7 +63,7 @@ export const CONFIG = {
     TIME_OFFSET: 'timeOffset',
     DVR_EARLIEST: 'dvrEarliestDate',
     OTHER_INFO: 'otherInfo',
-    
+
     // Analysis form specific
     OFFENCE_TYPE: 'offenceType',
     OFFENCE_TYPE_OTHER: 'offenceTypeOther',
@@ -78,7 +78,7 @@ export const CONFIG = {
     SERVICE_REQUIRED_OTHER: 'serviceRequiredOther',
     REQUEST_DETAILS: 'requestDetails',
     ADDITIONAL_INFO: 'additionalInfo',
-    
+
     // Recovery form specific
     UNIT: 'unit',
     LOCATION_CONTACT: 'locationContact',
@@ -94,28 +94,28 @@ export const CONFIG = {
     HAS_VIDEO_MONITOR: 'hasVideoMonitor',
     INCIDENT_DESCRIPTION: 'incidentDescription'
   },
-  
+
   // Form Types
   FORM_TYPES: {
     ANALYSIS: 'analysis',
     UPLOAD: 'upload',
     RECOVERY: 'recovery'
   },
-  
+
   // Progress Bar Colors
   PROGRESS_COLORS: {
     LOW: 'var(--color-danger)',      // 0-33%
     MEDIUM: 'var(--color-warning)',  // 34-66%
     HIGH: 'var(--color-success)'     // 67-100%
   },
-  
+
   // Animation Durations
   ANIMATIONS: {
     SHAKE_DURATION: 500,
     FADE_DURATION: 300,
     SCROLL_DURATION: 300
   },
-  
+
   // Messages
   MESSAGES: {
     REQUIRED_FIELD: 'This field is required',
@@ -149,7 +149,7 @@ export const CONFIG = {
     ERROR_UNKNOWN: 'Submission failed. Your draft has been saved.',
     RETRY_ATTEMPT: 'Connection issue. Retrying... (attempt {attempt} of {max})'
   },
-  
+
   // City Options
   CITY_OPTIONS: [
     { value: '', text: 'Select city' },
@@ -158,7 +158,7 @@ export const CONFIG = {
     { value: 'Toronto', text: 'Toronto' },
     { value: 'Other', text: 'Other' }
   ],
-  
+
   // Media Type Options
   MEDIA_TYPE_OPTIONS: [
     { value: '', text: 'Select media type' },
@@ -168,7 +168,7 @@ export const CONFIG = {
     { value: 'CD/DVD', text: 'CD/DVD' },
     { value: 'Other', text: 'Other' }
   ],
-  
+
   // Analysis Form Options
   OFFENCE_TYPE_OPTIONS: [
     { value: '', text: 'Select...' },
@@ -176,18 +176,19 @@ export const CONFIG = {
     { value: 'Missing Person', text: 'Missing Person' },
     { value: 'Other', text: 'Other' }
   ],
-  
+
   VIDEO_LOCATION_OPTIONS: [
     { value: '', text: 'Select...' },
     { value: 'NAS Storage', text: 'NAS Storage' },
-    { value: 'Evidence.com Locker', text: 'Evidence.com Locker' },
+    { value: 'Evidence.com', text: 'Evidence.com' },
+    { value: 'Locker', text: 'Locker' },
     { value: 'USB', text: 'USB' },
     { value: 'Hard Drive', text: 'Hard Drive' },
     { value: 'SD Card', text: 'SD Card' },
     { value: 'CD/DVD', text: 'CD/DVD' },
     { value: 'Other', text: 'Other' }
   ],
-  
+
   SERVICE_REQUIRED_OPTIONS: [
     { value: '', text: 'Select...' },
     { value: 'Video/Image Clarification', text: 'Video/Image Clarification' },
@@ -198,7 +199,7 @@ export const CONFIG = {
     { value: 'Data Carving', text: 'Data Carving' },
     { value: 'Other', text: 'Other' }
   ],
-  
+
   // Date/Time Formats
   DATE_FORMATS: {
     DISPLAY: 'MMM DD, YYYY',
@@ -206,10 +207,10 @@ export const CONFIG = {
     DATETIME: 'YYYY-MM-DD HH:mm',
     TIMESTAMP: 'YYYY-MM-DD HH:mm:ss'
   },
-  
+
   // Development Mode
   IS_DEVELOPMENT: window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
-  
+
   // Feature Flags
   FEATURES: {
     SAVE_DRAFTS: true,
@@ -217,7 +218,7 @@ export const CONFIG = {
     PROGRESS_BAR: true,
     ANIMATIONS: true
   },
-  
+
   // Officer Storage Configuration
   OFFICER_STORAGE: {
     ENABLED: true,
@@ -225,7 +226,7 @@ export const CONFIG = {
     VERSION: '1.0',
     FIRST_TIME_KEY: 'fvu_officer_storage_acknowledged'
   },
-  
+
   // Peel Regional Police Configuration
   PEEL_COLORS: {
     BLUE: '#1B3A6B',
@@ -236,7 +237,7 @@ export const CONFIG = {
   // Form Titles
   FORM_TITLES: {
     UPLOAD: 'Video Evidence Upload Request Form',
-    ANALYSIS: 'Forensic Analysis Request Form', 
+    ANALYSIS: 'Forensic Analysis Request Form',
     RECOVERY: 'CCTV Recovery Request Form'
   },
 
@@ -263,12 +264,12 @@ export const CONFIG = {
     BUTTON_HOVER: '0 4px 12px rgba(0, 0, 0, 0.2)'
   },
 
-  // Draft Animation Values  
+  // Draft Animation Values
   DRAFT_ANIMATIONS: {
     PULSE_DURATION: 1000,
     PULSE_OPACITY_MIN: 0.7
   },
-  
+
   // PDF Configuration
   PDF_CONFIG: {
     METADATA: {
@@ -277,7 +278,7 @@ export const CONFIG = {
       keywords: 'forensic, video, evidence'
     }
   },
-  
+
   // PDF Logo Configuration
   PDF_LOGO: {
     HOMICIDE: FVU_LOGO_BASE64,
