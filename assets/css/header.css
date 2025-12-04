@@ -38,19 +38,26 @@
   --form-title-color: var(--peel-blue);
 }
 
-/* Main Header - STICKY! */
+/* Add padding to body to prevent content from hiding behind fixed header */
+body {
+  padding-top: var(--header-height);
+}
+
+/* Main Header - FIXED! */
 .main-header {
   height: var(--header-height);
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   border-bottom: var(--input-border-width) solid var(--border-color);
 
-  /* STICKY POSITIONING - stays at top when scrolling */
-  position: sticky;
+  /* FIXED POSITIONING - stays locked at top, no rubber banding */
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: var(--z-sticky);
 
-  /* Smooth transition when becoming sticky */
+  /* Smooth transition when becoming scrolled */
   transition: box-shadow var(--transition-base);
 }
 
@@ -248,6 +255,11 @@
 /* Index Page Specific Styles */
 .index-header {
   --header-height: 100px; /* Larger header for index page */
+}
+
+/* Adjust body padding when index header is present */
+body:has(.index-header) {
+  padding-top: 100px;
 }
 
 .index-header .container {
