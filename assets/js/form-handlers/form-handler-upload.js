@@ -108,13 +108,19 @@ export class UploadFormHandler extends FormHandler {
     const locationVideoGroup = createElement('div', {
       className: 'location-video-group',
       dataset: { groupIndex: index },
-      style: 'background: var(--glass-bg); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; border: 1px solid var(--border-color); opacity: 0;'
+      style: 'background: var(--glass-bg); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; border: 2px solid var(--color-primary); opacity: 0;'
     });
+
+    // Location header (like "DVR 1")
+    const header = createElement('h2', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem; text-align: center; font-size: 1.5rem;'
+    }, `Location ${index + 1}`);
+    locationVideoGroup.appendChild(header);
 
     // Create location section
     const locationSection = createElement('section', { className: 'form-section' });
     locationSection.innerHTML = `
-      <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Location Information</h2>
+      <h3 style="color: var(--color-primary); margin-bottom: 1.5rem;">Location Information</h3>
     `;
 
     // Location fields
@@ -129,7 +135,7 @@ export class UploadFormHandler extends FormHandler {
     // Create video timeframe section
     const videoSection = createElement('section', { className: 'form-section' });
     videoSection.innerHTML = `
-      <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Video Timeframe</h2>
+      <h3 style="color: var(--color-primary); margin-bottom: 1.5rem;">Video Timeframe</h3>
     `;
 
     // Video timeframe fields
