@@ -47,6 +47,10 @@ foreach ($file in $FormFiles) {
         # Matches <form ...> and adds the hidden field on the next line
         $content = $content -replace '(<form[^>]*>)', "`$1`n        $SessionField"
 
+        # Convert internal .html links to .php links
+        $content = $content -replace '\.html"', '.php"'
+        $content = $content -replace "\.html'", ".php'"
+
         # Write the PHP file
         Set-Content -Path $DestPath -Value $content -NoNewline
 
@@ -64,6 +68,16 @@ $AssetsDest = Join-Path $DeployDir "assets"
 if (Test-Path $AssetsSource) {
     Copy-Item -Path $AssetsSource -Destination $AssetsDest -Recurse
     Write-Host "  [OK] assets/ copied" -ForegroundColor Green
+
+# Copy lib folder (pdfmake)
+Write-Host ""
+Write-Host "Copying lib folder..." -ForegroundColor White
+$LibSource = Join-Path $SourceDir "lib"
+$LibDest = Join-Path $DeployDir "lib"
+if (Test-Path $LibSource) {
+    Copy-Item -Path $LibSource -Destination $LibDest -Recurse
+    Write-Host "  [OK] lib/ copied" -ForegroundColor Green
+}
 
     # Remove files not needed in production
     $FilesToExclude = @(
@@ -94,6 +108,25 @@ if (Test-Path $ConfigPath) {
 
     Set-Content -Path $ConfigPath -Value $configContent -NoNewline
     Write-Host "  [OK] USE_SUPABASE set to false" -ForegroundColor Green
+}
+
+# Remove supabase import from api-client.js
+$ApiClientPath = Join-Path $AssetsDest "js\api-client.js"
+if (Test-Path $ApiClientPath) {
+    $apiContent = Get-Content -Path $ApiClientPath -Raw
+    $apiContent = $apiContent -replace "import \{ submitToSupabase \} from './supabase\.js';", "// import { submitToSupabase } from './supabase.js'; // Removed for production"
+    Set-Content -Path $ApiClientPath -Value $apiContent -NoNewline
+    Write-Host "  [OK] Removed supabase import from api-client.js" -ForegroundColor Green
+}
+
+# Convert .html links to .php in header-component.js
+$HeaderPath = Join-Path $AssetsDest "js\header-component.js"
+if (Test-Path $HeaderPath) {
+    $headerContent = Get-Content -Path $HeaderPath -Raw
+    $headerContent = $headerContent -replace '\.html"', '.php"'
+    $headerContent = $headerContent -replace "\.html'", ".php'"
+    Set-Content -Path $HeaderPath -Value $headerContent -NoNewline
+    Write-Host "  [OK] Converted .html links to .php in header-component.js" -ForegroundColor Green
 }
 
 # Create a simple deployment info file
