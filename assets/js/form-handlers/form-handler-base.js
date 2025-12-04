@@ -152,8 +152,12 @@ export class FormHandler {
 
       // TECHNIQUE 4: Make readonly initially, remove on user interaction
       // This prevents autofill from triggering on page load
+      // Skip date/datetime inputs as they need to be interactive for the picker to work
       if (field.type !== 'radio' &&
           field.type !== 'checkbox' &&
+          field.type !== 'date' &&
+          field.type !== 'datetime-local' &&
+          field.type !== 'time' &&
           field.tagName !== 'SELECT' &&
           !field.hasAttribute('readonly')) {
 
@@ -202,24 +206,8 @@ export class FormHandler {
         }
       }
 
-      // TECHNIQUE 6: Add input event listener to detect and clear autofill
-      field.addEventListener('input', function(e) {
-        // If value appears instantly (typical of autofill), clear it after a brief delay
-        // This gives the browser time to autofill, then we remove it
-        if (!field.hasAttribute('data-user-edited')) {
-          setTimeout(() => {
-            if (field.value && !field.hasAttribute('data-user-edited')) {
-              // Check if this was likely autofill by checking if user didn't actually type
-              const timeSinceInteraction = Date.now() - (field.dataset.lastInteraction || 0);
-              if (timeSinceInteraction > 1000) {
-                field.value = '';
-              }
-            }
-          }, 100);
-        }
-      });
-
-      // Track user interaction timing
+      // Track user interaction timing - MUST come before input listener
+      // This ensures legitimate user actions are marked before input event fires
       field.addEventListener('keydown', function() {
         field.setAttribute('data-user-edited', 'true');
         field.dataset.lastInteraction = Date.now();
@@ -229,6 +217,37 @@ export class FormHandler {
         field.setAttribute('data-user-edited', 'true');
         field.dataset.lastInteraction = Date.now();
       });
+
+      // Track change events from dropdowns, date pickers, and other UI controls
+      // This is critical for SELECT elements and date inputs
+      field.addEventListener('change', function() {
+        field.setAttribute('data-user-edited', 'true');
+        field.dataset.lastInteraction = Date.now();
+      });
+
+      // TECHNIQUE 6: Add input event listener to detect and clear autofill
+      // Only applies to text-like inputs, not SELECT or date inputs
+      if (field.tagName !== 'SELECT' &&
+          field.type !== 'date' &&
+          field.type !== 'datetime-local' &&
+          field.type !== 'time') {
+
+        field.addEventListener('input', function(e) {
+          // If value appears instantly (typical of autofill), clear it after a brief delay
+          // This gives the browser time to autofill, then we remove it
+          if (!field.hasAttribute('data-user-edited')) {
+            setTimeout(() => {
+              if (field.value && !field.hasAttribute('data-user-edited')) {
+                // Check if this was likely autofill by checking if user didn't actually type
+                const timeSinceInteraction = Date.now() - (field.dataset.lastInteraction || 0);
+                if (timeSinceInteraction > 1000) {
+                  field.value = '';
+                }
+              }
+            }, 100);
+          }
+        });
+      }
     });
   }
 
