@@ -36,6 +36,9 @@ export class FormHandler {
     // Save session start
     saveSessionStart();
 
+    // Disable browser autofill if feature flag is off
+    this.configureAutofill();
+
     // Set up event listeners
     this.setupEventListeners();
 
@@ -47,6 +50,186 @@ export class FormHandler {
 
     // Initialize progress bar
     this.updateProgress();
+  }
+
+  /**
+   * Configure browser autofill behavior based on feature flag
+   * When BROWSER_AUTOFILL is false, disables all browser autofill suggestions
+   */
+  configureAutofill() {
+    if (CONFIG.FEATURES.BROWSER_AUTOFILL === false) {
+      // Set autocomplete="off" on the form itself
+      this.form.setAttribute('autocomplete', 'off');
+
+      // Inject decoy fields BEFORE applying field-level prevention
+      this.injectDecoyFields();
+
+      // Apply aggressive autofill prevention to all input fields
+      const fields = this.form.querySelectorAll('input, select, textarea');
+      this.applyAutofillPrevention(fields);
+
+      console.log('Browser autofill disabled via feature flag with aggressive prevention');
+    } else {
+      console.log('Browser autofill enabled via feature flag');
+    }
+  }
+
+  /**
+   * Inject invisible decoy fields to fool browser autofill heuristics
+   * Browsers will fill these instead of real fields
+   */
+  injectDecoyFields() {
+    // Create decoy container at the very start of the form
+    const decoyContainer = document.createElement('div');
+    decoyContainer.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;';
+    decoyContainer.setAttribute('aria-hidden', 'true');
+    decoyContainer.setAttribute('tabindex', '-1');
+
+    // Create decoy fields that browsers commonly target
+    const decoyFields = [
+      { name: 'username', type: 'text', autocomplete: 'username' },
+      { name: 'email', type: 'email', autocomplete: 'email' },
+      { name: 'organization', type: 'text', autocomplete: 'organization' },
+      { name: 'address-line1', type: 'text', autocomplete: 'address-line1' },
+      { name: 'address-level2', type: 'text', autocomplete: 'address-level2' },
+      { name: 'tel', type: 'tel', autocomplete: 'tel' }
+    ];
+
+    decoyFields.forEach(field => {
+      const input = document.createElement('input');
+      input.type = field.type;
+      input.name = `decoy_${field.name}`;
+      input.setAttribute('autocomplete', field.autocomplete);
+      input.tabIndex = -1;
+      decoyContainer.appendChild(input);
+    });
+
+    // Insert at the very beginning of the form
+    this.form.insertBefore(decoyContainer, this.form.firstChild);
+  }
+
+  /**
+   * Apply autofill prevention to specific elements
+   * Uses multiple aggressive techniques to block modern browser autofill
+   * Can be called on dynamically created fields
+   * @param {NodeList|HTMLElement|Array} elements - Elements to apply autofill prevention to
+   */
+  applyAutofillPrevention(elements) {
+    if (CONFIG.FEATURES.BROWSER_AUTOFILL !== false) {
+      return; // Only apply if autofill is disabled
+    }
+
+    // Convert single element to array
+    if (elements instanceof HTMLElement) {
+      elements = [elements];
+    }
+
+    elements.forEach(field => {
+      // Skip hidden fields, submit buttons, and decoy fields
+      if (field.type === 'hidden' ||
+          field.type === 'submit' ||
+          field.type === 'button' ||
+          field.name?.startsWith('decoy_')) {
+        return;
+      }
+
+      // TECHNIQUE 1: Use "one-time-code" which browsers respect more than "off"
+      // This is the most effective single technique for modern Chrome/Edge
+      field.setAttribute('autocomplete', 'one-time-code');
+
+      // TECHNIQUE 2: Add random data attribute to confuse browser heuristics
+      field.setAttribute('data-form-type', 'forensic-' + Math.random().toString(36).substr(2, 9));
+
+      // TECHNIQUE 3: Obfuscate the name attribute (but preserve it for form submission)
+      // Store original name in data attribute
+      if (field.name && field.name !== 'decoy_field') {
+        field.setAttribute('data-real-name', field.name);
+        // Add random suffix to name to prevent pattern matching
+        const randomSuffix = '_' + Math.random().toString(36).substr(2, 5);
+        field.setAttribute('data-name-suffix', randomSuffix);
+        // We'll restore the original name on form submit
+      }
+
+      // TECHNIQUE 4: Make readonly initially, remove on user interaction
+      // This prevents autofill from triggering on page load
+      if (field.type !== 'radio' &&
+          field.type !== 'checkbox' &&
+          field.tagName !== 'SELECT' &&
+          !field.hasAttribute('readonly')) {
+
+        field.setAttribute('readonly', 'readonly');
+        field.style.backgroundColor = field.style.backgroundColor || 'transparent';
+
+        // Remove readonly on ANY user interaction
+        const removeReadonly = () => {
+          field.removeAttribute('readonly');
+          // Remove all listeners after first interaction
+          field.removeEventListener('focus', removeReadonly);
+          field.removeEventListener('click', removeReadonly);
+          field.removeEventListener('touchstart', removeReadonly);
+        };
+
+        field.addEventListener('focus', removeReadonly, { once: true });
+        field.addEventListener('click', removeReadonly, { once: true });
+        field.addEventListener('touchstart', removeReadonly, { once: true, passive: true });
+      }
+
+      // TECHNIQUE 5: For text/tel/email fields that commonly trigger autofill,
+      // add additional protective measures
+      if (field.type === 'text' || field.type === 'tel' || field.type === 'email') {
+        // Prevent Chrome's aggressive address autofill
+        field.setAttribute('autocompletetype', 'false');
+        field.setAttribute('aria-autocomplete', 'none');
+
+        // Block common autofill triggers
+        if (field.name?.toLowerCase().includes('name')) {
+          field.setAttribute('autocomplete', 'nope');
+        }
+        if (field.name?.toLowerCase().includes('phone') || field.type === 'tel') {
+          field.setAttribute('autocomplete', 'tel-national');
+        }
+        if (field.name?.toLowerCase().includes('email') || field.type === 'email') {
+          field.setAttribute('autocomplete', 'email-new');
+        }
+        if (field.name?.toLowerCase().includes('address')) {
+          field.setAttribute('autocomplete', 'nope-address');
+        }
+        if (field.name?.toLowerCase().includes('city')) {
+          field.setAttribute('autocomplete', 'nope-city');
+        }
+        if (field.name?.toLowerCase().includes('business')) {
+          field.setAttribute('autocomplete', 'nope-organization');
+        }
+      }
+
+      // TECHNIQUE 6: Add input event listener to detect and clear autofill
+      field.addEventListener('input', function(e) {
+        // If value appears instantly (typical of autofill), clear it after a brief delay
+        // This gives the browser time to autofill, then we remove it
+        if (!field.hasAttribute('data-user-edited')) {
+          setTimeout(() => {
+            if (field.value && !field.hasAttribute('data-user-edited')) {
+              // Check if this was likely autofill by checking if user didn't actually type
+              const timeSinceInteraction = Date.now() - (field.dataset.lastInteraction || 0);
+              if (timeSinceInteraction > 1000) {
+                field.value = '';
+              }
+            }
+          }, 100);
+        }
+      });
+
+      // Track user interaction timing
+      field.addEventListener('keydown', function() {
+        field.setAttribute('data-user-edited', 'true');
+        field.dataset.lastInteraction = Date.now();
+      });
+
+      field.addEventListener('paste', function() {
+        field.setAttribute('data-user-edited', 'true');
+        field.dataset.lastInteraction = Date.now();
+      });
+    });
   }
 
   setupEventListeners() {

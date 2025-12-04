@@ -253,6 +253,10 @@ export class RecoveryFormHandler extends FormHandler {
 
     container.appendChild(dvrGroup);
 
+    // Apply autofill prevention to the newly created fields
+    const newFields = dvrGroup.querySelectorAll('input, select, textarea');
+    this.applyAutofillPrevention(newFields);
+
     // Setup listeners for the new DVR
     this.setupDVRListeners(dvrIndex);
 
@@ -473,6 +477,10 @@ export class RecoveryFormHandler extends FormHandler {
     // Set initial opacity for animation
     timeFrameGroup.style.opacity = '0';
     container.appendChild(timeFrameGroup);
+
+    // Apply autofill prevention to the newly created fields
+    const newFields = timeFrameGroup.querySelectorAll('input, select, textarea');
+    this.applyAutofillPrevention(newFields);
 
     // Setup listeners for the new time frame
     this.setupTimeFrameListeners(index, dvrIndex);

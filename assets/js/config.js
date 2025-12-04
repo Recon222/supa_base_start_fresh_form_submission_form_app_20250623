@@ -216,7 +216,8 @@ export const CONFIG = {
     SAVE_DRAFTS: true,
     SESSION_WARNINGS: true,
     PROGRESS_BAR: true,
-    ANIMATIONS: true
+    ANIMATIONS: true,
+    BROWSER_AUTOFILL: false  // Set to false to disable browser autofill suggestions
   },
 
   // Officer Storage Configuration

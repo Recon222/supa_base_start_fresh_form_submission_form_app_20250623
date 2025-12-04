@@ -171,6 +171,10 @@ export class UploadFormHandler extends FormHandler {
 
     container.appendChild(locationVideoGroup);
 
+    // Apply autofill prevention to the newly created fields
+    const newFields = locationVideoGroup.querySelectorAll('input, select, textarea');
+    this.applyAutofillPrevention(newFields);
+
     // Setup listeners for the new group
     this.setupLocationVideoListeners(index);
 
