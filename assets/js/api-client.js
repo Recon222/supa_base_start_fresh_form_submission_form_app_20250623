@@ -104,7 +104,17 @@ async function submitForm(formData, pdfBlob, jsonBlob) {
   
   // Original PHP submission logic
   const submission = new FormData();
-  
+
+  // Map requestDetails to rfsDetails for Phil's server
+  if (formData.requestDetails) {
+    formData.rfsDetails = formData.requestDetails;
+  }
+
+  // Set default occType if not provided
+  if (!formData.occType) {
+    formData.occType = "Homicide";
+  }
+
   // Add all form fields using their field names
   Object.entries(formData).forEach(([key, value]) => {
     if (value !== null && value !== undefined) {
