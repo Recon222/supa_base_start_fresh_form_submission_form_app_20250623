@@ -613,34 +613,166 @@ export class RecoveryFormHandler extends FormHandler {
   }
 
   generateFileDetails(data) {
-    const details = [];
+    const sections = [];
 
-    // Add location info
+    // === CASE ===
+    const caseInfo = [];
+    if (data.occNumber) {
+      caseInfo.push(`Occurrence: ${data.occNumber}`);
+    }
+    if (data.offenceTypeDisplay) {
+      caseInfo.push(`Offence: ${data.offenceTypeDisplay}`);
+    }
+    if (caseInfo.length > 0) {
+      sections.push('=== CASE ===');
+      sections.push(...caseInfo);
+      sections.push('');
+    }
+
+    // === INVESTIGATOR ===
+    const investigatorInfo = [];
+    if (data.rName) {
+      const badgeText = data.badge ? ` (Badge: ${data.badge})` : '';
+      investigatorInfo.push(`Name: ${data.rName}${badgeText}`);
+    }
+    if (data.requestingPhone) {
+      investigatorInfo.push(`Phone: ${data.requestingPhone}`);
+    }
+    if (data.requestingEmail) {
+      investigatorInfo.push(`Email: ${data.requestingEmail}`);
+    }
+    if (investigatorInfo.length > 0) {
+      sections.push('=== INVESTIGATOR ===');
+      sections.push(...investigatorInfo);
+      sections.push('');
+    }
+
+    // === LOCATION ===
+    const locationInfo = [];
     if (data.businessName) {
-      details.push(`Business: ${data.businessName}`);
+      locationInfo.push(`Business: ${data.businessName}`);
     }
-    details.push(`Location: ${data.locationAddress}, ${data.cityDisplay}`);
-
-    // Add extraction time info
-    if (data.extractionStartTime && data.extractionEndTime) {
-      const startDate = new Date(data.extractionStartTime);
-      const endDate = new Date(data.extractionEndTime);
-      const duration = Math.round((endDate - startDate) / (1000 * 60)); // minutes
-      details.push(`Extraction period: ${duration} minutes`);
+    if (data.locationAddress && data.cityDisplay) {
+      locationInfo.push(`Address: ${data.locationAddress}, ${data.cityDisplay}`);
     }
-
-    // Add time period type
-    if (data.timePeriodType) {
-      details.push(`Time type: ${data.timePeriodType}`);
+    if (data.locationContact) {
+      const contactPhone = data.locationContactPhone ? ` (${data.locationContactPhone})` : '';
+      locationInfo.push(`Contact: ${data.locationContact}${contactPhone}`);
+    }
+    if (locationInfo.length > 0) {
+      sections.push('=== LOCATION ===');
+      sections.push(...locationInfo);
+      sections.push('');
     }
 
-    // Add camera info
-    if (data.cameraDetails) {
-      const cameraCount = data.cameraDetails.split('\n').filter(c => c.trim()).length;
-      details.push(`${cameraCount} camera(s) listed`);
+    // === DVR X === (for each DVR)
+    if (data.dvrGroups && data.dvrGroups.length > 0) {
+      data.dvrGroups.forEach((dvr, dvrIndex) => {
+        sections.push(`=== DVR ${dvrIndex + 1} ===`);
+
+        // DVR Information
+        if (dvr.dvrMakeModel) {
+          sections.push(`Make/Model: ${dvr.dvrMakeModel}`);
+        }
+        if (dvr.isTimeDateCorrect) {
+          sections.push(`Time Correct: ${dvr.isTimeDateCorrect}`);
+          // Show time offset only if time is NOT correct
+          if (dvr.isTimeDateCorrect === 'No' && dvr.timeOffset) {
+            sections.push(`Time Offset: ${dvr.timeOffset}`);
+          }
+        }
+        if (dvr.dvrRetention) {
+          const retention = calculateRetentionDays(dvr.dvrRetention);
+          const urgentText = retention.days <= 4 ? ' - URGENT' : '';
+          sections.push(`Retention: ${retention.days} days${urgentText}`);
+        }
+        if (dvr.hasVideoMonitor) {
+          sections.push(`Monitor On-Site: ${dvr.hasVideoMonitor}`);
+        }
+
+        sections.push('');
+
+        // --- Time Frame X --- (for each time frame within this DVR)
+        if (dvr.extractionTimeFrames && dvr.extractionTimeFrames.length > 0) {
+          dvr.extractionTimeFrames.forEach((timeFrame, frameIndex) => {
+            sections.push(`--- Time Frame ${frameIndex + 1} ---`);
+
+            // Format dates nicely
+            if (timeFrame.extractionStartTime && timeFrame.extractionEndTime) {
+              const startDate = new Date(timeFrame.extractionStartTime);
+              const endDate = new Date(timeFrame.extractionEndTime);
+
+              const formattedStart = this.formatDateTime(startDate);
+              const formattedEnd = this.formatDateTime(endDate);
+
+              sections.push(`Period: ${formattedStart} to ${formattedEnd}`);
+
+              // Calculate duration
+              const durationMinutes = Math.round((endDate - startDate) / (1000 * 60));
+              const durationText = this.formatDuration(durationMinutes);
+              sections.push(`Duration: ${durationText}`);
+            }
+
+            if (timeFrame.timePeriodType) {
+              sections.push(`Time Type: ${timeFrame.timePeriodType}`);
+            }
+
+            // Camera details as bullet points
+            if (timeFrame.cameraDetails) {
+              sections.push('Cameras:');
+              const cameraLines = timeFrame.cameraDetails.split('\n').filter(line => line.trim());
+              cameraLines.forEach(camera => {
+                sections.push(`- ${camera.trim()}`);
+              });
+            }
+
+            sections.push('');
+          });
+        }
+
+        // Access Information
+        const username = dvr.dvrUsername || '(none)';
+        const password = dvr.dvrPassword || '(none)';
+        sections.push(`Access: ${username} / ${password}`);
+        sections.push('');
+      });
     }
 
-    return details.join(' | ');
+    // === INCIDENT ===
+    if (data.incidentDescription) {
+      sections.push('=== INCIDENT ===');
+      sections.push(data.incidentDescription);
+    }
+
+    return sections.join('\n');
+  }
+
+  /**
+   * Format a date object to readable string (e.g., "Dec 3, 2025 14:30")
+   */
+  formatDateTime(date) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[date.getMonth()];
+    const day = date.getDate();
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${month} ${day}, ${year} ${hours}:${minutes}`;
+  }
+
+  /**
+   * Format duration in minutes to readable string
+   */
+  formatDuration(minutes) {
+    if (minutes < 60) {
+      return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    if (remainingMinutes === 0) {
+      return `${hours} hour${hours !== 1 ? 's' : ''}`;
+    }
+    return `${hours} hour${hours !== 1 ? 's' : ''} ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}`;
   }
 
   validateForm() {
