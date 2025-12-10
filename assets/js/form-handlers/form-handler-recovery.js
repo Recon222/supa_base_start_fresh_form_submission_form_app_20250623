@@ -615,6 +615,16 @@ export class RecoveryFormHandler extends FormHandler {
   generateFileDetails(data) {
     const sections = [];
 
+    // Form Title Header
+    const title = 'CCTV RECOVERY REQUEST';
+    const boxWidth = title.length + 6; // title + padding
+    const horizontalLine = '═'.repeat(boxWidth);
+    const padding = ' '.repeat(Math.floor((boxWidth - title.length) / 2));
+
+    sections.push(`╔${horizontalLine}╗`);
+    sections.push(`║${padding}${title}${padding}║`);
+    sections.push(`╚${horizontalLine}╝`);
+
     // === CASE ===
     const caseInfo = [];
     if (data.occNumber) {
