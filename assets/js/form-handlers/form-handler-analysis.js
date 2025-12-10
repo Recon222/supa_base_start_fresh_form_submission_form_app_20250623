@@ -138,7 +138,13 @@ export class AnalysisFormHandler extends FormHandler {
     const locationFields = [];
     if (data.videoSeizedFrom) locationFields.push(`Seized From: ${data.videoSeizedFrom}`);
     if (data.businessName) locationFields.push(`Business: ${data.businessName}`);
-    if (data.cityDisplay) locationFields.push(`City: ${data.cityDisplay}`);
+    if (data.locationAddress) {
+      const city = data.cityDisplay || '';
+      const address = city ? `${data.locationAddress}, ${city}` : data.locationAddress;
+      locationFields.push(`Address: ${address}`);
+    } else if (data.cityDisplay) {
+      locationFields.push(`City: ${data.cityDisplay}`);
+    }
     if (data.recordingDate) locationFields.push(`Recording Date: ${data.recordingDate}`);
     if (locationFields.length > 0) {
       sections.push('=== LOCATION ===\n' + locationFields.join('\n'));

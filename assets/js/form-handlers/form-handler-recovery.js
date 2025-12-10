@@ -662,8 +662,12 @@ export class RecoveryFormHandler extends FormHandler {
     if (data.businessName) {
       locationInfo.push(`Business: ${data.businessName}`);
     }
-    if (data.locationAddress && data.cityDisplay) {
-      locationInfo.push(`Address: ${data.locationAddress}, ${data.cityDisplay}`);
+    if (data.locationAddress) {
+      const city = data.cityDisplay || '';
+      const address = city ? `${data.locationAddress}, ${city}` : data.locationAddress;
+      locationInfo.push(`Address: ${address}`);
+    } else if (data.cityDisplay) {
+      locationInfo.push(`City: ${data.cityDisplay}`);
     }
     if (data.locationContact) {
       const contactPhone = data.locationContactPhone ? ` (${data.locationContactPhone})` : '';
