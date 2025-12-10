@@ -12,7 +12,7 @@ import { generateJSON } from '../json-generator.js';
 import { submitWithRetry } from '../api-client.js';
 import { showToast, downloadBlob } from '../utils.js';
 import { toggleElement, scrollToElement, createElement } from '../utils.js';
-import { calculateRetentionDays, generateFieldSummaries } from '../calculations.js';
+import { calculateRetentionDays } from '../calculations.js';
 import { CONFIG } from '../config.js';
 
 /**
@@ -202,6 +202,155 @@ export class UploadFormHandler extends FormHandler {
     }, 300);
   }
 
+  /**
+   * Generate fileDetails string for Upload form
+   * Maps all form data into a readable format following PDF section order
+   * @param {Object} data - Form data collected from collectFormData()
+   * @returns {string} Formatted fileDetails string
+   */
+  generateFileDetails(data) {
+    const sections = [];
+
+    // === EVIDENCE ===
+    const evidenceLines = [];
+    if (data.occNumber) evidenceLines.push(`Occurrence: ${data.occNumber}`);
+    if (data.evidenceBag) evidenceLines.push(`Evidence Bag: ${data.evidenceBag}`);
+    if (data.mediaTypeDisplay) evidenceLines.push(`Media Type: ${data.mediaTypeDisplay}`);
+
+    if (evidenceLines.length > 0) {
+      sections.push('=== EVIDENCE ===\n' + evidenceLines.join('\n'));
+    }
+
+    // === INVESTIGATOR ===
+    const investigatorLines = [];
+    if (data.rName && data.badge) {
+      investigatorLines.push(`Name: ${data.rName} (Badge: ${data.badge})`);
+    } else if (data.rName) {
+      investigatorLines.push(`Name: ${data.rName}`);
+    }
+    if (data.requestingPhone) investigatorLines.push(`Phone: ${data.requestingPhone}`);
+    if (data.requestingEmail) investigatorLines.push(`Email: ${data.requestingEmail}`);
+
+    if (investigatorLines.length > 0) {
+      sections.push('=== INVESTIGATOR ===\n' + investigatorLines.join('\n'));
+    }
+
+    // === LOCATION X === (for each location)
+    if (data.locations && data.locations.length > 0) {
+      data.locations.forEach((location, index) => {
+        const locationLines = [];
+        const locationNum = index + 1;
+
+        if (location.businessName) {
+          locationLines.push(`Business: ${location.businessName}`);
+        }
+
+        if (location.locationAddress) {
+          const city = location.city === 'Other' && location.cityOther ? location.cityOther : location.city;
+          const address = city ? `${location.locationAddress}, ${city}` : location.locationAddress;
+          locationLines.push(`Address: ${address}`);
+        }
+
+        // Format video period and calculate duration
+        if (location.videoStartTime && location.videoEndTime) {
+          const startFormatted = this.formatDateTime(location.videoStartTime);
+          const endFormatted = this.formatDateTime(location.videoEndTime);
+          locationLines.push(`Video Period: ${startFormatted} to ${endFormatted}`);
+
+          // Calculate duration
+          const duration = this.calculateDuration(location.videoStartTime, location.videoEndTime);
+          if (duration) {
+            locationLines.push(`Duration: ${duration}`);
+          }
+        }
+
+        // Time sync
+        if (location.isTimeDateCorrect) {
+          locationLines.push(`Time Sync: ${location.isTimeDateCorrect}`);
+
+          // Only show offset if time is NOT correct
+          if (location.isTimeDateCorrect === 'No' && location.timeOffset) {
+            locationLines.push(`Time Offset: ${location.timeOffset}`);
+          }
+        }
+
+        // DVR retention with urgency warning
+        if (location.dvrEarliestDate) {
+          const retention = calculateRetentionDays(location.dvrEarliestDate);
+          let retentionText = `DVR Retention: ${retention.days} days`;
+          if (retention.days <= 4) {
+            retentionText += ' - URGENT';
+          }
+          locationLines.push(retentionText);
+        }
+
+        if (locationLines.length > 0) {
+          sections.push(`=== LOCATION ${locationNum} ===\n` + locationLines.join('\n'));
+        }
+      });
+    }
+
+    // === ADDITIONAL ===
+    if (data.otherInfo && data.otherInfo.trim()) {
+      sections.push('=== ADDITIONAL ===\n' + data.otherInfo.trim());
+    }
+
+    return sections.join('\n\n');
+  }
+
+  /**
+   * Format datetime-local value to readable format
+   * @param {string} datetimeLocal - datetime-local value (e.g., "2025-12-03T14:30")
+   * @returns {string} Formatted date (e.g., "Dec 3, 2025 14:30")
+   */
+  formatDateTime(datetimeLocal) {
+    if (!datetimeLocal) return '';
+
+    const date = new Date(datetimeLocal);
+    if (isNaN(date.getTime())) return datetimeLocal;
+
+    const options = {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    };
+
+    return date.toLocaleString('en-US', options).replace(',', '');
+  }
+
+  /**
+   * Calculate duration between two datetime values
+   * @param {string} startTime - Start datetime-local value
+   * @param {string} endTime - End datetime-local value
+   * @returns {string} Duration string (e.g., "1 hour 15 minutes" or "30 minutes")
+   */
+  calculateDuration(startTime, endTime) {
+    if (!startTime || !endTime) return '';
+
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return '';
+
+    const diffMs = end - start;
+    if (diffMs < 0) return '';
+
+    const diffMinutes = Math.floor(diffMs / 60000);
+    const hours = Math.floor(diffMinutes / 60);
+    const minutes = diffMinutes % 60;
+
+    if (hours > 0 && minutes > 0) {
+      return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${minutes > 1 ? 's' : ''}`;
+    } else if (hours > 0) {
+      return `${hours} hour${hours > 1 ? 's' : ''}`;
+    } else {
+      return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    }
+  }
+
   collectFormData() {
     const data = super.collectFormData();
 
@@ -241,9 +390,8 @@ export class UploadFormHandler extends FormHandler {
       data.mediaTypeDisplay = data.mediaType;
     }
 
-    // Generate field summaries for third-party
-    const summaries = generateFieldSummaries(data);
-    Object.assign(data, summaries);
+    // Generate fileDetails using the new method
+    data.fileDetails = this.generateFileDetails(data);
 
     // Add fileNr mapping for PHP system
     data.fileNr = data.occNumber || '';
