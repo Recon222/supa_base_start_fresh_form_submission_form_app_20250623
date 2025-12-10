@@ -8,7 +8,7 @@ import { FVU_LOGO_BASE64, FVU_LOGO_WIDTH, FVU_LOGO_HEIGHT } from './logo-data.js
 
 export const CONFIG = {
   // API Configuration
-  API_ENDPOINT: 'rfs_request_process.php',
+  API_ENDPOINT: 'https://homicidefvu.fatsystems.ca/rfs_request_process.php',
   API_TIMEOUT: 30000, // 30 seconds
 
   // Supabase Configuration
