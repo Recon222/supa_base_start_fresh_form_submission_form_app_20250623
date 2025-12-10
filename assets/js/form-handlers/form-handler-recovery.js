@@ -617,13 +617,13 @@ export class RecoveryFormHandler extends FormHandler {
 
     // Form Title Header
     const title = 'CCTV RECOVERY REQUEST';
-    const boxWidth = title.length + 6; // title + padding
-    const horizontalLine = '═'.repeat(boxWidth);
+    const boxWidth = 40; // Fixed width for header
+    const horizontalLine = '='.repeat(boxWidth);
     const padding = ' '.repeat(Math.floor((boxWidth - title.length) / 2));
 
-    sections.push(`╔${horizontalLine}╗`);
-    sections.push(`║${padding}${title}${padding}║`);
-    sections.push(`╚${horizontalLine}╝`);
+    sections.push(horizontalLine);
+    sections.push(`${padding}${title}`);
+    sections.push(horizontalLine);
 
     // === CASE ===
     const caseInfo = [];
