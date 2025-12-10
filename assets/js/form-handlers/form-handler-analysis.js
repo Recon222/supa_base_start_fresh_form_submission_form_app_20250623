@@ -89,17 +89,78 @@ export class AnalysisFormHandler extends FormHandler {
   }
 
   generateFileDetails(data) {
-    const details = [];
-    if (data.videoLocation) {
-      const location = data.videoLocation === 'Other' ? data.videoLocationOther : data.videoLocation;
-      details.push(`Location: ${location}`);
+    const sections = [];
+
+    // Section 1: Case Information
+    const caseFields = [];
+    if (data.occNumber) caseFields.push(`Occurrence: ${data.occNumber}`);
+    if (data.offenceTypeDisplay) caseFields.push(`Offence: ${data.offenceTypeDisplay}`);
+    if (data.jobRequired) caseFields.push(`Priority: ${data.jobRequired}`);
+    if (caseFields.length > 0) {
+      sections.push('=== CASE ===\n' + caseFields.join('\n'));
     }
-    if (data.videoSeizedFrom) details.push(`Seized from: ${data.videoSeizedFrom}`);
+
+    // Section 2: Evidence Location
+    const evidenceFields = [];
+    if (data.videoLocationDisplay) evidenceFields.push(`Storage: ${data.videoLocationDisplay}`);
+    if (data.bagNumber) evidenceFields.push(`Bag #: ${data.bagNumber}`);
+    if (data.lockerNumber) evidenceFields.push(`Locker: ${data.lockerNumber}`);
+    if (evidenceFields.length > 0) {
+      sections.push('=== EVIDENCE ===\n' + evidenceFields.join('\n'));
+    }
+
+    // Section 3: Investigator
+    const investigatorFields = [];
+    if (data.rName && data.badge) {
+      investigatorFields.push(`Name: ${data.rName} (Badge: ${data.badge})`);
+    } else if (data.rName) {
+      investigatorFields.push(`Name: ${data.rName}`);
+    } else if (data.badge) {
+      investigatorFields.push(`Badge: ${data.badge}`);
+    }
+    if (data.requestingPhone) investigatorFields.push(`Phone: ${data.requestingPhone}`);
+    if (data.requestingEmail) investigatorFields.push(`Email: ${data.requestingEmail}`);
+    if (investigatorFields.length > 0) {
+      sections.push('=== INVESTIGATOR ===\n' + investigatorFields.join('\n'));
+    }
+
+    // Section 4: Location Details
+    const locationFields = [];
+    if (data.videoSeizedFrom) locationFields.push(`Seized From: ${data.videoSeizedFrom}`);
+    if (data.businessName) locationFields.push(`Business: ${data.businessName}`);
+    if (data.cityDisplay) locationFields.push(`City: ${data.cityDisplay}`);
+    if (data.recordingDate) locationFields.push(`Recording Date: ${data.recordingDate}`);
+    if (locationFields.length > 0) {
+      sections.push('=== LOCATION ===\n' + locationFields.join('\n'));
+    }
+
+    // Section 5: File Names
     if (data.fileNames) {
-      const fileCount = data.fileNames.split('\n').filter(f => f.trim()).length;
-      details.push(`${fileCount} file(s) listed`);
+      const fileList = data.fileNames.split('\n')
+        .map(f => f.trim())
+        .filter(f => f.length > 0)
+        .join('\n');
+      if (fileList) {
+        sections.push('=== FILES ===\n' + fileList);
+      }
     }
-    return details.join(' | ');
+
+    // Section 6: Service Required
+    if (data.serviceRequiredDisplay) {
+      sections.push('=== SERVICE ===\n' + data.serviceRequiredDisplay);
+    }
+
+    // Section 7: Request Details
+    if (data.requestDetails) {
+      sections.push('=== REQUEST ===\n' + data.requestDetails);
+    }
+
+    // Section 8: Additional Information
+    if (data.additionalInfo) {
+      sections.push('=== ADDITIONAL ===\n' + data.additionalInfo);
+    }
+
+    return sections.join('\n\n');
   }
 
   async submitForm(formData) {
