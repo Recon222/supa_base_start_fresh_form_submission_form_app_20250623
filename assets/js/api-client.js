@@ -110,10 +110,44 @@ async function submitForm(formData, pdfBlob, jsonBlob) {
     formData.rfsDetails = formData.requestDetails;
   }
 
-  // Set default occType if not provided
-  if (!formData.occType) {
-    formData.occType = "Homicide";
+  // Map occType to Phil's fat_occTypes table IDs
+  // Our forms only use: Homicide (1), Missing Person (2)
+  const occTypeMap = {
+    'homicide': '1',
+    'missing person': '2'
+  };
+
+  // Convert occType text to Phil's ID, default to 1 (Homicide)
+  if (formData.occType) {
+    const lookupKey = formData.occType.toLowerCase().trim();
+    formData.occType = occTypeMap[lookupKey] || '1';
+  } else {
+    formData.occType = '1';
   }
+
+  // Set reqArea to Phil's fat_servicing table ID for "Homicide and Missing Persons"
+  // serviceID 36 = "Homicide and Missing Persons"
+  formData.reqArea = '36';
+
+  // Set rfsHeader (File Desc) based on form type
+  const rfsHeaderMap = {
+    'upload': 'FVU Upload Request',
+    'analysis': 'FVU Analysis Request',
+    'recovery': 'FVU Recovery Request'
+  };
+  formData.rfsHeader = rfsHeaderMap[formData.formType] || 'FVU Request';
+
+  // Set ticketStatus (Request Type) based on form type
+  // Maps to Phil's fat_rfs_types table:
+  // 1 = Video Analysis (was Video Clarification)
+  // 2 = Video Extraction (was Video Timeline)
+  // 4 = Video Upload
+  const ticketStatusMap = {
+    'analysis': '1',
+    'recovery': '2',
+    'upload': '4'
+  };
+  formData.ticketStatus = ticketStatusMap[formData.formType] || '1';
 
   // Add all form fields using their field names
   Object.entries(formData).forEach(([key, value]) => {
