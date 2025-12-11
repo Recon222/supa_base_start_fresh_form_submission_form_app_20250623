@@ -30,7 +30,6 @@ export class RecoveryFormHandler extends FormHandler {
     const conditionalHandler = new ConditionalFieldHandler(this);
 
     // Setup "Other" fields
-    conditionalHandler.setupOtherField('offenceType', 'offenceTypeOtherGroup', 'offenceTypeOther');
     conditionalHandler.setupOtherField('city', 'cityOtherGroup', 'cityOther');
 
     // Setup listeners for the first DVR (index 0)
@@ -574,18 +573,7 @@ export class RecoveryFormHandler extends FormHandler {
     data[CONFIG.FIELD_NAMES.REQUEST_AREA] = data.city || '';
 
     // Set occurrence type
-    if (data.offenceType === 'Other' && data.offenceTypeOther) {
-      data[CONFIG.FIELD_NAMES.OCCURRENCE_TYPE] = data.offenceTypeOther;
-    } else if (data.offenceType) {
-      data[CONFIG.FIELD_NAMES.OCCURRENCE_TYPE] = data.offenceType;
-    } else {
-      data[CONFIG.FIELD_NAMES.OCCURRENCE_TYPE] = 'Recovery Request';
-    }
-
-    // Set occurrence date to extraction start date
-    if (data.extractionStartTime) {
-      data[CONFIG.FIELD_NAMES.OCCURRENCE_DATE] = data.extractionStartTime.split('T')[0];
-    }
+    data[CONFIG.FIELD_NAMES.OCCURRENCE_TYPE] = data.offenceType || 'Recovery Request';
 
     // Format location contact phone
     if (data[CONFIG.FIELD_NAMES.LOCATION_CONTACT_PHONE]) {
@@ -597,11 +585,7 @@ export class RecoveryFormHandler extends FormHandler {
     data[CONFIG.FIELD_NAMES.REQUEST_DETAILS] = data.incidentDescription || '';
 
     // Handle conditional fields for display
-    if (data.offenceType === 'Other' && data.offenceTypeOther) {
-      data.offenceTypeDisplay = data.offenceTypeOther;
-    } else {
-      data.offenceTypeDisplay = data.offenceType || 'Not specified';
-    }
+    data.offenceTypeDisplay = data.offenceType || 'Not specified';
 
     if (data.city === 'Other' && data.cityOther) {
       data.cityDisplay = data.cityOther;

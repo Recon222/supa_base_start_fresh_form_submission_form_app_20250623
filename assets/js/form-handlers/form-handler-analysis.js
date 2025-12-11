@@ -26,21 +26,9 @@ export class AnalysisFormHandler extends FormHandler {
     const conditionalHandler = new ConditionalFieldHandler(this);
 
     // Setup all "Other" fields
-    conditionalHandler.setupOtherField('offenceType', 'offenceTypeOtherGroup', 'offenceTypeOther');
     conditionalHandler.setupOtherField('videoLocation', 'videoLocationOtherGroup', 'videoLocationOther');
     conditionalHandler.setupOtherField('city', 'cityOtherGroup', 'cityOther');
     conditionalHandler.setupOtherField('serviceRequired', 'serviceRequiredOtherGroup', 'serviceRequiredOther');
-
-    // Set occurrence date from recording date
-    const recordingDateField = this.form.querySelector('#recordingDate');
-    if (recordingDateField) {
-      recordingDateField.addEventListener('change', (e) => {
-        const occDateField = this.form.querySelector('#occDate');
-        if (occDateField && e.target.value) {
-          occDateField.value = e.target.value;
-        }
-      });
-    }
   }
 
   collectFormData() {
