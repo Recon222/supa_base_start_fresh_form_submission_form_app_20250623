@@ -57,11 +57,6 @@ export class UploadFormHandler extends FormHandler {
       addLocationBtn.addEventListener('click', () => this.addLocationVideo());
     }
 
-    // Set incident date to today (hidden field)
-    const occDateField = this.form.querySelector('#occDate');
-    if (occDateField) {
-      occDateField.value = new Date().toISOString().split('T')[0];
-    }
   }
 
   setupLocationVideoListeners(index) {
