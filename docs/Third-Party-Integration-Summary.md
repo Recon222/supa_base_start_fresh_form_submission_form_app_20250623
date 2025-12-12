@@ -7,7 +7,7 @@
 
 ## Overview
 
-The FVU Request System generates PDFs client-side and submits them to the FAT (Forensic Analysis Tracking) system for storage and workflow management. The FAT system has limited intake fields, so we optimized our submissions to populate as many fields as possible automatically.
+The FVU Request System generates PDFs client-side and submits them to the FAT system for storage and workflow management. The FAT system has limited intake fields that are suited for our use case, so we optimized our submissions to populate as many fields as possible automatically.
 
 This document summarizes the field mappings implemented to eliminate manual data entry during ticket evaluation.
 
@@ -17,15 +17,13 @@ This document summarizes the field mappings implemented to eliminate manual data
 
 When forms were submitted, the FAT system showed mostly empty fields:
 
-| Field | Before | After |
-|-------|--------|-------|
-| Summary (File Desc) | NEW Request For Service | FVU Analysis Request |
-| File Type | Test | Video Clarification |
-| Type of Occurrence | (empty) | Homicide |
-| Requesting Area | (empty) | Homicide and Missing Persons |
-| Occurrence Date | (empty) | 2025-12-05 |
-
-This required staff to manually read each submission and fill in the dropdown fields during evaluation.
+| Field               | Before                  | After                        |
+| ------------------- | ----------------------- | ---------------------------- |
+| Summary (File Desc) | NEW Request For Service | FVU Analysis Request         |
+| File Type           | Test                    | Video Clarification          |
+| Type of Occurrence  | (empty)                 | Homicide                     |
+| Requesting Area     | (empty)                 | Homicide and Missing Persons |
+| Occurrence Date     | (empty)                 | 2025-12-05                   |
 
 ---
 
@@ -76,11 +74,9 @@ This is why our integration sends `occType: "1"` rather than `occType: "Homicide
 Maps to the FAT System's `fat_occTypes` table.
 
 | Our Form Value | FAT System ID | FAT System Label |
-|----------------|---------------|------------------|
-| Homicide | 1 | Homicide |
-| Missing Person | 2 | Missing Person |
-
-We simplified our forms to only offer these two options since they match the FAT system.
+| -------------- | ------------- | ---------------- |
+| Homicide       | 1             | Homicide         |
+| Missing Person | 2             | Missing Person   |
 
 ---
 
@@ -88,9 +84,9 @@ We simplified our forms to only offer these two options since they match the FAT
 
 Maps to the FAT System's `fat_servicing` table.
 
-| Our Setting | FAT System ID | FAT System Label |
-|-------------|---------------|------------------|
-| (hardcoded) | 36 | Homicide and Missing Persons |
+| Our Setting | FAT System ID | FAT System Label             |
+| ----------- | ------------- | ---------------------------- |
+| (hardcoded) | 36            | Homicide and Missing Persons |
 
 All FVU requests route to the same area, so this is set automatically.
 
@@ -98,15 +94,13 @@ All FVU requests route to the same area, so this is set automatically.
 
 ### 3. Request Type (ticketStatus)
 
-Maps to the FAT System's `fat_rfs_types` table.
+Maps to `fat_rfs_types`.
 
-| Our Form | FAT System ID | Current Label | Suggested Label |
-|----------|---------------|---------------|-----------------|
-| Analysis | 1 | Video Clarification | Video Analysis |
-| Recovery | 2 | Video Timeline | Video Extraction |
-| Upload | 4 | Video Upload | Video Upload |
-
-**Action for FAT System:** Rename labels in `fat_rfs_types` table to match FVU terminology.
+| Our Form | FAT System ID | Old Label           | New Label                |
+| -------- | ------------- | ------------------- | ------------------------ |
+| Analysis | 1             | Video Clarification | Video Analysis           |
+| Recovery | 2             | Video Timeline      | CCTV Extraction/Recovery |
+| Upload   | 4             | Video Upload        | Video Upload             |
 
 ---
 
@@ -114,11 +108,11 @@ Maps to the FAT System's `fat_rfs_types` table.
 
 Maps to the FAT System's `fat_tickets.rfsHeader` field.
 
-| Our Form | Value Sent |
-|----------|------------|
+| Our Form | Value Sent           |
+| -------- | -------------------- |
 | Analysis | FVU Analysis Request |
 | Recovery | FVU Recovery Request |
-| Upload | FVU Upload Request |
+| Upload   | FVU Upload Request   |
 
 **Note:** We are sending the correct value, but the FAT system still shows "NEW Request For Service". This requires a fix on the FAT System's end to use the submitted `rfsHeader` value instead of the default.
 
@@ -127,6 +121,7 @@ Maps to the FAT System's `fat_tickets.rfsHeader` field.
 ### 5. Date of Occurrence (occDate)
 
 Previously handled inconsistently:
+
 - Upload: Auto-set to today's date (hidden)
 - Analysis: Copied from recording date
 - Recovery: Derived from extraction start time
@@ -138,14 +133,17 @@ Previously handled inconsistently:
 ## Form Changes Summary
 
 ### All Forms
+
 - Added "Date of Occurrence" date picker (required field)
 - Simplified offence types to: Homicide, Missing Person
 - Removed "Other" option and free-text fallback
 
 ### Upload Form
+
 - Added "Type of Offence" dropdown (was missing)
 
 ### Recovery Form
+
 - Removed: Robbery, Shooting, Sexual Assault, Other options
 
 ---
@@ -155,6 +153,7 @@ Previously handled inconsistently:
 For the FAT System's reference, here are the relevant tables:
 
 ### fat_occTypes
+
 ```
 ID  | Name
 ----|----------------
@@ -163,6 +162,7 @@ ID  | Name
 ```
 
 ### fat_servicing (partial)
+
 ```
 ID  | Name
 ----|---------------------------
@@ -170,6 +170,7 @@ ID  | Name
 ```
 
 ### fat_rfs_types
+
 ```
 ID  | Name (current)        | Suggested
 ----|----------------------|------------------
@@ -197,15 +198,3 @@ The issue is in the FAT System's ticket creation code - the submitted `rfsHeader
 - `assets/js/form-handlers/form-handler-*.js` - Removed legacy occDate logic
 
 ---
-
-## Testing Verification
-
-After deployment, submitted forms should show:
-
-| Field | Expected Value |
-|-------|----------------|
-| Type of Occurrence | Homicide or Missing Person |
-| Requesting Area | Homicide and Missing Persons |
-| File Type | Video Clarification/Timeline/Upload |
-| Occurrence Date | User-selected date |
-| Requested by | Officer name from form |
