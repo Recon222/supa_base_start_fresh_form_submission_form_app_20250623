@@ -979,6 +979,23 @@ select.form-control.is-valid {
   .form-section h3 {
     font-size: var(--font-size-lg);  /* 1.125rem */
   }
+
+  /* Reduce section spacing on mobile for less scrolling */
+  .form-section {
+    margin-bottom: var(--space-lg);  /* 1.5rem instead of 3rem */
+    padding-bottom: var(--space-md);  /* 1rem instead of 2rem */
+  }
+
+  /* Location/DVR groups - less padding on mobile */
+  .location-video-group,
+  .dvr-group {
+    padding: var(--space-md) !important;  /* 1rem instead of default larger padding */
+  }
+
+  /* Form group spacing on mobile */
+  .form-group {
+    margin-bottom: var(--space-md);  /* 1rem instead of 1.5rem */
+  }
 }
 
 /* ========================================
