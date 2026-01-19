@@ -34,6 +34,7 @@
   },
   "homepage": "https://github.com/Recon222/supa_base_start_fresh_form_submission_form_app_20250623#readme",
   "devDependencies": {
-    "@playwright/test": "^1.57.0"
+    "@playwright/test": "^1.57.0",
+    "md-to-pdf": "^5.2.5"
   }
 }
