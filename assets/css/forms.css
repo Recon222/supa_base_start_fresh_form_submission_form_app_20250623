@@ -611,12 +611,13 @@ input[type="number"].form-control::-webkit-inner-spin-button {
   margin: 0;
 }
 
-/* Date and time input constraints for mobile */
+/* Date and time input constraints for mobile - match select approach */
 input[type="date"],
 input[type="time"],
 input[type="datetime-local"] {
-  -webkit-appearance: textfield;
-  appearance: textfield;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   width: 100%;
   max-width: 100%;
   min-width: 0;
