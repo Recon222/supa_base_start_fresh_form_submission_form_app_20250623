@@ -179,6 +179,78 @@ if (Test-Path $SplashSource) {
     Write-Host "  [WARN] PWA splash folder not found at $SplashSource" -ForegroundColor Yellow
 }
 
+# ============================================
+# Update PWA paths for production subdirectory
+# ============================================
+Write-Host ""
+Write-Host "Updating PWA paths for production subdirectory..." -ForegroundColor White
+$ProductionPath = "/ext/intake"
+
+# Update manifest.json paths
+$ManifestFile = Join-Path $DeployDir "manifest.json"
+if (Test-Path $ManifestFile) {
+    $content = Get-Content $ManifestFile -Raw
+    # Update start_url
+    $content = $content -replace '"start_url":\s*"/index\.php"', "`"start_url`": `"$ProductionPath/index.php`""
+    # Update scope
+    $content = $content -replace '"scope":\s*"/"', "`"scope`": `"$ProductionPath/`""
+    # Update all icon src paths (matches "/assets/images/icons/...")
+    $content = $content -replace '"src":\s*"/assets/', "`"src`": `"$ProductionPath/assets/"
+    Set-Content $ManifestFile $content -NoNewline
+    Write-Host "  [OK] manifest.json paths updated for $ProductionPath" -ForegroundColor Green
+}
+
+# Update sw.js paths
+$SwFile = Join-Path $DeployDir "sw.js"
+if (Test-Path $SwFile) {
+    $content = Get-Content $SwFile -Raw
+    # Update all paths in STATIC_ASSETS array
+    # Root path
+    $content = $content -replace "'/'", "'$ProductionPath/'"
+    # PHP pages
+    $content = $content -replace "'/index\.php'", "'$ProductionPath/index.php'"
+    $content = $content -replace "'/upload\.php'", "'$ProductionPath/upload.php'"
+    $content = $content -replace "'/analysis\.php'", "'$ProductionPath/analysis.php'"
+    $content = $content -replace "'/recovery\.php'", "'$ProductionPath/recovery.php'"
+    # Asset paths (CSS, JS, images, lib)
+    $content = $content -replace "'/assets/", "'$ProductionPath/assets/"
+    $content = $content -replace "'/lib/", "'$ProductionPath/lib/"
+    $content = $content -replace "'/manifest\.json'", "'$ProductionPath/manifest.json'"
+    Set-Content $SwFile $content -NoNewline
+    Write-Host "  [OK] sw.js paths updated for $ProductionPath" -ForegroundColor Green
+}
+
+# Update pwa-register.js paths
+$PwaRegisterFile = Join-Path $AssetsDest "js\pwa-register.js"
+if (Test-Path $PwaRegisterFile) {
+    $content = Get-Content $PwaRegisterFile -Raw
+    # Update service worker registration path and scope
+    $content = $content -replace "register\('/sw\.js',\s*\{\s*scope:\s*'/'\s*\}\)", "register('$ProductionPath/sw.js', { scope: '$ProductionPath/' })"
+    # Update iOS install prompt icon path
+    $content = $content -replace 'src="/assets/images/icons/', "src=`"$ProductionPath/assets/images/icons/"
+    Set-Content $PwaRegisterFile $content -NoNewline
+    Write-Host "  [OK] pwa-register.js paths updated for $ProductionPath" -ForegroundColor Green
+}
+
+# Update PHP files with PWA paths
+$PhpFiles = @("index.php", "upload.php", "analysis.php", "recovery.php")
+foreach ($phpFile in $PhpFiles) {
+    $PhpPath = Join-Path $DeployDir $phpFile
+    if (Test-Path $PhpPath) {
+        $content = Get-Content $PhpPath -Raw
+        # Update manifest.json link
+        $content = $content -replace 'href="/manifest\.json"', "href=`"$ProductionPath/manifest.json`""
+        # Update icon paths
+        $content = $content -replace 'href="/assets/images/icons/', "href=`"$ProductionPath/assets/images/icons/"
+        # Update splash screen paths
+        $content = $content -replace 'href="/assets/images/splash/', "href=`"$ProductionPath/assets/images/splash/"
+        # Update content attributes (for msapplication-TileImage)
+        $content = $content -replace 'content="/assets/images/icons/', "content=`"$ProductionPath/assets/images/icons/"
+        Set-Content $PhpPath $content -NoNewline
+    }
+}
+Write-Host "  [OK] PHP files PWA paths updated for $ProductionPath" -ForegroundColor Green
+
 # Create a simple deployment info file
 $DeployInfo = @"
 FVU Forms - PHP Deployment Package
