@@ -615,7 +615,11 @@ input[type="number"].form-control::-webkit-inner-spin-button {
 input[type="date"],
 input[type="time"],
 input[type="datetime-local"] {
+  -webkit-appearance: textfield;
+  appearance: textfield;
+  width: 100%;
   max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
 }
 

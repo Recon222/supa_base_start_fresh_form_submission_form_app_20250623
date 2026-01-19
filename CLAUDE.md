@@ -186,8 +186,8 @@ All forms share:
 |-----------------|-------------------------------------------------------------------|
 | VM SSH access   | `ssh -p 2211 fvuadmin@72.142.23.10`                               |
 | SFTP to Phil    | `sftp -P 2109 peeluploader@3.96.182.77`                           |
-| Build script    | Handles: .html→.php links, lib/, supabase removal, header links   |
-| Deploy workflow | Build → SCP to VM → SFTP to Phil's /intake/                       |
+| Build script    | Handles: .html→.php, lib/, supabase removal, header links, PWA    |
+| Deploy workflow | Build → SCP to VM → SSH to VM → SFTP to Phil's /intake/           |
 
 **When ready to redeploy:**
 
@@ -196,12 +196,17 @@ All forms share:
    .\scripts\build-php.ps1
    ```
 
-2. SCP to VM:
+2. SCP to VM (from local Windows machine):
    ```cmd
    scp -P 2211 -r "deploy\*" fvuadmin@72.142.23.10:/var/www/fvu/
    ```
 
-3. SFTP to Phil's server:
+3. SSH into VM:
+   ```cmd
+   ssh -p 2211 fvuadmin@72.142.23.10
+   ```
+
+4. SFTP to Phil's server (from VM):
    ```bash
    sftp -P 2109 peeluploader@3.96.182.77
    cd intake
@@ -209,9 +214,13 @@ All forms share:
    put /var/www/fvu/upload.php
    put /var/www/fvu/analysis.php
    put /var/www/fvu/recovery.php
+   put /var/www/fvu/manifest.json
+   put /var/www/fvu/sw.js
    put -r /var/www/fvu/lib
    put -r /var/www/fvu/assets
    ```
+
+**Note:** The `assets/` folder includes PWA icons (`assets/images/icons/`) and iOS splash screens (`assets/images/splash/`).
 
 ## MCP Integration
 
