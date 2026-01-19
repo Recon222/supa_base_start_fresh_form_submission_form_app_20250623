@@ -26,26 +26,56 @@
       gap: 4rem;
       margin-bottom: 2rem;
     }
-    
+
     .header-logo {
       width: 300px;
       height: 300px;
       flex-shrink: 0;
     }
-    
-    @media (max-width: 768px) {
+
+    /* Tablet and small desktop */
+    @media (max-width: 992px) {
       .logo-header {
-        flex-direction: column;
         gap: 2rem;
       }
-      
+
       .header-logo {
         width: 200px;
         height: 200px;
       }
-      
+    }
+
+    /* Mobile devices */
+    @media (max-width: 768px) {
+      .logo-header {
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .header-logo {
+        width: 150px;
+        height: 150px;
+      }
+
       .hero-title {
-        font-size: 2rem !important;
+        font-size: 1.75rem !important;
+      }
+    }
+
+    /* Extra small screens (iPhone SE, small Android) */
+    @media (max-width: 375px) {
+      .header-logo {
+        width: 120px;
+        height: 120px;
+      }
+
+      .hero-title {
+        font-size: 1.5rem !important;
+      }
+
+      .logo-header {
+        gap: 1rem;
       }
     }
   </style>
@@ -69,10 +99,10 @@
     <div class="container">
       <div class="hero-content" style="margin-top: -2rem;">
         <!-- Logo Header Section -->
-        <div class="logo-header" style="display: flex; align-items: center; justify-content: center; gap: 4rem; margin-bottom: 2rem;">
-          <img src="assets/images/homicide-logo-300x300.svg" alt="Forensic Video Unit" class="header-logo" style="width: 300px; height: 300px;">
+        <div class="logo-header">
+          <img src="assets/images/homicide-logo-300x300.svg" alt="Forensic Video Unit" class="header-logo">
           <h2 class="hero-title" style="margin: 0;">FVU Request Portal</h2>
-          <img src="assets/images/peel-logo.svg" alt="Peel Regional Police" class="header-logo" style="width: 300px; height: 300px;">
+          <img src="assets/images/peel-logo.svg" alt="Peel Regional Police" class="header-logo">
         </div>
         
         <p class="text-muted" style="margin-bottom: 1.5rem; margin-top: 4rem;">Choose the appropriate form for your video evidence needs</p>
