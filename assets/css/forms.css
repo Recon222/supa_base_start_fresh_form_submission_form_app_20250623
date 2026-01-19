@@ -203,6 +203,8 @@
 html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
 }
 
 body {
@@ -214,6 +216,7 @@ body {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+  overscroll-behavior-x: none;
 }
 
 /* ========================================
@@ -598,6 +601,14 @@ input[type="number"].form-control::-webkit-inner-spin-button {
   opacity: 1;
   height: var(--input-height);
   margin: 0;
+}
+
+/* Date and time input constraints for mobile */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* ========================================
