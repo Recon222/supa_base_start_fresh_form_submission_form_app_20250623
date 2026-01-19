@@ -970,6 +970,15 @@ select.form-control.is-valid {
   .container {
     padding: 0 var(--space-md);
   }
+
+  /* Reduce section headings on mobile for less scrolling */
+  .form-section h2 {
+    font-size: var(--font-size-xl);  /* 1.25rem instead of default 1.5rem */
+  }
+
+  .form-section h3 {
+    font-size: var(--font-size-lg);  /* 1.125rem */
+  }
 }
 
 /* ========================================
