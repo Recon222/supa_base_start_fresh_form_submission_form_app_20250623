@@ -312,6 +312,8 @@ body:has(.index-header) {
     font-size: var(--font-size-lg);
     flex: 1 0 100%;
     order: 2;
+    /* Prevent overlap with header-right buttons (two 56px buttons + 16px gap + 8px safety) */
+    padding-right: calc(var(--header-button-size) * 2 + var(--space-md) + var(--space-sm));
   }
 
   .btn-secondary.btn-sm {
