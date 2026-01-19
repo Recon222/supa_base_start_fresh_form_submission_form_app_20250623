@@ -46,6 +46,20 @@ npm run report         # View HTML test report
 
 ## Architecture
 
+### Header Component (JS-Injected)
+
+Unlike the rest of the UI which uses inline HTML, the header is dynamically injected via JavaScript. This allows a single source of truth for the header across all forms.
+
+**Usage in form HTML:**
+```html
+<script type="module">
+  import { initHeader } from './assets/js/header-component.js';
+  initHeader('Form Title');
+</script>
+```
+
+**Important:** The header requires a `.background-animation` element to exist in the DOM - it injects itself immediately after this element. The build script converts `.html` links to `.php` in the header for production.
+
 ### Form Handler Hierarchy
 ```
 FormHandler (form-handler-base.js)     # Base class: validation, drafts, progress, submission
@@ -56,13 +70,84 @@ FormHandler (form-handler-base.js)     # Base class: validation, drafts, progres
 
 ### Key Modules (`assets/js/`)
 - `config.js` - All configuration constants (frozen objects)
-- `header-component.js` - Reusable header with `initHeader(formTitle)`, fixed positioning, theme toggle, draft button
 - `validators.js` - Field validation with patterns from config
 - `storage.js` - Draft auto-save (localStorage, 2s debounce)
 - `officer-storage.js` - Persistent investigator info across forms
-- `api-client.js` - Submission with retry logic
+- `api-client.js` - Submission logic (see below)
 - `pdf-generator.js` / `pdf-templates.js` - Uses pdfmake (`lib/pdfmake.min.js`)
 - `supabase.js` - Supabase integration (toggle via `CONFIG.USE_SUPABASE`)
+
+### API Client (`api-client.js`)
+
+Handles form submission with:
+- **Retry logic**: Exponential backoff (1s, 2s, 4s), max 3 attempts
+- **Smart retry**: Skips retry for 4xx client errors (validation failures)
+- **Dual path**: Routes to Supabase or PHP based on `CONFIG.USE_SUPABASE`
+- **File attachments**: PDF as `fileAttachmentA`, JSON as `fileAttachmentB`
+- **Dev mode**: Mock submission with simulated delay and random success/failure
+- **Error handling**: Custom `APIError` class, offline detection, timeout handling
+
+**Third-party field mapping (Phil's FAT system):**
+
+Field mappings happen in two places:
+1. **Form handlers** (`collectFormData()`) - field renames, flattening nested data (e.g., Recovery flattens first DVR to root level)
+2. **api-client.js** - ID lookups and hardcoded values
+
+Key mappings in api-client.js:
+```javascript
+// requestDetails → rfsDetails (field rename)
+formData.rfsDetails = formData.requestDetails
+
+// occType → fat_occTypes table
+'homicide' → '1'
+'missing person' → '2'
+
+// reqArea → fat_servicing table (always 36 = "Homicide and Missing Persons")
+formData.reqArea = '36'
+
+// ticketStatus → fat_rfs_types table
+'analysis' → '1'  // Video Analysis
+'recovery' → '2'  // Video Extraction
+'upload' → '4'    // Video Upload
+
+// rfsHeader (File Desc)
+'upload' → 'FVU Upload Request'
+'analysis' → 'FVU Analysis Request'
+'recovery' → 'FVU Recovery Request'
+```
+
+### fileDetails Generation
+
+Each form handler implements `generateFileDetails(data)` which creates a structured text summary sent to Phil's FAT system. This is the primary human-readable description of the request.
+
+**Architecture:**
+- Each form handler overrides `generateFileDetails()` with form-specific logic
+- Called during `collectFormData()` before submission
+- Output is a multi-line formatted string with section headers
+
+**Format pattern:**
+```
+========================================
+         VIDEO EVIDENCE UPLOAD REQUEST
+========================================
+=== EVIDENCE ===
+Occurrence: PR12345
+Evidence Bag: 123456
+Media Type: USB
+
+=== INVESTIGATOR ===
+Name: John Smith (Badge: 1234)
+Phone: 905-555-1234
+Email: john.smith@peelpolice.ca
+
+=== LOCATION 1 ===
+Business: Example Store
+Address: 123 Main St, Mississauga
+Video Period: Dec 15, 2025 10:00 to Dec 15, 2025 14:00
+...
+```
+
+Each form type has different sections (Upload has locations, Recovery has DVR systems with time frames, Analysis has video source info).
 
 ### Dual Backend Support
 - **Supabase**: Set `USE_SUPABASE: true` in config.js (default for development)
@@ -94,3 +179,40 @@ All forms share:
 ## Feature Flags (`config.js` → `CONFIG.FEATURES`)
 
 - `BROWSER_AUTOFILL` - Controls browser autofill suggestions (default: `false` for production)
+
+## Deployment
+
+| Task            | Status                                                            |
+|-----------------|-------------------------------------------------------------------|
+| VM SSH access   | `ssh -p 2211 fvuadmin@72.142.23.10`                               |
+| SFTP to Phil    | `sftp -P 2109 peeluploader@3.96.182.77`                           |
+| Build script    | Handles: .html→.php links, lib/, supabase removal, header links   |
+| Deploy workflow | Build → SCP to VM → SFTP to Phil's /intake/                       |
+
+**When ready to redeploy:**
+
+1. Build:
+   ```powershell
+   .\scripts\build-php.ps1
+   ```
+
+2. SCP to VM:
+   ```cmd
+   scp -P 2211 -r "deploy\*" fvuadmin@72.142.23.10:/var/www/fvu/
+   ```
+
+3. SFTP to Phil's server:
+   ```bash
+   sftp -P 2109 peeluploader@3.96.182.77
+   cd intake
+   put /var/www/fvu/index.php
+   put /var/www/fvu/upload.php
+   put /var/www/fvu/analysis.php
+   put /var/www/fvu/recovery.php
+   put -r /var/www/fvu/lib
+   put -r /var/www/fvu/assets
+   ```
+
+## MCP Integration
+
+This project has Supabase MCP configured for database operations during development. The MCP server provides direct database access for debugging and data inspection.
