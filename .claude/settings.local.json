@@ -19,7 +19,12 @@
       "Bash(powershell -Command \"Get-Content ''D:\\Work Coding Projects\\Submission Forms for FAT\\supa_base_start_fresh_form_submission_form_app_20250623\\assets\\js\\logo-data.js'' | Select-Object -Skip 20 -First 20\")",
       "Bash(powershell -Command \"Get-Content ''D:\\Work Coding Projects\\Submission Forms for FAT\\supa_base_start_fresh_form_submission_form_app_20250623\\assets\\js\\logo-data.js'' | Select-Object -First 40\")",
       "Bash(start \"D:\\Work Coding Projects\\Submission Forms for FAT\\supa_base_start_fresh_form_submission_form_app_20250623\\test-logo.html\")",
-      "Bash(node -c:*)"
+      "Bash(node -c:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File \".\\scripts\\build-php.ps1\")",
+      "Bash(node --check:*)",
+      "Bash(npx md-to-pdf:*)",
+      "Bash(npx md-to-pdf \"docs/Upload_Form_fileDetails_Mapping_Plan.md\")",
+      "Bash(dir:*)"
     ],
     "deny": []
   },
