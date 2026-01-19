@@ -773,6 +773,14 @@ select.form-control.is-valid {
   font-size: var(--font-size-sm);
 }
 
+/* Icon-only home button - square padding */
+.home-btn {
+  padding: var(--space-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .btn-danger {
   background: var(--color-danger);
   color: var(--color-white);

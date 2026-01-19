@@ -328,7 +328,7 @@ body:has(.index-header) {
     /* REMOVE absolute positioning - stay in normal flex flow */
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: var(--space-xs);
     margin-left: auto; /* Push to right side of row 1 */
     flex: 0 0 auto;
   }
