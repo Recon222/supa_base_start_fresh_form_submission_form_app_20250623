@@ -19,12 +19,30 @@
   
   <!-- Responsive CSS for logos -->
   <style>
+    /* Desktop: logos on sides, title in middle (all in one row) */
     .logo-header {
-      display: flex;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
       align-items: center;
-      justify-content: center;
+      justify-items: center;
       gap: 4rem;
       margin-bottom: 2rem;
+    }
+
+    /* On desktop, logos-row wrapper is invisible - logos act as direct grid items */
+    .logos-row {
+      display: contents;
+    }
+
+    /* Desktop order: logo1, title, logo2 */
+    .logos-row .header-logo:first-child {
+      order: 1;
+    }
+    .hero-title {
+      order: 2;
+    }
+    .logos-row .header-logo:last-child {
+      order: 3;
     }
 
     .header-logo {
@@ -45,36 +63,54 @@
       }
     }
 
-    /* Mobile devices */
+    /* Mobile devices - logos side by side, title underneath */
     @media (max-width: 768px) {
       .logo-header {
+        display: flex;
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 1rem;
         margin-bottom: 1.5rem;
       }
 
+      /* Enable logos-row as flex container on mobile */
+      .logos-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+        order: -1; /* Ensure logos row appears first (above title) */
+      }
+
+      /* Reset order for mobile - handled by logos-row order */
+      .logos-row .header-logo:first-child,
+      .logos-row .header-logo:last-child {
+        order: unset;
+      }
+
       .header-logo {
-        width: 150px;
-        height: 150px;
+        width: 130px;
+        height: 130px;
       }
 
       .hero-title {
+        order: unset;
         font-size: 1.75rem !important;
+        text-align: center;
       }
     }
 
     /* Extra small screens (iPhone SE, small Android) */
     @media (max-width: 375px) {
       .header-logo {
-        width: 120px;
-        height: 120px;
+        width: 100px;
+        height: 100px;
       }
 
       .hero-title {
         font-size: 1.5rem !important;
       }
 
-      .logo-header {
+      .logos-row {
         gap: 1rem;
       }
     }
@@ -100,9 +136,11 @@
       <div class="hero-content" style="margin-top: -2rem;">
         <!-- Logo Header Section -->
         <div class="logo-header">
-          <img src="assets/images/homicide-logo-300x300.svg" alt="Forensic Video Unit" class="header-logo">
+          <div class="logos-row">
+            <img src="assets/images/homicide-logo-300x300.svg" alt="Forensic Video Unit" class="header-logo">
+            <img src="assets/images/peel-logo.svg" alt="Peel Regional Police" class="header-logo">
+          </div>
           <h2 class="hero-title" style="margin: 0;">FVU Request Portal</h2>
-          <img src="assets/images/peel-logo.svg" alt="Peel Regional Police" class="header-logo">
         </div>
         
         <p class="text-muted" style="margin-bottom: 1.5rem; margin-top: 4rem;">Choose the appropriate form for your video evidence needs</p>
