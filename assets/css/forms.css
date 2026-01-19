@@ -221,7 +221,7 @@ body {
   overflow-x: hidden;
   overscroll-behavior-x: none;
   /* iOS safe area padding for notch and home indicator */
-  padding-top: env(safe-area-inset-top);
+  /* Note: padding-top handled in header.css with var(--header-height) */
   padding-right: env(safe-area-inset-right);
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
