@@ -62,62 +62,21 @@ export async function submitWithRetry(formData, pdfBlob, jsonBlob, maxRetries = 
  * @returns {Promise<Object>} API response
  */
 async function submitForm(formData, pdfBlob, jsonBlob) {
-  // If Supabase is enabled, use Supabase submission
-  if (CONFIG.USE_SUPABASE) {
-    try {
-      // Convert blobs to base64 for storage
-      const pdfBase64 = await blobToBase64(pdfBlob);
-      const jsonBase64 = await blobToBase64(jsonBlob);
-      
-      // Add file data to formData
-      const submissionData = {
-        ...formData,
-        attachments: [
-          {
-            type: 'pdf',
-            filename: `${formData.reqArea}_${Date.now()}.pdf`,
-            data: pdfBase64,
-            size: pdfBlob.size
-          },
-          {
-            type: 'json',
-            filename: `${formData.reqArea}_${Date.now()}.json`,
-            data: jsonBase64,
-            size: jsonBlob.size
-          }
-        ]
-      };
-      
-      const result = await submitToSupabase(submissionData);
-      
-      return {
-        success: true,
-        message: 'Request submitted successfully',
-        ticketNumber: result.data.id,
-        submissionId: result.data.id
-      };
-    } catch (error) {
-      console.error('Supabase submission error:', error);
-      throw new APIError('Failed to submit to Supabase', { originalError: error });
-    }
-  }
-  
-  // Original PHP submission logic
-  const submission = new FormData();
+  // ===== FIELD MAPPING (shared by both Supabase and PHP paths) =====
 
-  // Map requestDetails to rfsDetails for Phil's server
+  // Map requestDetails to rfsDetails for third-party
   if (formData.requestDetails) {
     formData.rfsDetails = formData.requestDetails;
   }
 
-  // Map occType to Phil's fat_occTypes table IDs
+  // Map occType to fat_occTypes table IDs
   // Our forms only use: Homicide (1), Missing Person (2)
   const occTypeMap = {
     'homicide': '1',
     'missing person': '2'
   };
 
-  // Convert occType text to Phil's ID, default to 1 (Homicide)
+  // Convert occType text to ID, default to 1 (Homicide)
   if (formData.occType) {
     const lookupKey = formData.occType.toLowerCase().trim();
     formData.occType = occTypeMap[lookupKey] || '1';
@@ -125,7 +84,7 @@ async function submitForm(formData, pdfBlob, jsonBlob) {
     formData.occType = '1';
   }
 
-  // Set reqArea to Phil's fat_servicing table ID for "Homicide and Missing Persons"
+  // Set reqArea to fat_servicing table ID for "Homicide and Missing Persons"
   // serviceID 36 = "Homicide and Missing Persons"
   formData.reqArea = '36';
 
@@ -138,16 +97,61 @@ async function submitForm(formData, pdfBlob, jsonBlob) {
   formData.rfsHeader = rfsHeaderMap[formData.formType] || 'FVU Request';
 
   // Set ticketStatus (Request Type) based on form type
-  // Maps to Phil's fat_rfs_types table:
-  // 1 = Video Analysis (was Video Clarification)
-  // 2 = Video Extraction (was Video Timeline)
-  // 4 = Video Upload
+  // Maps to fat_rfs_types table:
+  // 1 = Video Analysis, 2 = Video Extraction, 4 = Video Upload
   const ticketStatusMap = {
     'analysis': '1',
     'recovery': '2',
     'upload': '4'
   };
   formData.ticketStatus = ticketStatusMap[formData.formType] || '1';
+
+  // ===== END FIELD MAPPING =====
+
+  // If Supabase is enabled, use Supabase submission
+  if (CONFIG.USE_SUPABASE) {
+    try {
+      // Convert blobs to base64 for storage
+      const pdfBase64 = await blobToBase64(pdfBlob);
+      const jsonBase64 = await blobToBase64(jsonBlob);
+
+      const timestamp = Date.now();
+
+      // Add file data to formData
+      const submissionData = {
+        ...formData,
+        attachments: [
+          {
+            type: 'pdf',
+            filename: `${formData.formType}_${timestamp}.pdf`,
+            data: pdfBase64,
+            size: pdfBlob.size
+          },
+          {
+            type: 'json',
+            filename: `${formData.formType}_${timestamp}.json`,
+            data: jsonBase64,
+            size: jsonBlob.size
+          }
+        ]
+      };
+
+      const result = await submitToSupabase(submissionData);
+
+      return {
+        success: true,
+        message: 'Request submitted successfully',
+        ticketNumber: result.data.id,
+        submissionId: result.data.id
+      };
+    } catch (error) {
+      console.error('Supabase submission error:', error);
+      throw new APIError('Failed to submit to Supabase', { originalError: error });
+    }
+  }
+
+  // PHP submission
+  const submission = new FormData();
 
   // Add all form fields using their field names
   Object.entries(formData).forEach(([key, value]) => {

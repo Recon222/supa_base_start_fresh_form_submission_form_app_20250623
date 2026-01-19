@@ -45,37 +45,59 @@ export async function initSupabase() {
 export async function submitToSupabase(formData) {
   try {
     const supabase = await initSupabase();
-    
+
     // Extract attachments if they exist
     const attachments = formData.attachments || [];
-    
-    // Remove attachments from formData to avoid duplication
+
+    // Remove attachments from formData for clean storage in form_data column
     const cleanFormData = { ...formData };
     delete cleanFormData.attachments;
-    
-    // Prepare the submission data
+
+    // Prepare the submission data - mirrors third-party PHP structure
     const submission = {
-      request_type: formData.reqArea,
-      form_data: cleanFormData,
+      // Form identification
+      form_type: formData.formType,
+      ticket_status: formData.ticketStatus,
+      req_area: formData.reqArea,
+      rfs_header: formData.rfsHeader,
+
+      // Officer info
+      r_name: formData.rName,
+      badge: formData.badge,
+      requesting_phone: formData.requestingPhone,
       requesting_email: formData.requestingEmail,
-      requesting_name: formData.rName,
-      occurrence_number: formData.occNumber || null,
-      status: 'pending',
-      attachments: attachments // Add attachments to the submission
+
+      // Occurrence info
+      occ_number: formData.occNumber,
+      occ_date: formData.occDate || null,
+      occ_type: formData.occType,
+
+      // Request content
+      rfs_details: formData.rfsDetails || null,
+      file_details: formData.fileDetails || null,
+
+      // Full form data (all fields for reference)
+      form_data: cleanFormData,
+
+      // Attachments (PDF and JSON as base64)
+      attachments: attachments,
+
+      // Status
+      status: 'pending'
     };
-    
+
     // Insert into form_submissions table
     const { data, error } = await supabase
       .from('form_submissions')
       .insert([submission])
       .select()
       .single();
-    
+
     if (error) {
       console.error('Supabase submission error:', error);
       throw error;
     }
-    
+
     return { success: true, data };
   } catch (error) {
     console.error('Failed to submit to Supabase:', error);
