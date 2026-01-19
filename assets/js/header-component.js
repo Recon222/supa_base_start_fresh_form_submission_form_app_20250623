@@ -18,7 +18,7 @@ export function createHeader(formTitle) {
 
   header.innerHTML = `
     <div class="container">
-      <div class="header-content">
+      <div class="header-content" data-mobile-title="${formTitle}">
         <div class="header-left">
           <a href="index.html" class="btn btn-secondary btn-sm">← Back</a>
           <div class="header-divider"></div>

@@ -294,53 +294,83 @@ body:has(.index-header) {
 
 /* Mobile Responsive - using breakpoint variable */
 @media (max-width: 768px) {
+  /* Allow header to grow with content */
+  .main-header {
+    height: auto;
+    min-height: var(--header-height);
+  }
+
   .header-content {
-    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-sm);
     padding: var(--space-sm) var(--space-md);
   }
 
   .header-left {
-    flex-wrap: wrap;
+    /* Back button only - no wrapping needed */
+    flex: 0 0 auto;
     gap: var(--space-sm);
+  }
+
+  /* Hide the form title from header-left on mobile (we'll show it separately) */
+  .header-left .form-title {
+    display: none;
   }
 
   .header-divider {
     display: none;
   }
 
-  .form-title {
-    font-size: var(--font-size-lg);
-    flex: 1 0 100%;
-    order: 2;
-    /* Prevent overlap with header-right buttons (two 56px buttons + 16px gap + 8px safety) */
-    padding-right: calc(var(--header-button-size) * 2 + var(--space-md) + var(--space-sm));
-  }
-
-  .btn-secondary.btn-sm {
-    order: 1;
-  }
-
   .header-right {
-    position: absolute;
-    top: var(--space-sm);
-    right: var(--space-md);
+    /* REMOVE absolute positioning - stay in normal flex flow */
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-left: auto; /* Push to right side of row 1 */
+    flex: 0 0 auto;
   }
 
-  /* Draft button mobile - icon only */
-  .draft-button span:not(.draft-icon) {
-    display: none;
-  }
-
+  /* Draft button mobile - show text, auto width */
   .draft-button {
-    width: var(--header-button-size);
-    height: var(--header-button-size);
-    padding: 0;
-    justify-content: center;
+    width: auto;
+    height: auto;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-sm);
+  }
+
+  .draft-button .draft-text {
+    display: inline; /* Show the text on mobile */
+  }
+
+  /* Theme toggle - slightly smaller on mobile */
+  .theme-toggle {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Form title as pseudo-element on mobile - full width row 2 */
+  .header-content::after {
+    content: attr(data-mobile-title);
+    display: block;
+    flex: 1 0 100%;
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--form-title-color);
+    margin-top: var(--space-sm);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    line-height: var(--line-height-tight);
   }
 
   /* Index page mobile adjustments */
   .index-header .header-content {
     padding: var(--space-md);
+  }
+
+  .index-header .header-content::after {
+    display: none; /* Index page doesn't use this pattern */
   }
 
   .index-title {
