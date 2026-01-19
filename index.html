@@ -5,7 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Forensic Video Unit Request System - Peel Regional Police">
   <title>Forensic Video Unit - Request System</title>
-  
+
+  <!-- PWA Configuration -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1B3A6B">
+
+  <!-- iOS PWA Support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FVU Requests">
+
+  <!-- iOS Icons -->
+  <link rel="apple-touch-icon" href="/assets/images/icons/icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/icons/icon-180x180.png">
+
+  <!-- iOS Splash Screen - iPhone 16 Pro -->
+  <link rel="apple-touch-startup-image"
+        href="/assets/images/splash/splash-1206x2622.png"
+        media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3)">
+
+  <!-- Windows/Edge -->
+  <meta name="msapplication-TileColor" content="#1B3A6B">
+  <meta name="msapplication-TileImage" content="/assets/images/icons/icon-144x144.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/icons/icon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/icons/icon-16x16.png">
+
   <!-- Main CSS -->
   <link rel="stylesheet" href="assets/css/forms.css">
   <link rel="stylesheet" href="assets/css/header.css">
@@ -227,10 +253,14 @@
   <!-- Simple JavaScript for theme toggle and initialization -->
   <script type="module">
     import { initTheme, setupThemeToggle } from './assets/js/theme-manager.js';
-    
+    import { initPWA } from './assets/js/pwa-register.js';
+
     // Initialize theme system
     initTheme();
     setupThemeToggle();
+
+    // Initialize PWA
+    initPWA();
     
     // Add 3D tilt effect on card hover (optional enhancement)
     document.querySelectorAll('.form-card').forEach(card => {

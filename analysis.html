@@ -6,6 +6,32 @@
   <meta name="description" content="Analysis Request Form - Forensic Video Unit">
   <title>Analysis Request - Forensic Video Unit</title>
 
+  <!-- PWA Configuration -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1B3A6B">
+
+  <!-- iOS PWA Support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FVU Requests">
+
+  <!-- iOS Icons -->
+  <link rel="apple-touch-icon" href="/assets/images/icons/icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/icons/icon-180x180.png">
+
+  <!-- iOS Splash Screen - iPhone 16 Pro -->
+  <link rel="apple-touch-startup-image"
+        href="/assets/images/splash/splash-1206x2622.png"
+        media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3)">
+
+  <!-- Windows/Edge -->
+  <meta name="msapplication-TileColor" content="#1B3A6B">
+  <meta name="msapplication-TileImage" content="/assets/images/icons/icon-144x144.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/icons/icon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/icons/icon-16x16.png">
+
   <!-- CSS Files -->
   <link rel="stylesheet" href="assets/css/forms.css">
   <link rel="stylesheet" href="assets/css/header.css">
@@ -395,12 +421,16 @@
     import { CONFIG } from './assets/js/config.js';
     import { AnalysisFormHandler } from './assets/js/form-handlers/form-handler-analysis.js';
     import { initHeader } from './assets/js/header-component.js';
+    import { initPWA } from './assets/js/pwa-register.js';
 
     // Initialize header with form title
     initHeader('Forensic Analysis Request Form');
 
     // Initialize form handler
     const formHandler = new AnalysisFormHandler('analysis-form');
+
+    // Initialize PWA
+    initPWA();
   </script>
 </body>
 </html>

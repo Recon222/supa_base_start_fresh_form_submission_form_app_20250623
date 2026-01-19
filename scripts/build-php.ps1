@@ -129,6 +129,56 @@ if (Test-Path $HeaderPath) {
     Write-Host "  [OK] Converted .html links to .php in header-component.js" -ForegroundColor Green
 }
 
+# Copy PWA files
+Write-Host ""
+Write-Host "Copying PWA files..." -ForegroundColor White
+
+# Copy manifest.json
+$ManifestSource = Join-Path $SourceDir "manifest.json"
+$ManifestDest = Join-Path $DeployDir "manifest.json"
+if (Test-Path $ManifestSource) {
+    Copy-Item -Path $ManifestSource -Destination $ManifestDest
+    Write-Host "  [OK] manifest.json copied" -ForegroundColor Green
+} else {
+    Write-Host "  [WARN] manifest.json not found" -ForegroundColor Yellow
+}
+
+# Copy service worker
+$SwSource = Join-Path $SourceDir "sw.js"
+$SwDest = Join-Path $DeployDir "sw.js"
+if (Test-Path $SwSource) {
+    Copy-Item -Path $SwSource -Destination $SwDest
+    Write-Host "  [OK] sw.js copied" -ForegroundColor Green
+} else {
+    Write-Host "  [WARN] sw.js not found" -ForegroundColor Yellow
+}
+
+# Copy PWA icons folder
+$IconsSource = Join-Path $SourceDir "assets\images\icons"
+$IconsDest = Join-Path $DeployDir "assets\images\icons"
+if (Test-Path $IconsSource) {
+    if (!(Test-Path $IconsDest)) {
+        New-Item -Path $IconsDest -ItemType Directory -Force | Out-Null
+    }
+    Copy-Item -Path "$IconsSource\*" -Destination $IconsDest -Recurse -Force
+    Write-Host "  [OK] PWA icons copied" -ForegroundColor Green
+} else {
+    Write-Host "  [WARN] PWA icons folder not found at $IconsSource" -ForegroundColor Yellow
+}
+
+# Copy PWA splash screen folder
+$SplashSource = Join-Path $SourceDir "assets\images\splash"
+$SplashDest = Join-Path $DeployDir "assets\images\splash"
+if (Test-Path $SplashSource) {
+    if (!(Test-Path $SplashDest)) {
+        New-Item -Path $SplashDest -ItemType Directory -Force | Out-Null
+    }
+    Copy-Item -Path "$SplashSource\*" -Destination $SplashDest -Recurse -Force
+    Write-Host "  [OK] PWA splash screens copied" -ForegroundColor Green
+} else {
+    Write-Host "  [WARN] PWA splash folder not found at $SplashSource" -ForegroundColor Yellow
+}
+
 # Create a simple deployment info file
 $DeployInfo = @"
 FVU Forms - PHP Deployment Package
@@ -141,12 +191,23 @@ Files included:
 - upload.php
 - analysis.php
 - recovery.php
-- assets/ (CSS, JS, images)
+- manifest.json (PWA)
+- sw.js (Service Worker)
+- assets/ (CSS, JS, images, icons)
+- lib/ (pdfmake)
+
+PWA Configuration:
+- Service Worker: sw.js (cache version in file)
+- Manifest: manifest.json
+- Icons: assets/images/icons/
+- Splash: assets/images/splash/
 
 Deployment steps:
 1. Upload all files to homicidefvu.fatsystems.ca via SFTP
 2. Ensure file permissions: 644 for files, 755 for directories
-3. Test each form submission
+3. Verify manifest.json is served with correct MIME type
+4. Test each form submission
+5. Test PWA installation on Chrome/Safari
 
 Configuration:
 - USE_SUPABASE: false (configured for PHP endpoint)
