@@ -143,9 +143,6 @@
   </style>
 </head>
 <body>
-  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" style="position: fixed; top: 20px; right: 20px; z-index: 100;">
-    🌓
-  </button>
   <!-- Animated Background - The cool grid effect with floating shapes -->
   <div class="background-animation">
     <div class="grid-overlay"></div>
@@ -250,14 +247,9 @@
     </div>
   </main>
 
-  <!-- Simple JavaScript for theme toggle and initialization -->
+  <!-- Simple JavaScript for initialization -->
   <script type="module">
-    import { initTheme, setupThemeToggle } from './assets/js/theme-manager.js';
     import { initPWA } from './assets/js/pwa-register.js';
-
-    // Initialize theme system
-    initTheme();
-    setupThemeToggle();
 
     // Initialize PWA
     initPWA();
