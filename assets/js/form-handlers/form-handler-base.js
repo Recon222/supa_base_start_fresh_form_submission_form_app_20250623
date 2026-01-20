@@ -61,6 +61,10 @@ export class FormHandler {
    * This hides the progress bar when any input is focused and shows it again on blur.
    */
   setupKeyboardProgressBarFix() {
+    // Only apply on iOS where the keyboard causes fixed positioning issues
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (!isIOS) return;
+
     const progressContainer = document.querySelector('.progress-container');
     if (!progressContainer) return;
 
