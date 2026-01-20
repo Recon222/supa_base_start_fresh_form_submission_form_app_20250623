@@ -5,6 +5,9 @@
  * @module pwa-register
  */
 
+// Guard against double initialization
+let pwaInitialized = false;
+
 // Store the deferred install prompt for later use
 let deferredInstallPrompt = null;
 
@@ -394,6 +397,12 @@ function showIOSPrompt() {
  * Call this once on app startup
  */
 export function initPWA() {
+  if (pwaInitialized) {
+    console.log('[PWA] Already initialized, skipping');
+    return;
+  }
+  pwaInitialized = true;
+
   registerServiceWorker();
   setupInstallPrompt();
   setupOnlineStatus();
