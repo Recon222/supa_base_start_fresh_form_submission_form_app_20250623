@@ -14,6 +14,9 @@ let deferredInstallPrompt = null;
 // Track if the app is installed
 let isAppInstalled = false;
 
+// Store controllerchange handler reference to prevent memory leak
+let controllerChangeHandler = null;
+
 /**
  * Register the service worker
  * Called on page load
@@ -260,12 +263,19 @@ function showUpdateNotification(registration = null, version = '') {
   document.body.appendChild(banner);
 
   // Set up controller change listener BEFORE triggering skip waiting
+  // Remove old listener if exists to prevent memory leak
+  if (controllerChangeHandler) {
+    navigator.serviceWorker.removeEventListener('controllerchange', controllerChangeHandler);
+  }
+
   let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
+  controllerChangeHandler = () => {
     if (refreshing) return;
     refreshing = true;
     window.location.reload();
-  });
+  };
+
+  navigator.serviceWorker.addEventListener('controllerchange', controllerChangeHandler);
 
   document.getElementById('pwa-update-btn').addEventListener('click', () => {
     if (registration && registration.waiting) {
