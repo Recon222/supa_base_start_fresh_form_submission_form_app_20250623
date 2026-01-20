@@ -813,6 +813,7 @@ select.form-control.is-valid {
   left: 0;
   right: 0;
   z-index: var(--z-sticky);
+  transition: opacity 0.2s ease;
 }
 
 .progress {

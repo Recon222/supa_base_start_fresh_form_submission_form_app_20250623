@@ -42,6 +42,9 @@ export class FormHandler {
     // Set up event listeners
     this.setupEventListeners();
 
+    // Set up iOS keyboard fix for progress bar
+    this.setupKeyboardProgressBarFix();
+
     // Load officer info if exists
     this.loadOfficerInfoIfExists();
 
@@ -50,6 +53,29 @@ export class FormHandler {
 
     // Initialize progress bar
     this.updateProgress();
+  }
+
+  /**
+   * Hide progress bar when iOS keyboard is open
+   * On iOS, position:fixed elements at bottom:0 jump around when the keyboard opens.
+   * This hides the progress bar when any input is focused and shows it again on blur.
+   */
+  setupKeyboardProgressBarFix() {
+    const progressContainer = document.querySelector('.progress-container');
+    if (!progressContainer) return;
+
+    // Hide progress bar when any form input is focused (keyboard opens on iOS)
+    const inputs = document.querySelectorAll('input, textarea, select');
+    inputs.forEach(el => {
+      el.addEventListener('focus', () => {
+        progressContainer.style.opacity = '0';
+        progressContainer.style.pointerEvents = 'none';
+      });
+      el.addEventListener('blur', () => {
+        progressContainer.style.opacity = '1';
+        progressContainer.style.pointerEvents = '';
+      });
+    });
   }
 
   /**
