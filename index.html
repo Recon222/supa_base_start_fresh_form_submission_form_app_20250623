@@ -481,7 +481,7 @@
     }
   </style>
 </head>
-<body>
+<body style="background-color: #0a0a0a;">
   <!-- =====================================================
        EPIC LOADING SCREEN - First thing users see
        ===================================================== -->
@@ -603,22 +603,38 @@
 
   <!-- Loading Screen Handler - Must be non-module for immediate execution -->
   <script>
-    // Dismiss loading screen after 3 seconds (matches progress bar animation)
-    const LOADING_DURATION = 3000;
-    const FADE_DURATION = 800;
-
-    setTimeout(() => {
+    (function() {
       const loadingScreen = document.getElementById('loadingScreen');
-      if (loadingScreen) {
-        // Trigger the exit animations
-        loadingScreen.classList.add('fade-out');
+      const SESSION_KEY = 'fvu_loading_shown';
 
-        // Remove from DOM after exit animation completes
-        setTimeout(() => {
-          loadingScreen.classList.add('hidden');
-        }, FADE_DURATION);
+      // Check if loading screen was already shown this session
+      if (sessionStorage.getItem(SESSION_KEY)) {
+        // Skip loading screen on navigation (home button clicks)
+        if (loadingScreen) {
+          loadingScreen.remove();
+        }
+        return;
       }
-    }, LOADING_DURATION);
+
+      // First load (app launch) - mark as shown and display loading screen
+      sessionStorage.setItem(SESSION_KEY, 'true');
+
+      // Dismiss loading screen after 3 seconds (matches progress bar animation)
+      const LOADING_DURATION = 3000;
+      const FADE_DURATION = 800;
+
+      setTimeout(() => {
+        if (loadingScreen) {
+          // Trigger the exit animations
+          loadingScreen.classList.add('fade-out');
+
+          // Remove from DOM after exit animation completes
+          setTimeout(() => {
+            loadingScreen.classList.add('hidden');
+          }, FADE_DURATION);
+        }
+      }, LOADING_DURATION);
+    })();
   </script>
 
   <!-- Simple JavaScript for initialization -->
