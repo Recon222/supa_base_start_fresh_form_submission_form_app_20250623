@@ -64,8 +64,9 @@ export class FormHandler {
     const progressContainer = document.querySelector('.progress-container');
     if (!progressContainer) return;
 
-    // Hide progress bar when any form input is focused (keyboard opens on iOS)
-    const inputs = document.querySelectorAll('input, textarea, select');
+    // Hide progress bar only for inputs that trigger the iOS keyboard
+    // Excludes: select (dropdowns), date/time pickers, checkbox, radio, hidden
+    const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input:not([type]), textarea');
     inputs.forEach(el => {
       el.addEventListener('focus', () => {
         progressContainer.style.opacity = '0';
