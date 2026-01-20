@@ -35,14 +35,353 @@
   <!-- Main CSS -->
   <link rel="stylesheet" href="assets/css/forms.css">
   <link rel="stylesheet" href="assets/css/header.css">
-  
+
   <!-- Early theme initialization to prevent FOUC -->
   <script>
     // Prevent flash of unstyled content by setting theme before body renders
-    document.documentElement.setAttribute('data-theme', 
+    document.documentElement.setAttribute('data-theme',
       localStorage.getItem('fvu-theme') || 'dark');
   </script>
-  
+
+  <!-- =====================================================
+       EPIC LOADING SCREEN STYLES - Inline for instant load
+       ===================================================== -->
+  <style>
+    /* Loading Screen - Cinematic Authority Design */
+    .loading-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #0a0a0a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Subtle radial gradient for depth */
+    .loading-screen::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 50% at 50% 40%, rgba(27, 58, 107, 0.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Ambient particle effect - floating dots */
+    .loading-screen::after {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      top: -50%;
+      left: -50%;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(255, 209, 0, 0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 40% 70%, rgba(27, 58, 107, 0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 40%, rgba(255, 209, 0, 0.2) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 90% 80%, rgba(27, 58, 107, 0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 90%, rgba(255, 255, 255, 0.1) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 60% 10%, rgba(27, 58, 107, 0.2) 0%, transparent 100%);
+      background-size: 300px 300px;
+      animation: particleDrift 60s linear infinite;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    @keyframes particleDrift {
+      from { transform: translate(0, 0); }
+      to { transform: translate(-150px, -150px); }
+    }
+
+    /* Logo container with breathing glow */
+    .loading-logo-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 80px;
+    }
+
+    /* Outer glow ring - pulsing */
+    .loading-logo-container::before {
+      content: '';
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(27, 58, 107, 0.4) 0%, rgba(27, 58, 107, 0.1) 40%, transparent 70%);
+      animation: glowPulse 2s ease-in-out infinite;
+    }
+
+    /* Inner glow ring */
+    .loading-logo-container::after {
+      content: '';
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      border: 1px solid rgba(27, 58, 107, 0.3);
+      animation: ringPulse 2s ease-in-out infinite 0.5s;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.6;
+      }
+      50% {
+        transform: scale(1.08);
+        opacity: 1;
+      }
+    }
+
+    @keyframes ringPulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.3;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.6;
+      }
+    }
+
+    /* The logo itself - BIG and commanding */
+    .loading-logo {
+      width: 320px;
+      height: 320px;
+      position: relative;
+      z-index: 2;
+      filter: drop-shadow(0 0 40px rgba(27, 58, 107, 0.5));
+      animation: logoEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+                 logoFloat 4s ease-in-out 0.8s infinite;
+      opacity: 0;
+      transform: scale(0.9);
+    }
+
+    @keyframes logoEntrance {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* Progress bar container - at bottom */
+    .loading-progress-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: rgba(27, 58, 107, 0.2);
+    }
+
+    /* The actual progress bar */
+    .loading-progress-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #1B3A6B 0%, #2B5AA8 50%, #1B3A6B 100%);
+      background-size: 200% 100%;
+      animation: progressFill 3s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+                 progressShimmer 1.5s linear infinite;
+      position: relative;
+      box-shadow:
+        0 0 20px rgba(27, 58, 107, 0.8),
+        0 0 40px rgba(27, 58, 107, 0.4);
+    }
+
+    @keyframes progressFill {
+      0% { width: 0; }
+      10% { width: 15%; }
+      30% { width: 35%; }
+      50% { width: 55%; }
+      70% { width: 75%; }
+      90% { width: 92%; }
+      100% { width: 100%; }
+    }
+
+    @keyframes progressShimmer {
+      from { background-position: 200% 0; }
+      to { background-position: -200% 0; }
+    }
+
+    /* Sweeping shine effect on progress bar */
+    .loading-progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+      );
+      animation: progressSweep 1.2s ease-in-out infinite;
+    }
+
+    @keyframes progressSweep {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+
+    /* Leading edge glow */
+    .loading-progress-bar::before {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: -8px;
+      bottom: -8px;
+      width: 30px;
+      background: radial-gradient(ellipse at right, rgba(255, 209, 0, 0.6) 0%, transparent 70%);
+      filter: blur(4px);
+      animation: edgeGlow 0.3s ease-out infinite alternate;
+    }
+
+    @keyframes edgeGlow {
+      from { opacity: 0.6; }
+      to { opacity: 1; }
+    }
+
+    /* Text below logo */
+    .loading-text {
+      position: absolute;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
+      animation: textFadeIn 1s ease-out 0.5s forwards;
+      opacity: 0;
+    }
+
+    @keyframes textFadeIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* Exit animation - the epic reveal */
+    .loading-screen.fade-out {
+      animation: screenReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .loading-screen.fade-out .loading-logo {
+      animation: logoExit 0.6s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards;
+    }
+
+    .loading-screen.fade-out .loading-logo-container::before,
+    .loading-screen.fade-out .loading-logo-container::after {
+      animation: ringExit 0.5s ease-out forwards;
+    }
+
+    .loading-screen.fade-out .loading-text {
+      animation: textExit 0.4s ease-out forwards;
+    }
+
+    @keyframes screenReveal {
+      0% {
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+      }
+      100% {
+        opacity: 0;
+        clip-path: inset(0 0 100% 0);
+      }
+    }
+
+    @keyframes logoExit {
+      from {
+        opacity: 1;
+        transform: scale(1);
+      }
+      to {
+        opacity: 0;
+        transform: scale(1.1);
+      }
+    }
+
+    @keyframes ringExit {
+      to {
+        opacity: 0;
+        transform: scale(1.3);
+      }
+    }
+
+    @keyframes textExit {
+      to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+      }
+    }
+
+    /* Hidden state after animation completes */
+    .loading-screen.hidden {
+      display: none;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      .loading-logo {
+        width: 240px;
+        height: 240px;
+      }
+
+      .loading-logo-container::before {
+        width: 320px;
+        height: 320px;
+      }
+
+      .loading-logo-container::after {
+        width: 280px;
+        height: 280px;
+      }
+
+      .loading-logo-container {
+        margin-bottom: 60px;
+      }
+
+      .loading-text {
+        font-size: 12px;
+        letter-spacing: 2px;
+        bottom: 50px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .loading-logo {
+        width: 200px;
+        height: 200px;
+      }
+
+      .loading-logo-container::before {
+        width: 280px;
+        height: 280px;
+      }
+
+      .loading-logo-container::after {
+        width: 240px;
+        height: 240px;
+      }
+    }
+  </style>
+
   <!-- Responsive CSS for logos -->
   <style>
     /* Desktop: logos on sides, title in middle (all in one row) */
@@ -143,6 +482,21 @@
   </style>
 </head>
 <body>
+  <!-- =====================================================
+       EPIC LOADING SCREEN - First thing users see
+       ===================================================== -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-logo-container">
+      <img src="assets/images/homicide-logo-300x300.svg"
+           alt="Forensic Video Unit"
+           class="loading-logo">
+    </div>
+    <div class="loading-text">Forensic Video Unit</div>
+    <div class="loading-progress-container">
+      <div class="loading-progress-bar"></div>
+    </div>
+  </div>
+
   <!-- Animated Background - The cool grid effect with floating shapes -->
   <div class="background-animation">
     <div class="grid-overlay"></div>
@@ -247,13 +601,33 @@
     </div>
   </main>
 
+  <!-- Loading Screen Handler - Must be non-module for immediate execution -->
+  <script>
+    // Dismiss loading screen after 3 seconds (matches progress bar animation)
+    const LOADING_DURATION = 3000;
+    const FADE_DURATION = 800;
+
+    setTimeout(() => {
+      const loadingScreen = document.getElementById('loadingScreen');
+      if (loadingScreen) {
+        // Trigger the exit animations
+        loadingScreen.classList.add('fade-out');
+
+        // Remove from DOM after exit animation completes
+        setTimeout(() => {
+          loadingScreen.classList.add('hidden');
+        }, FADE_DURATION);
+      }
+    }, LOADING_DURATION);
+  </script>
+
   <!-- Simple JavaScript for initialization -->
   <script type="module">
     import { initPWA } from './assets/js/pwa-register.js';
 
     // Initialize PWA
     initPWA();
-    
+
     // Add 3D tilt effect on card hover (optional enhancement)
     document.querySelectorAll('.form-card').forEach(card => {
       card.addEventListener('mousemove', (e) => {
