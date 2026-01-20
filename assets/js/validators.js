@@ -104,7 +104,7 @@ function validateTimeOffset(timeOffset) {
 }
 
 /**
- * Validate locker number (1-15, optional field)
+ * Validate locker number (1-28, optional field)
  * @param {string} lockerNumber - Locker number to validate
  * @returns {string|null} Error message or null
  */
@@ -113,17 +113,17 @@ function validateLockerNumber(lockerNumber) {
   if (!lockerNumber || lockerNumber.trim() === '') {
     return null;
   }
-  
+
   const num = parseInt(lockerNumber, 10);
-  
+
   if (isNaN(num)) {
     return 'Locker number must be a number';
   }
-  
-  if (num < 1 || num > 15) {
-    return 'Locker number must be between 1 and 15';
+
+  if (num < 1 || num > 28) {
+    return 'Locker number must be between 1 and 28';
   }
-  
+
   return null;
 }
 

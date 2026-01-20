@@ -709,21 +709,21 @@ test.describe('Upload Form Tests (upload.html)', () => {
       await page.locator('[name="lockerNumber"]').blur();
 
       const errorMsg = page.locator('[name="lockerNumber"]').locator('~ .invalid-feedback');
-      await expect(errorMsg).toContainText('between 1 and 15');
+      await expect(errorMsg).toContainText('between 1 and 28');
     });
 
-    test('1.13.4 Rejects locker number 16', async ({ page }) => {
+    test('1.13.4 Rejects locker number 29', async ({ page }) => {
       await page.goto('/upload.html');
-      await page.fill('[name="lockerNumber"]', '16');
+      await page.fill('[name="lockerNumber"]', '29');
       await page.locator('[name="lockerNumber"]').blur();
 
       const errorMsg = page.locator('[name="lockerNumber"]').locator('~ .invalid-feedback');
-      await expect(errorMsg).toContainText('between 1 and 15');
+      await expect(errorMsg).toContainText('between 1 and 28');
     });
 
-    test('1.13.5 Accepts locker number 15', async ({ page }) => {
+    test('1.13.5 Accepts locker number 28', async ({ page }) => {
       await page.goto('/upload.html');
-      await page.fill('[name="lockerNumber"]', '15');
+      await page.fill('[name="lockerNumber"]', '28');
       await page.locator('[name="lockerNumber"]').blur();
 
       const errorMsg = page.locator('[name="lockerNumber"]').locator('~ .invalid-feedback');
