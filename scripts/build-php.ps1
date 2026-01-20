@@ -200,10 +200,16 @@ if (Test-Path $ManifestFile) {
     Write-Host "  [OK] manifest.json paths updated for $ProductionPath" -ForegroundColor Green
 }
 
-# Update sw.js paths
+# Update sw.js paths and cache version
 $SwFile = Join-Path $DeployDir "sw.js"
 if (Test-Path $SwFile) {
     $content = Get-Content $SwFile -Raw
+
+    # Auto-bump cache version with timestamp to ensure fresh content after deploys
+    $CacheVersion = Get-Date -Format "yyyyMMddHHmm"
+    $content = $content -replace "CACHE_VERSION = 'v[^']*'", "CACHE_VERSION = 'v$CacheVersion'"
+    Write-Host "  [OK] Cache version updated to v$CacheVersion" -ForegroundColor Green
+
     # Update all paths in STATIC_ASSETS array
     # Root path
     $content = $content -replace "'/'", "'$ProductionPath/'"
