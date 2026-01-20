@@ -108,8 +108,7 @@ self.addEventListener('install', (event) => {
       })
       .then(() => {
         console.log('[SW] Pre-caching complete');
-        // Force activation without waiting for existing workers to finish
-        return self.skipWaiting();
+        // Don't auto-activate - let user control via update banner
       })
   );
 });

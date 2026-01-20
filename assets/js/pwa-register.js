@@ -39,7 +39,7 @@ export function registerServiceWorker() {
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
             // New version available
-            showUpdateNotification();
+            showUpdateNotification(registration);
           }
         });
       });
@@ -52,7 +52,7 @@ export function registerServiceWorker() {
   // Listen for messages from service worker
   navigator.serviceWorker.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'SW_UPDATED') {
-      showUpdateNotification(event.data.version);
+      showUpdateNotification(null, event.data.version);
     }
   });
 }
@@ -194,8 +194,15 @@ function createInstallButton() {
 
 /**
  * Show update notification to user
+ * @param {ServiceWorkerRegistration|null} registration - The SW registration to use for triggering update
+ * @param {string} version - Optional version string to display
  */
-function showUpdateNotification(version = '') {
+function showUpdateNotification(registration = null, version = '') {
+  // Prevent duplicate banners
+  if (document.getElementById('pwa-update-banner')) {
+    return;
+  }
+
   // Use the existing toast system if available
   if (typeof window.showToast === 'function') {
     window.showToast(
@@ -249,8 +256,22 @@ function showUpdateNotification(version = '') {
 
   document.body.appendChild(banner);
 
-  document.getElementById('pwa-update-btn').addEventListener('click', () => {
+  // Set up controller change listener BEFORE triggering skip waiting
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
     window.location.reload();
+  });
+
+  document.getElementById('pwa-update-btn').addEventListener('click', () => {
+    if (registration && registration.waiting) {
+      // Tell waiting SW to activate
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    } else {
+      // Fallback: just reload
+      window.location.reload();
+    }
   });
 
   document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
