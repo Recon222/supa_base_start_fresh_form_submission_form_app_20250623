@@ -19,6 +19,13 @@
     "test:analysis": "playwright test analysis-form.spec.js",
     "test:recovery": "playwright test recovery-form.spec.js",
     "test:cross": "playwright test cross-form.spec.js",
+    "test:unit": "vitest run tests/unit",
+    "test:unit:watch": "vitest watch tests/unit",
+    "test:unit:ui": "vitest --ui tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:integration:watch": "vitest watch tests/integration",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test",
+    "coverage": "vitest run --coverage",
     "serve": "npx http-server -p 3000 -g",
     "report": "playwright show-report"
   },
@@ -35,7 +42,11 @@
   "homepage": "https://github.com/Recon222/supa_base_start_fresh_form_submission_form_app_20250623#readme",
   "devDependencies": {
     "@playwright/test": "^1.57.0",
+    "@vitest/coverage-v8": "^4.0.17",
+    "@vitest/ui": "^4.0.17",
+    "happy-dom": "^20.3.4",
     "md-to-pdf": "^5.2.5",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "vitest": "^4.0.17"
   }
 }
