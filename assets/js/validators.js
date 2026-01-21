@@ -105,6 +105,7 @@ function validateTimeOffset(timeOffset) {
 
 /**
  * Validate locker number (1-28, optional field)
+ * Must be an integer only (no decimals, letters, or special characters)
  * @param {string} lockerNumber - Locker number to validate
  * @returns {string|null} Error message or null
  */
@@ -114,11 +115,15 @@ function validateLockerNumber(lockerNumber) {
     return null;
   }
 
-  const num = parseInt(lockerNumber, 10);
+  const trimmed = lockerNumber.trim();
 
-  if (isNaN(num)) {
+  // Must be digits only (no letters, decimals, special chars, or spaces in between)
+  // This pattern matches strings that contain ONLY digits from start to end
+  if (!/^\d+$/.test(trimmed)) {
     return 'Locker number must be a number';
   }
+
+  const num = parseInt(trimmed, 10);
 
   if (num < 1 || num > 28) {
     return 'Locker number must be between 1 and 28';

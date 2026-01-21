@@ -78,6 +78,9 @@
   <link rel="stylesheet" href="assets/css/header.css">
   <link rel="stylesheet" href="assets/css/notifications.css">
 
+  <!-- Flatpickr CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
   <!-- Early theme initialization to prevent FOUC -->
   <script>
     // Prevent flash of unstyled content by setting theme before body renders
@@ -109,329 +112,23 @@
       <!-- <input type="hidden" name="session_verify" value="<?php echo session_id(); ?>"> -->
 
       <!-- Case Information Section -->
-      <section class="form-section">
-        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Case Information</h2>
-
-        <!-- Row 1: Occurrence Number + Date of Occurrence -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="occNumber" class="form-label">
-              Occurrence Number <span class="required">*</span>
-            </label>
-            <input type="text"
-                   class="form-control"
-                   id="occNumber"
-                   name="occNumber"
-                   placeholder="e.g., PR240368708"
-                   required>
-            <small class="form-text">Format: PR followed by numbers</small>
-            <div class="invalid-feedback"></div>
-          </div>
-
-          <div class="form-group">
-            <label for="occDate" class="form-label">
-              Date of Occurrence <span class="required">*</span>
-            </label>
-            <input type="date"
-                   class="form-control"
-                   id="occDate"
-                   name="occDate"
-                   required>
-            <div class="invalid-feedback"></div>
-          </div>
-        </div>
-
-        <!-- Row 2: Type of Offence + Location of Video -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="offenceType" class="form-label">
-              Type of Offence <span class="required">*</span>
-            </label>
-            <select class="form-control" id="offenceType" name="offenceType" required>
-              <option value="">Select...</option>
-              <option value="Homicide">Homicide</option>
-              <option value="Missing Person">Missing Person</option>
-            </select>
-            <div class="invalid-feedback"></div>
-          </div>
-
-          <div class="form-group">
-            <label for="videoLocation" class="form-label">
-              Location of Video <span class="required">*</span>
-            </label>
-            <select class="form-control" id="videoLocation" name="videoLocation" required>
-              <option value="">Select...</option>
-              <option value="NAS Storage">NAS Storage</option>
-              <option value="Evidence.com">Evidence.com</option>
-              <option value="Locker">Locker</option>
-              <option value="USB">USB</option>
-              <option value="Hard Drive">Hard Drive</option>
-              <option value="SD Card">SD Card</option>
-              <option value="CD/DVD">CD/DVD</option>
-              <option value="Other">Other</option>
-            </select>
-            <small class="form-text">Storage medium where the video evidence is located</small>
-            <div class="invalid-feedback"></div>
-          </div>
-        </div>
-
-        <!-- Conditional field for Other video location -->
-        <div class="form-group d-none" id="videoLocationOtherGroup">
-          <label for="videoLocationOther" class="form-label">
-            Specify Storage Location <span class="required">*</span>
-          </label>
-          <input type="text"
-                 class="form-control"
-                 id="videoLocationOther"
-                 name="videoLocationOther"
-                 placeholder="Please specify the storage location">
-          <div class="invalid-feedback"></div>
-        </div>
-
-        <!-- Row 2: Bag Number + Locker Number -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="bagNumber" class="form-label">Bag Number</label>
-            <input type="text"
-                   class="form-control"
-                   id="bagNumber"
-                   name="bagNumber"
-                   placeholder="Evidence bag identification">
-          </div>
-
-          <div class="form-group">
-            <label for="lockerNumber" class="form-label">Locker Number</label>
-            <input type="text"
-                   class="form-control"
-                   id="lockerNumber"
-                   name="lockerNumber"
-                   inputmode="numeric"
-                   placeholder="1-28">
-            <small class="form-text">Evidence locker number (1-28)</small>
-          </div>
-        </div>
+      <section class="form-section" id="case-section-container">
+        <!-- Built by JS via FormFieldBuilder -->
       </section>
 
       <!-- Submitting Investigator Information Section -->
-      <section class="form-section">
-        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Submitting Investigator Information</h2>
-
-        <!-- Row 1: Investigator Name + Badge -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="rName" class="form-label">
-              Submitting Investigator <span class="required">*</span>
-            </label>
-            <input type="text"
-                   class="form-control"
-                   id="rName"
-                   name="rName"
-                   placeholder="Last name or full name"
-                   required>
-            <div class="invalid-feedback"></div>
-          </div>
-
-          <div class="form-group">
-            <label for="badge" class="form-label">
-              Badge Number <span class="required">*</span>
-            </label>
-            <input type="text"
-                   class="form-control"
-                   id="badge"
-                   name="badge"
-                   placeholder="Investigator badge number"
-                   required>
-            <div class="invalid-feedback"></div>
-          </div>
-        </div>
-
-        <!-- Row 2: Phone + Email -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="requestingPhone" class="form-label">
-              Contact Number <span class="required">*</span>
-            </label>
-            <input type="tel"
-                   class="form-control"
-                   id="requestingPhone"
-                   name="requestingPhone"
-                   placeholder="XXX-XXX-XXXX"
-                   required>
-            <small class="form-text">10 digits required (dashes optional)</small>
-            <div class="invalid-feedback"></div>
-          </div>
-
-          <div class="form-group">
-            <label for="requestingEmail" class="form-label">
-              Email Address <span class="required">*</span>
-            </label>
-            <input type="email"
-                   class="form-control"
-                   id="requestingEmail"
-                   name="requestingEmail"
-                   placeholder="investigator@peelpolice.ca"
-                   required>
-            <div class="invalid-feedback"></div>
-          </div>
-        </div>
-
-        <!-- Clear investigator info button -->
-        <div class="form-group text-right">
-          <button type="button"
-                  class="btn btn-sm btn-secondary"
-                  id="clearOfficerInfo">
-            Clear Investigator Info
-          </button>
-          <small class="form-text d-block mt-1">
-            Removes saved investigator information from this browser
-          </small>
-        </div>
+      <section class="form-section" id="investigator-section-container">
+        <!-- Built by JS via FormFieldBuilder -->
       </section>
 
-      <!-- Evidence Details Section -->
-      <section class="form-section">
-        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Evidence Details</h2>
-
-        <!-- Video Seized From - full width -->
-        <div class="form-group">
-          <label for="videoSeizedFrom" class="form-label">
-            Video Seized From <span class="required">*</span>
-          </label>
-          <input type="text"
-                 class="form-control"
-                 id="videoSeizedFrom"
-                 name="videoSeizedFrom"
-                 placeholder="Address where video was recovered"
-                 required>
-          <div class="invalid-feedback"></div>
-        </div>
-
-        <!-- Business Name - full width -->
-        <div class="form-group">
-          <label for="businessName" class="form-label">Business Name</label>
-          <input type="text"
-                 class="form-control"
-                 id="businessName"
-                 name="businessName"
-                 placeholder="Leave blank if none">
-          <small class="form-text">Name of business at the address above</small>
-        </div>
-
-        <!-- City - full width -->
-        <div class="form-group">
-          <label for="city" class="form-label">
-            City <span class="required">*</span>
-          </label>
-          <select class="form-control" id="city" name="city" required>
-            <option value="">Select city</option>
-            <option value="Brampton">Brampton</option>
-            <option value="Mississauga">Mississauga</option>
-            <option value="Toronto">Toronto</option>
-            <option value="Other">Other</option>
-          </select>
-          <div class="invalid-feedback"></div>
-        </div>
-
-        <!-- Conditional field for Other city -->
-        <div class="form-group d-none" id="cityOtherGroup">
-          <label for="cityOther" class="form-label">
-            Specify City <span class="required">*</span>
-          </label>
-          <input type="text"
-                 class="form-control"
-                 id="cityOther"
-                 name="cityOther"
-                 placeholder="Enter city name">
-          <small class="form-text">Please enter the city name</small>
-          <div class="invalid-feedback"></div>
-        </div>
-
-        <!-- Row: Recording Date + Job Required -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="recordingDate" class="form-label">
-              Recording Date <span class="required">*</span>
-            </label>
-            <input type="date"
-                   class="form-control"
-                   id="recordingDate"
-                   name="recordingDate"
-                   required>
-            <small class="form-text">Date the video was recorded</small>
-            <div class="invalid-feedback"></div>
-          </div>
-
-          <div class="form-group">
-            <label for="serviceRequired" class="form-label">
-              Service Required <span class="required">*</span>
-            </label>
-            <select class="form-control" id="serviceRequired" name="serviceRequired" required>
-              <option value="">Select...</option>
-              <option value="Video/Image Clarification">Video/Image Clarification</option>
-              <option value="Audio Clarification">Audio Clarification</option>
-              <option value="Comparator Analysis">Comparator Analysis</option>
-              <option value="Timeline">Timeline</option>
-              <option value="Make Playable">Make Playable</option>
-              <option value="Data Carving">Data Carving</option>
-              <option value="Other">Other</option>
-            </select>
-            <div class="invalid-feedback"></div>
-          </div>
-        </div>
-
-        <!-- Conditional field for Other service -->
-        <div class="form-group d-none" id="serviceRequiredOtherGroup">
-          <label for="serviceRequiredOther" class="form-label">
-            Specify Service Required <span class="required">*</span>
-          </label>
-          <input type="text"
-                 class="form-control"
-                 id="serviceRequiredOther"
-                 name="serviceRequiredOther"
-                 placeholder="Please specify the service required">
-          <div class="invalid-feedback"></div>
-        </div>
-
-        <!-- File Names - full width -->
-        <div class="form-group">
-          <label for="fileNames" class="form-label">File Names</label>
-          <textarea class="form-control"
-                    id="fileNames"
-                    name="fileNames"
-                    rows="3"
-                    placeholder="List all file names (one per line)"></textarea>
-          <small class="form-text">Enter each file name on a separate line</small>
-        </div>
+      <!-- Video Source Information Section -->
+      <section class="form-section" id="video-source-section-container">
+        <!-- Built by JS via FormFieldBuilder -->
       </section>
 
-      <!-- Request Details Section -->
-      <section class="form-section">
-        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Request Details</h2>
-
-
-        <!-- Request Details - large textarea -->
-        <div class="form-group">
-          <label for="requestDetails" class="form-label">
-            Request Details <span class="required">*</span>
-          </label>
-          <textarea class="form-control"
-                    id="requestDetails"
-                    name="requestDetails"
-                    rows="6"
-                    placeholder="Provide detailed information about your request..."
-                    required></textarea>
-          <div class="invalid-feedback"></div>
-        </div>
-
-        <!-- Additional Information -->
-        <div class="form-group">
-          <label for="additionalInfo" class="form-label">Additional Information</label>
-          <textarea class="form-control"
-                    id="additionalInfo"
-                    name="additionalInfo"
-                    rows="4"
-                    placeholder="Any additional information relevant to this request"></textarea>
-        </div>
+      <!-- Work Request Section -->
+      <section class="form-section" id="work-request-section-container">
+        <!-- Built by JS via FormFieldBuilder -->
       </section>
 
       <!-- Form Actions -->
@@ -455,6 +152,9 @@
       </div>
     </div>
   </main>
+
+  <!-- Flatpickr JS -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
   <!-- JavaScript Modules -->
   <script type="module">

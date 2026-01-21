@@ -208,6 +208,18 @@ export const CONFIG = {
     TIMESTAMP: 'YYYY-MM-DD HH:mm:ss'
   },
 
+  // Flatpickr Configuration
+  FLATPICKR_CONFIG: {
+    DATE: {
+      dateFormat: 'Y-m-d',
+      altInput: true,
+      altFormat: 'M j, Y',
+      allowInput: true,
+      closeOnSelect: true,
+      defaultDate: null
+    }
+  },
+
   // Development Mode
   IS_DEVELOPMENT: window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
 
@@ -360,3 +372,5 @@ Object.freeze(CONFIG.PDF_LAYOUT.HEADER);
 Object.freeze(CONFIG.PDF_LAYOUT.HEADER_FONTS);
 Object.freeze(CONFIG.PDF_LAYOUT.SECTION);
 Object.freeze(CONFIG.PDF_LAYOUT.FONTS);
+Object.freeze(CONFIG.FLATPICKR_CONFIG);
+Object.freeze(CONFIG.FLATPICKR_CONFIG.DATE);

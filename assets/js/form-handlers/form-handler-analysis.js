@@ -20,11 +20,17 @@ export class AnalysisFormHandler extends FormHandler {
   constructor(formId) {
     super(formId);
 
+    // Store Flatpickr instances for programmatic access
+    this.flatpickrInstances = {};
+
     // Build initial form fields via FormFieldBuilder
     this.buildInitialFields();
 
     // Setup analysis-specific listeners (conditionals, etc.)
     this.setupAnalysisSpecificListeners();
+
+    // Initialize Flatpickr on date fields (AFTER fields are built)
+    this.initializeFlatpickrFields();
   }
 
   /**
@@ -168,10 +174,31 @@ export class AnalysisFormHandler extends FormHandler {
       });
     }
 
-    // Recording date validation (past date only)
+    // Recording date validation (past date only) - handled by Flatpickr onChange
+    // Fallback for browsers without Flatpickr
     const recordingDateField = this.form.querySelector('#recordingDate');
     if (recordingDateField) {
       recordingDateField.addEventListener('change', () => this.validateSingleField(recordingDateField));
+    }
+  }
+
+  /**
+   * Initialize Flatpickr on all date fields
+   * Must be called AFTER buildInitialFields() so DOM elements exist
+   */
+  initializeFlatpickrFields() {
+    // Recording date field with past-date restriction
+    const recordingDateField = this.form.querySelector('#recordingDate');
+    if (recordingDateField && typeof window !== 'undefined' && window.flatpickr) {
+      this.flatpickrInstances.recordingDate = window.flatpickr(recordingDateField, {
+        ...CONFIG.FLATPICKR_CONFIG.DATE,
+        maxDate: 'today', // Prevent future dates
+
+        // Trigger validation on change
+        onChange: (selectedDates, dateStr) => {
+          this.validateSingleField(recordingDateField);
+        }
+      });
     }
   }
 
