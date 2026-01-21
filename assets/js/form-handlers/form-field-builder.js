@@ -28,7 +28,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const labelEl = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
@@ -75,7 +75,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const labelEl = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
@@ -115,7 +115,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const labelEl = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
@@ -158,7 +158,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const labelEl = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
@@ -203,7 +203,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const labelEl = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
@@ -247,7 +247,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const labelEl = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
@@ -293,7 +293,7 @@ export class FormFieldBuilder {
     });
 
     const labelEl = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     });
     labelEl.innerHTML = `Specify ${labelPrefix} <span class="required">*</span>`;
@@ -322,7 +322,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      for: 'occNumber',
+      htmlFor: 'occNumber',
       className: 'form-label'
     });
     label.innerHTML = 'Occurrence Number <span class="required">*</span>';
@@ -355,7 +355,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      for: 'lockerNumber',
+      htmlFor: 'lockerNumber',
       className: 'form-label'
     }, 'FVU Locker #');
 
@@ -518,8 +518,8 @@ export class FormFieldBuilder {
 
     // Row 1: Name + Badge
     const row1 = createElement('div', { className: 'form-row' });
-    row1.appendChild(this.createTextField('rName', 0, 'Investigator Name', true, '', 'Full name'));
-    row1.appendChild(this.createTextField('badge', 0, 'Badge Number', true, '', 'Badge #'));
+    row1.appendChild(this.createTextField('rName', 0, 'Submitting Investigator', true, '', 'Last name or full name'));
+    row1.appendChild(this.createTextField('badge', 0, 'Badge Number', true, '', 'Investigator badge number'));
     section.appendChild(row1);
 
     // Row 2: Phone + Email
@@ -545,7 +545,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const labelEl = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
@@ -585,7 +585,7 @@ export class FormFieldBuilder {
     const cityGroup = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     });
     label.innerHTML = 'City <span class="required">*</span>';
@@ -649,7 +649,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const labelEl = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
@@ -782,7 +782,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     }, 'Earliest Recorded Date on DVR');
 
@@ -822,7 +822,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const labelEl = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
@@ -915,7 +915,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     });
     label.innerHTML = 'Camera Details <span class="required">*</span>';
@@ -951,7 +951,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     }, 'DVR Make/Model');
 
@@ -1075,7 +1075,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     }, 'DVR Retention');
 
@@ -1173,7 +1173,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     }, 'Username');
 
@@ -1201,7 +1201,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      for: fieldId,
+      htmlFor: fieldId,
       className: 'form-label'
     });
     label.innerHTML = 'Password <span class="required">*</span>';

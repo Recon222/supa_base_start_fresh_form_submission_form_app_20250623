@@ -132,7 +132,7 @@ export function scrollToElement(element, options = {}) {
  */
 export function createElement(tag, attrs = {}, content = null) {
   const element = document.createElement(tag);
-  
+
   // Set attributes
   Object.entries(attrs).forEach(([key, value]) => {
     if (key === 'className') {
@@ -143,6 +143,9 @@ export function createElement(tag, attrs = {}, content = null) {
       });
     } else if (key.startsWith('on') && typeof value === 'function') {
       element.addEventListener(key.slice(2).toLowerCase(), value);
+    } else if (key === 'htmlFor') {
+      // htmlFor is the DOM property that maps to the 'for' HTML attribute
+      element.setAttribute('for', value);
     } else {
       element.setAttribute(key, value);
     }
