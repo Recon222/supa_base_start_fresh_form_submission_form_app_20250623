@@ -4,11 +4,12 @@
  */
 
 import { FormHandler } from './form-handler-base.js';
+import { FormFieldBuilder } from './form-field-builder.js';
 import { ConditionalFieldHandler } from './conditional-field-handler.js';
 import { generatePDF } from '../pdf-generator.js';
 import { generateJSON } from '../json-generator.js';
 import { submitWithRetry } from '../api-client.js';
-import { showToast, downloadBlob } from '../utils.js';
+import { showToast, downloadBlob, toggleElement, debounce } from '../utils.js';
 import { CONFIG } from '../config.js';
 
 /**
@@ -18,17 +19,139 @@ import { CONFIG } from '../config.js';
 export class AnalysisFormHandler extends FormHandler {
   constructor(formId) {
     super(formId);
+
+    // Build initial form fields via FormFieldBuilder
+    this.buildInitialFields();
+
+    // Setup analysis-specific listeners (conditionals, etc.)
     this.setupAnalysisSpecificListeners();
+  }
+
+  /**
+   * Build all initial form fields via FormFieldBuilder
+   * Creates sections for case info, investigator, video source, and work request
+   */
+  buildInitialFields() {
+    this.buildCaseSection();
+    this.buildInvestigatorSection();
+    this.buildVideoSourceSection();
+    this.buildWorkRequestSection();
+
+    // Attach validation listeners to all built fields
+    this.attachValidationListeners(this.form);
+  }
+
+  /**
+   * Build case information section
+   */
+  buildCaseSection() {
+    const container = document.getElementById('case-section-container');
+    if (!container) return;
+
+    const section = FormFieldBuilder.createCaseInformationSection();
+    container.appendChild(section);
+  }
+
+  /**
+   * Build investigator section
+   */
+  buildInvestigatorSection() {
+    const container = document.getElementById('investigator-section-container');
+    if (!container) return;
+
+    const section = FormFieldBuilder.createInvestigatorSection();
+    container.appendChild(section);
+  }
+
+  /**
+   * Build video source section
+   */
+  buildVideoSourceSection() {
+    const container = document.getElementById('video-source-section-container');
+    if (!container) return;
+
+    const section = FormFieldBuilder.createVideoSourceSection();
+    container.appendChild(section);
+  }
+
+  /**
+   * Build work request section
+   */
+  buildWorkRequestSection() {
+    const container = document.getElementById('work-request-section-container');
+    if (!container) return;
+
+    const section = FormFieldBuilder.createWorkRequestSection();
+    container.appendChild(section);
+  }
+
+  /**
+   * Attach validation event listeners to all form-control elements
+   * Ensures sliding green checkmark validation UI works on all dynamically built fields
+   * @param {HTMLElement} container - Container with fields
+   */
+  attachValidationListeners(container) {
+    const fields = container.querySelectorAll('.form-control');
+
+    fields.forEach(field => {
+      // Blur validation for all fields
+      field.addEventListener('blur', () => this.validateSingleField(field));
+
+      // Real-time validation for phone and email fields (debounced)
+      if (field.type === 'tel' || field.name === CONFIG.FIELD_NAMES.OFFICER_EMAIL) {
+        field.addEventListener('input', debounce(() => this.validateSingleField(field), 500));
+      }
+
+      // Locker number real-time validation
+      if (field.name === 'lockerNumber') {
+        field.addEventListener('input', debounce(() => this.validateSingleField(field), 500));
+      }
+    });
   }
 
   setupAnalysisSpecificListeners() {
     // Initialize conditional field handler
     const conditionalHandler = new ConditionalFieldHandler(this);
 
-    // Setup all "Other" fields
+    // Setup all "Other" fields - standard pattern
+    conditionalHandler.setupOtherField('offenceType', 'offenceTypeOtherGroup', 'offenceTypeOther');
     conditionalHandler.setupOtherField('videoLocation', 'videoLocationOtherGroup', 'videoLocationOther');
-    conditionalHandler.setupOtherField('city', 'cityOtherGroup', 'cityOther');
     conditionalHandler.setupOtherField('serviceRequired', 'serviceRequiredOtherGroup', 'serviceRequiredOther');
+
+    // Special handling for "Locker" selection in videoLocation
+    // This shows bagNumber and lockerNumber fields (both OPTIONAL)
+    const videoLocationSelect = this.form.querySelector('#videoLocation');
+    if (videoLocationSelect) {
+      videoLocationSelect.addEventListener('change', (e) => {
+        const lockerGroup = document.getElementById('lockerInfoGroup');
+        if (lockerGroup) {
+          const showLocker = e.target.value === 'Locker';
+          toggleElement(lockerGroup, showLocker);
+
+          const bagField = document.getElementById('bagNumber');
+          const lockerField = document.getElementById('lockerNumber');
+
+          // Note: bagNumber and lockerNumber are OPTIONAL - do NOT add required attribute
+          if (!showLocker) {
+            // Clear values and validation when hiding
+            if (bagField) {
+              bagField.value = '';
+              this.showFieldValidation(bagField, null);
+            }
+            if (lockerField) {
+              lockerField.value = '';
+              this.showFieldValidation(lockerField, null);
+            }
+          }
+        }
+      });
+    }
+
+    // Recording date validation (past date only)
+    const recordingDateField = this.form.querySelector('#recordingDate');
+    if (recordingDateField) {
+      recordingDateField.addEventListener('change', () => this.validateSingleField(recordingDateField));
+    }
   }
 
   collectFormData() {
