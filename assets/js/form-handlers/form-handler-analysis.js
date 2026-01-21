@@ -45,6 +45,10 @@ export class AnalysisFormHandler extends FormHandler {
 
     // Attach validation listeners to all built fields
     this.attachValidationListeners(this.form);
+
+    // Re-apply iOS keyboard fix for dynamically created fields
+    // The base class init() runs before buildInitialFields(), so dynamic fields miss the fix
+    this.setupKeyboardProgressBarFix();
   }
 
   /**
@@ -200,6 +204,19 @@ export class AnalysisFormHandler extends FormHandler {
         }
       });
     }
+  }
+
+  /**
+   * Cleanup Flatpickr instances to prevent memory leaks
+   * Should be called when the form is destroyed or page is unloaded
+   */
+  destroy() {
+    Object.values(this.flatpickrInstances).forEach(instance => {
+      if (instance && typeof instance.destroy === 'function') {
+        instance.destroy();
+      }
+    });
+    this.flatpickrInstances = {};
   }
 
   collectFormData() {
