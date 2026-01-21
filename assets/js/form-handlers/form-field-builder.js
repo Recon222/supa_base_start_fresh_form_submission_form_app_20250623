@@ -7,6 +7,534 @@ import { CONFIG } from '../config.js';
 import { createElement } from '../utils.js';
 
 export class FormFieldBuilder {
+  // =========================================================================
+  // GENERIC FIELD CREATION METHODS (Analysis form and shared)
+  // =========================================================================
+
+  /**
+   * Create text input field
+   * @param {string} baseName - Field base name
+   * @param {number} index - Field index (0 for first)
+   * @param {string} label - Field label text
+   * @param {boolean} required - Whether field is required
+   * @param {string} helpText - Help text below field
+   * @param {string} placeholder - Placeholder text
+   * @returns {HTMLElement} Form group element
+   */
+  static createTextField(baseName, index, label, required, helpText = '', placeholder = '') {
+    const fieldName = index === 0 ? baseName : `${baseName}_${index}`;
+    const fieldId = fieldName;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const labelEl = createElement('label', {
+      for: fieldId,
+      className: 'form-label'
+    });
+    labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
+
+    const input = createElement('input', {
+      type: 'text',
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName,
+      placeholder: placeholder
+    });
+
+    if (required) {
+      input.setAttribute('required', 'required');
+    }
+
+    group.appendChild(labelEl);
+    group.appendChild(input);
+
+    if (helpText) {
+      const small = createElement('small', { className: 'form-text' }, helpText);
+      group.appendChild(small);
+    }
+
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
+
+  /**
+   * Create textarea field
+   * @param {string} baseName - Field base name
+   * @param {number} index - Field index (0 for first)
+   * @param {string} label - Field label text
+   * @param {boolean} required - Whether field is required
+   * @param {string} placeholder - Placeholder text
+   * @param {number} rows - Number of rows
+   * @returns {HTMLElement} Form group element
+   */
+  static createTextareaField(baseName, index, label, required, placeholder = '', rows = 4) {
+    const fieldName = index === 0 ? baseName : `${baseName}_${index}`;
+    const fieldId = fieldName;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const labelEl = createElement('label', {
+      for: fieldId,
+      className: 'form-label'
+    });
+    labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
+
+    const textarea = createElement('textarea', {
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName,
+      rows: rows.toString(),
+      placeholder: placeholder
+    });
+
+    if (required) {
+      textarea.setAttribute('required', 'required');
+    }
+
+    group.appendChild(labelEl);
+    group.appendChild(textarea);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
+
+  /**
+   * Create select field
+   * @param {string} baseName - Field base name
+   * @param {number} index - Field index (0 for first)
+   * @param {string} label - Field label text
+   * @param {Array} options - Array of {value, text} options
+   * @param {boolean} required - Whether field is required
+   * @returns {HTMLElement} Form group element
+   */
+  static createSelectField(baseName, index, label, options, required) {
+    const fieldName = index === 0 ? baseName : `${baseName}_${index}`;
+    const fieldId = fieldName;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const labelEl = createElement('label', {
+      for: fieldId,
+      className: 'form-label'
+    });
+    labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
+
+    const select = createElement('select', {
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName
+    });
+
+    if (required) {
+      select.setAttribute('required', 'required');
+    }
+
+    options.forEach(option => {
+      select.appendChild(createElement('option', {
+        value: option.value
+      }, option.text));
+    });
+
+    group.appendChild(labelEl);
+    group.appendChild(select);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
+
+  /**
+   * Create phone input field with proper type and validation
+   * @param {string} baseName - Field base name
+   * @param {number} index - Field index
+   * @param {string} label - Field label
+   * @param {boolean} required - Whether required
+   * @returns {HTMLElement} Form group element
+   */
+  static createPhoneField(baseName, index, label, required) {
+    const fieldName = index === 0 ? baseName : `${baseName}_${index}`;
+    const fieldId = fieldName;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const labelEl = createElement('label', {
+      for: fieldId,
+      className: 'form-label'
+    });
+    labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
+
+    const input = createElement('input', {
+      type: 'tel',
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName,
+      placeholder: '9055551234',
+      pattern: '[0-9]{10}',
+      inputmode: 'tel'
+    });
+
+    if (required) {
+      input.setAttribute('required', 'required');
+    }
+
+    const small = createElement('small', { className: 'form-text' },
+      '10 digits, no dashes or spaces');
+
+    group.appendChild(labelEl);
+    group.appendChild(input);
+    group.appendChild(small);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
+
+  /**
+   * Create email input field with Peel Police domain validation
+   * @param {string} baseName - Field base name
+   * @param {number} index - Field index
+   * @param {string} label - Field label
+   * @param {boolean} required - Whether required
+   * @returns {HTMLElement} Form group element
+   */
+  static createEmailField(baseName, index, label, required) {
+    const fieldName = index === 0 ? baseName : `${baseName}_${index}`;
+    const fieldId = fieldName;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const labelEl = createElement('label', {
+      for: fieldId,
+      className: 'form-label'
+    });
+    labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
+
+    const input = createElement('input', {
+      type: 'email',
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName,
+      placeholder: 'officer@peelpolice.ca'
+    });
+
+    if (required) {
+      input.setAttribute('required', 'required');
+    }
+
+    const small = createElement('small', { className: 'form-text' },
+      'Must be @peelpolice.ca email');
+
+    group.appendChild(labelEl);
+    group.appendChild(input);
+    group.appendChild(small);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
+
+  /**
+   * Create date input field
+   * @param {string} baseName - Field base name
+   * @param {number} index - Field index
+   * @param {string} label - Field label
+   * @param {boolean} required - Whether required
+   * @param {Object} options - Additional options (maxDate, etc.)
+   * @returns {HTMLElement} Form group element
+   */
+  static createDateField(baseName, index, label, required, options = {}) {
+    const fieldName = index === 0 ? baseName : `${baseName}_${index}`;
+    const fieldId = fieldName;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const labelEl = createElement('label', {
+      for: fieldId,
+      className: 'form-label'
+    });
+    labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
+
+    const input = createElement('input', {
+      type: 'date',
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName
+    });
+
+    if (required) {
+      input.setAttribute('required', 'required');
+    }
+
+    // Apply max date if specified (for past date validation)
+    if (options.maxDate === 'today') {
+      input.setAttribute('max', new Date().toISOString().split('T')[0]);
+    }
+
+    group.appendChild(labelEl);
+    group.appendChild(input);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
+
+  /**
+   * Create "Other" conditional field - hidden by default
+   * @param {string} baseName - Field base name (e.g., 'offenceTypeOther')
+   * @param {number} index - Field index
+   * @param {string} labelPrefix - Label prefix (e.g., 'Offence Type' -> "Specify Offence Type")
+   * @returns {HTMLElement} Form group element with d-none class
+   */
+  static createOtherField(baseName, index, labelPrefix) {
+    const fieldName = index === 0 ? baseName : `${baseName}_${index}`;
+    const fieldId = fieldName;
+    const groupId = index === 0 ? `${baseName}Group` : `${baseName}Group_${index}`;
+
+    const group = createElement('div', {
+      className: 'form-group d-none',
+      id: groupId
+    });
+
+    const labelEl = createElement('label', {
+      for: fieldId,
+      className: 'form-label'
+    });
+    labelEl.innerHTML = `Specify ${labelPrefix} <span class="required">*</span>`;
+
+    const input = createElement('input', {
+      type: 'text',
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName,
+      placeholder: `Enter ${labelPrefix.toLowerCase()}`
+    });
+    // Note: required is NOT set initially - it's added dynamically when "Other" is selected
+
+    group.appendChild(labelEl);
+    group.appendChild(input);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
+
+  /**
+   * Create occurrence number field (PR format)
+   * @returns {HTMLElement} Form group element
+   */
+  static createOccurrenceNumberField() {
+    const group = createElement('div', { className: 'form-group' });
+
+    const label = createElement('label', {
+      for: 'occNumber',
+      className: 'form-label'
+    });
+    label.innerHTML = 'Occurrence Number <span class="required">*</span>';
+
+    const input = createElement('input', {
+      type: 'text',
+      className: 'form-control',
+      id: 'occNumber',
+      name: 'occNumber',
+      placeholder: 'PR2024001234',
+      required: 'required'
+    });
+
+    const small = createElement('small', { className: 'form-text' },
+      'Must start with PR followed by numbers');
+
+    group.appendChild(label);
+    group.appendChild(input);
+    group.appendChild(small);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
+
+  /**
+   * Create locker number field (1-28 range)
+   * @returns {HTMLElement} Form group element
+   */
+  static createLockerNumberField() {
+    const group = createElement('div', { className: 'form-group' });
+
+    const label = createElement('label', {
+      for: 'lockerNumber',
+      className: 'form-label'
+    }, 'FVU Locker #');
+
+    const input = createElement('input', {
+      type: 'text',
+      className: 'form-control',
+      id: 'lockerNumber',
+      name: 'lockerNumber',
+      placeholder: '1-28',
+      inputmode: 'numeric'
+    });
+    // Note: lockerNumber is OPTIONAL - no required attribute
+
+    const small = createElement('small', { className: 'form-text' },
+      'Enter locker number (1-28)');
+
+    group.appendChild(label);
+    group.appendChild(input);
+    group.appendChild(small);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
+
+  // =========================================================================
+  // ANALYSIS FORM SECTION BUILDERS
+  // =========================================================================
+
+  /**
+   * Create case information section for Analysis form
+   * @returns {HTMLElement} Section element with case fields
+   */
+  static createCaseInformationSection() {
+    const section = createElement('section', { className: 'form-section' });
+
+    const heading = createElement('h2', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
+    }, 'Case Information');
+    section.appendChild(heading);
+
+    // Row: Occurrence Number + Type of Offence
+    const row = createElement('div', { className: 'form-row' });
+
+    // Occurrence Number
+    row.appendChild(this.createOccurrenceNumberField());
+
+    // Type of Offence (with Other conditional)
+    const offenceGroup = this.createSelectField('offenceType', 0, 'Type of Offence',
+      CONFIG.OFFENCE_TYPE_OPTIONS, true);
+    row.appendChild(offenceGroup);
+
+    section.appendChild(row);
+
+    // Offence Type Other (hidden by default)
+    section.appendChild(this.createOtherField('offenceTypeOther', 0, 'Offence Type'));
+
+    return section;
+  }
+
+  /**
+   * Create video source information section for Analysis form
+   * @returns {HTMLElement} Section element with video source fields
+   */
+  static createVideoSourceSection() {
+    const section = createElement('section', { className: 'form-section' });
+
+    const heading = createElement('h2', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
+    }, 'Video Source Information');
+    section.appendChild(heading);
+
+    // Row 1: Video Location + Video Seized From
+    const row1 = createElement('div', { className: 'form-row' });
+
+    const locationGroup = this.createSelectField('videoLocation', 0, 'Where is the Video Currently Stored?',
+      CONFIG.VIDEO_LOCATION_OPTIONS, true);
+    row1.appendChild(locationGroup);
+
+    // Seized From field
+    row1.appendChild(this.createTextField('videoSeizedFrom', 0, 'Video Seized From',
+      false, 'Location/business where video was obtained'));
+
+    section.appendChild(row1);
+
+    // Video Location Other (hidden by default)
+    section.appendChild(this.createOtherField('videoLocationOther', 0, 'Storage Location'));
+
+    // Locker Info Group (hidden by default, shows when "Locker" selected)
+    const lockerGroup = createElement('div', {
+      className: 'form-row d-none',
+      id: 'lockerInfoGroup'
+    });
+
+    // bagNumber - OPTIONAL field (no required attribute)
+    lockerGroup.appendChild(this.createTextField('bagNumber', 0, 'Evidence Bag Number',
+      false, 'Bag number containing the evidence'));
+
+    // lockerNumber - OPTIONAL field
+    lockerGroup.appendChild(this.createLockerNumberField());
+
+    section.appendChild(lockerGroup);
+
+    // Recording Date (with past date restriction)
+    section.appendChild(this.createDateField('recordingDate', 0, 'Original Recording Date', false, {
+      maxDate: 'today' // Prevent future dates
+    }));
+
+    return section;
+  }
+
+  /**
+   * Create work request section for Analysis form
+   * @returns {HTMLElement} Section element with work request fields
+   */
+  static createWorkRequestSection() {
+    const section = createElement('section', { className: 'form-section' });
+
+    const heading = createElement('h2', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
+    }, 'Work Request');
+    section.appendChild(heading);
+
+    // Job Required
+    section.appendChild(this.createTextareaField('jobRequired', 0, 'What is the Job Required?',
+      true, 'Describe what you need done with the video'));
+
+    // File Names
+    section.appendChild(this.createTextareaField('fileNames', 0, 'File Name(s)',
+      true, 'List the specific file names to be analyzed'));
+
+    // Service Required (with Other conditional)
+    section.appendChild(this.createSelectField('serviceRequired', 0, 'Service Required',
+      CONFIG.SERVICE_REQUIRED_OPTIONS, true));
+
+    // Service Required Other (hidden by default)
+    section.appendChild(this.createOtherField('serviceRequiredOther', 0, 'Service Type'));
+
+    // Request Details
+    section.appendChild(this.createTextareaField('requestDetails', 0, 'Request Details',
+      true, 'Provide detailed information about your request'));
+
+    // Additional Information
+    section.appendChild(this.createTextareaField('additionalInfo', 0, 'Additional Information',
+      false, 'Any other relevant information'));
+
+    return section;
+  }
+
+  /**
+   * Create investigator section for Analysis form
+   * @returns {HTMLElement} Section element with investigator fields
+   */
+  static createInvestigatorSection() {
+    const section = createElement('section', { className: 'form-section' });
+
+    const heading = createElement('h2', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
+    }, 'Submitting Investigator Information');
+    section.appendChild(heading);
+
+    // Row 1: Name + Badge
+    const row1 = createElement('div', { className: 'form-row' });
+    row1.appendChild(this.createTextField('rName', 0, 'Investigator Name', true, '', 'Full name'));
+    row1.appendChild(this.createTextField('badge', 0, 'Badge Number', true, '', 'Badge #'));
+    section.appendChild(row1);
+
+    // Row 2: Phone + Email
+    const row2 = createElement('div', { className: 'form-row' });
+    row2.appendChild(this.createPhoneField('requestingPhone', 0, 'Contact Phone', true));
+    row2.appendChild(this.createEmailField('requestingEmail', 0, 'Email Address', true));
+    section.appendChild(row2);
+
+    return section;
+  }
+
+  // =========================================================================
+  // EXISTING METHODS (Upload/Recovery forms)
+  // =========================================================================
+
   /**
    * Create a location field (business name or address)
    */
@@ -17,7 +545,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const labelEl = createElement('label', {
-      htmlFor: fieldId,
+      for: fieldId,
       className: 'form-label'
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
@@ -57,7 +585,7 @@ export class FormFieldBuilder {
     const cityGroup = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      htmlFor: fieldId,
+      for: fieldId,
       className: 'form-label'
     });
     label.innerHTML = 'City <span class="required">*</span>';
@@ -121,7 +649,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const labelEl = createElement('label', {
-      htmlFor: fieldId,
+      for: fieldId,
       className: 'form-label'
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
@@ -254,7 +782,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      htmlFor: fieldId,
+      for: fieldId,
       className: 'form-label'
     }, 'Earliest Recorded Date on DVR');
 
@@ -294,7 +822,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const labelEl = createElement('label', {
-      htmlFor: fieldId,
+      for: fieldId,
       className: 'form-label'
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
@@ -387,7 +915,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      htmlFor: fieldId,
+      for: fieldId,
       className: 'form-label'
     });
     label.innerHTML = 'Camera Details <span class="required">*</span>';
@@ -423,7 +951,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      htmlFor: fieldId,
+      for: fieldId,
       className: 'form-label'
     }, 'DVR Make/Model');
 
@@ -547,7 +1075,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      htmlFor: fieldId,
+      for: fieldId,
       className: 'form-label'
     }, 'DVR Retention');
 
@@ -645,7 +1173,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      htmlFor: fieldId,
+      for: fieldId,
       className: 'form-label'
     }, 'Username');
 
@@ -673,7 +1201,7 @@ export class FormFieldBuilder {
     const group = createElement('div', { className: 'form-group' });
 
     const label = createElement('label', {
-      htmlFor: fieldId,
+      for: fieldId,
       className: 'form-label'
     });
     label.innerHTML = 'Password <span class="required">*</span>';
