@@ -389,17 +389,19 @@ describe('Upload Form Builder', () => {
    * They follow the Analysis form pattern for Flatpickr initialization.
    */
   describe('Flatpickr Integration Methods', () => {
+    // Import UploadFormHandler to test method existence
+    let UploadFormHandler;
+
+    beforeEach(async () => {
+      // Dynamic import to get the actual class
+      const module = await import('../../../assets/js/form-handlers/form-handler-upload.js');
+      UploadFormHandler = module.UploadFormHandler;
+    });
+
     describe('initializeFlatpickrFields()', () => {
-      it('should define initializeFlatpickrFields method behavior', () => {
-        // This documents the expected behavior:
-        // 1. Initialize Flatpickr on occDate with DATE config
-        // 2. Call initializeFlatpickrInContainer() for first location group
-        const expectedBehavior = {
-          initializesOccDate: true,
-          callsInitializeFlatpickrInContainer: true
-        };
-        expect(expectedBehavior.initializesOccDate).toBe(true);
-        expect(expectedBehavior.callsInitializeFlatpickrInContainer).toBe(true);
+      it('should have initializeFlatpickrFields method on UploadFormHandler prototype', () => {
+        // RED-LINE: This will FAIL until the method is implemented
+        expect(typeof UploadFormHandler.prototype.initializeFlatpickrFields).toBe('function');
       });
 
       it('should use CONFIG.FLATPICKR_CONFIG.DATE for occDate', () => {
@@ -410,35 +412,18 @@ describe('Upload Form Builder', () => {
     });
 
     describe('initializeFlatpickrInContainer(container, index)', () => {
-      it('should define initializeFlatpickrInContainer method behavior', () => {
-        // This documents the expected behavior:
-        // 1. Find videoStartTime and videoEndTime fields in container
-        // 2. Initialize Flatpickr with DATETIME config
-        // 3. Store instances in this.flatpickrInstances
-        const expectedBehavior = {
-          initializesVideoStartTime: true,
-          initializesVideoEndTime: true,
-          usesDATETIMEConfig: true,
-          storesInstances: true
-        };
-        expect(expectedBehavior.initializesVideoStartTime).toBe(true);
-        expect(expectedBehavior.initializesVideoEndTime).toBe(true);
-        expect(expectedBehavior.usesDATETIMEConfig).toBe(true);
-        expect(expectedBehavior.storesInstances).toBe(true);
+      it('should have initializeFlatpickrInContainer method on UploadFormHandler prototype', () => {
+        // RED-LINE: This will FAIL until the method is implemented
+        expect(typeof UploadFormHandler.prototype.initializeFlatpickrInContainer).toBe('function');
       });
 
-      it('should target correct field IDs based on index', () => {
-        // Index 0: videoStartTime, videoEndTime
-        // Index 1: videoStartTime_1, videoEndTime_1
-        const index0StartId = 'videoStartTime';
-        const index0EndId = 'videoEndTime';
-        const index1StartId = 'videoStartTime_1';
-        const index1EndId = 'videoEndTime_1';
-
-        expect(index0StartId).toBe('videoStartTime');
-        expect(index0EndId).toBe('videoEndTime');
-        expect(index1StartId).toBe('videoStartTime_1');
-        expect(index1EndId).toBe('videoEndTime_1');
+      it('should have flatpickrInstances property initialized', () => {
+        // RED-LINE: This will FAIL until the property is initialized in constructor
+        // We need to set up a minimal DOM for the form handler
+        container.innerHTML = '<form id="uploadForm"></form>';
+        const handler = new UploadFormHandler('uploadForm');
+        expect(handler.flatpickrInstances).toBeDefined();
+        expect(typeof handler.flatpickrInstances).toBe('object');
       });
     });
   });
@@ -578,48 +563,96 @@ describe('Upload Form Builder', () => {
    * Test Suite: Field Naming Preservation
    *
    * CRITICAL: Field names must be preserved for PHP/PDF/JSON compatibility.
+   * These tests verify actual DOM field creation via FormFieldBuilder.
    */
   describe('Field Naming Preservation', () => {
-    const uploadFormFieldNames = [
-      // Evidence section
-      'occNumber', 'occDate', 'offenceType', 'evidenceBag', 'lockerNumber', 'mediaType', 'mediaTypeOther',
-      // Investigator section
-      'rName', 'badge', 'requestingPhone', 'requestingEmail',
-      // First location (index 0)
-      'businessName', 'locationAddress', 'city', 'cityOther',
-      'videoStartTime', 'videoEndTime', 'isTimeDateCorrect', 'timeOffset', 'dvrEarliestDate',
-      // Additional info
-      'otherInfo'
-    ];
+    describe('First location fields (index 0) - no suffix', () => {
+      it('should create businessName field without suffix at index 0', () => {
+        const field = FormFieldBuilder.createLocationField('businessName', 0, 'Business Name', false);
+        container.appendChild(field);
+        const input = container.querySelector('#businessName');
+        expect(input).toBeTruthy();
+        expect(input.getAttribute('name')).toBe('businessName');
+        expect(input.getAttribute('id')).not.toMatch(/_\d+$/);
+      });
 
-    uploadFormFieldNames.forEach(fieldName => {
-      it(`should preserve field name "${fieldName}"`, () => {
-        // This documents all field names that must be preserved
-        expect(fieldName).toBeTruthy();
-        expect(typeof fieldName).toBe('string');
+      it('should create locationAddress field without suffix at index 0', () => {
+        const field = FormFieldBuilder.createLocationField('locationAddress', 0, 'Location Address', true);
+        container.appendChild(field);
+        const input = container.querySelector('#locationAddress');
+        expect(input).toBeTruthy();
+        expect(input.getAttribute('name')).toBe('locationAddress');
+      });
+
+      it('should create city field without suffix at index 0', () => {
+        const field = FormFieldBuilder.createCityField(0);
+        container.appendChild(field);
+        const select = container.querySelector('#city');
+        expect(select).toBeTruthy();
+        expect(select.getAttribute('name')).toBe('city');
+      });
+
+      it('should create videoStartTime field without suffix at index 0', () => {
+        // RED-LINE: This will FAIL until createDateTimeField is implemented
+        const field = FormFieldBuilder.createDateTimeField('videoStartTime', 0, 'Video Start Time', true);
+        container.appendChild(field);
+        const input = container.querySelector('#videoStartTime');
+        expect(input).toBeTruthy();
+        expect(input.getAttribute('name')).toBe('videoStartTime');
+      });
+
+      it('should create videoEndTime field without suffix at index 0', () => {
+        // RED-LINE: This will FAIL until createDateTimeField is implemented
+        const field = FormFieldBuilder.createDateTimeField('videoEndTime', 0, 'Video End Time', true);
+        container.appendChild(field);
+        const input = container.querySelector('#videoEndTime');
+        expect(input).toBeTruthy();
+        expect(input.getAttribute('name')).toBe('videoEndTime');
       });
     });
 
-    it('should NOT add suffixes to first location fields (index 0)', () => {
-      const firstLocationFields = [
-        'businessName', 'locationAddress', 'city', 'cityOther',
-        'videoStartTime', 'videoEndTime', 'isTimeDateCorrect', 'timeOffset', 'dvrEarliestDate'
-      ];
-
-      firstLocationFields.forEach(fieldName => {
-        // Index 0 fields should NOT have _N suffix
-        expect(fieldName).not.toMatch(/_\d+$/);
+    describe('Second location fields (index 1) - with _1 suffix', () => {
+      it('should create businessName_1 field with suffix at index 1', () => {
+        const field = FormFieldBuilder.createLocationField('businessName', 1, 'Business Name', false);
+        container.appendChild(field);
+        const input = container.querySelector('#businessName_1');
+        expect(input).toBeTruthy();
+        expect(input.getAttribute('name')).toBe('businessName_1');
+        expect(input.getAttribute('id')).toMatch(/_1$/);
       });
-    });
 
-    it('should add _1 suffix to second location fields (index 1)', () => {
-      const expectedSecondLocationFields = [
-        'businessName_1', 'locationAddress_1', 'city_1', 'cityOther_1',
-        'videoStartTime_1', 'videoEndTime_1', 'isTimeDateCorrect_1', 'timeOffset_1', 'dvrEarliestDate_1'
-      ];
+      it('should create locationAddress_1 field with suffix at index 1', () => {
+        const field = FormFieldBuilder.createLocationField('locationAddress', 1, 'Location Address', true);
+        container.appendChild(field);
+        const input = container.querySelector('#locationAddress_1');
+        expect(input).toBeTruthy();
+        expect(input.getAttribute('name')).toBe('locationAddress_1');
+      });
 
-      expectedSecondLocationFields.forEach(fieldName => {
-        expect(fieldName).toMatch(/_1$/);
+      it('should create city_1 field with suffix at index 1', () => {
+        const field = FormFieldBuilder.createCityField(1);
+        container.appendChild(field);
+        const select = container.querySelector('#city_1');
+        expect(select).toBeTruthy();
+        expect(select.getAttribute('name')).toBe('city_1');
+      });
+
+      it('should create videoStartTime_1 field with suffix at index 1', () => {
+        // RED-LINE: This will FAIL until createDateTimeField is implemented
+        const field = FormFieldBuilder.createDateTimeField('videoStartTime', 1, 'Video Start Time', true);
+        container.appendChild(field);
+        const input = container.querySelector('#videoStartTime_1');
+        expect(input).toBeTruthy();
+        expect(input.getAttribute('name')).toBe('videoStartTime_1');
+      });
+
+      it('should create videoEndTime_1 field with suffix at index 1', () => {
+        // RED-LINE: This will FAIL until createDateTimeField is implemented
+        const field = FormFieldBuilder.createDateTimeField('videoEndTime', 1, 'Video End Time', true);
+        container.appendChild(field);
+        const input = container.querySelector('#videoEndTime_1');
+        expect(input).toBeTruthy();
+        expect(input.getAttribute('name')).toBe('videoEndTime_1');
       });
     });
   });

@@ -73,31 +73,31 @@ describe('CONFIG', () => {
       });
 
       it('should have enableTime set to true for time selection', () => {
-        expect(CONFIG.FLATPICKR_CONFIG.DATETIME.enableTime).toBe(true);
+        expect(CONFIG.FLATPICKR_CONFIG.DATETIME?.enableTime).toBe(true);
       });
 
       it('should have time_24hr set to true for 24-hour format', () => {
-        expect(CONFIG.FLATPICKR_CONFIG.DATETIME.time_24hr).toBe(true);
+        expect(CONFIG.FLATPICKR_CONFIG.DATETIME?.time_24hr).toBe(true);
       });
 
       it('should have dateFormat set to Y-m-d H:i for ISO datetime submission', () => {
-        expect(CONFIG.FLATPICKR_CONFIG.DATETIME.dateFormat).toBe('Y-m-d H:i');
+        expect(CONFIG.FLATPICKR_CONFIG.DATETIME?.dateFormat).toBe('Y-m-d H:i');
       });
 
       it('should have altInput enabled for user-friendly display', () => {
-        expect(CONFIG.FLATPICKR_CONFIG.DATETIME.altInput).toBe(true);
+        expect(CONFIG.FLATPICKR_CONFIG.DATETIME?.altInput).toBe(true);
       });
 
       it('should have altFormat for readable datetime display', () => {
-        expect(CONFIG.FLATPICKR_CONFIG.DATETIME.altFormat).toBe('M j, Y H:i');
+        expect(CONFIG.FLATPICKR_CONFIG.DATETIME?.altFormat).toBe('M j, Y H:i');
       });
 
       it('should have allowInput enabled for manual entry', () => {
-        expect(CONFIG.FLATPICKR_CONFIG.DATETIME.allowInput).toBe(true);
+        expect(CONFIG.FLATPICKR_CONFIG.DATETIME?.allowInput).toBe(true);
       });
 
       it('should have minuteIncrement set to 1 for precise time selection', () => {
-        expect(CONFIG.FLATPICKR_CONFIG.DATETIME.minuteIncrement).toBe(1);
+        expect(CONFIG.FLATPICKR_CONFIG.DATETIME?.minuteIncrement).toBe(1);
       });
     });
   });
