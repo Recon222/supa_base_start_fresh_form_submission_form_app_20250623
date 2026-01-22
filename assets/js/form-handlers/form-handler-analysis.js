@@ -146,9 +146,6 @@ export class AnalysisFormHandler extends FormHandler {
     conditionalHandler.setupOtherField('videoLocation', 'videoLocationOtherGroup', 'videoLocationOther');
     conditionalHandler.setupOtherField('serviceRequired', 'serviceRequiredOtherGroup', 'serviceRequiredOther');
 
-    // Also setup city "Other" field (present in current HTML)
-    conditionalHandler.setupOtherField('city', 'cityOtherGroup', 'cityOther');
-
     // Special handling for "Locker" selection in videoLocation
     // This shows bagNumber and lockerNumber fields (both OPTIONAL)
     // Note: lockerInfoGroup container will be added in Phase 3 via FormFieldBuilder
