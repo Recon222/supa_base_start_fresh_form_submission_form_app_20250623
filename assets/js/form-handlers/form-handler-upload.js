@@ -7,7 +7,7 @@ import { FormHandler } from './form-handler-base.js';
 import { ConditionalFieldHandler } from './conditional-field-handler.js';
 import { FormFieldBuilder } from './form-field-builder.js';
 import { validateDateRange, validateLocations } from '../validators.js';
-import { toggleElement, scrollToElement, createElement } from '../utils.js';
+import { toggleElement, scrollToElement, createElement, debounce } from '../utils.js';
 import { calculateRetentionDays } from '../calculations.js';
 import { CONFIG } from '../config.js';
 
@@ -19,7 +19,348 @@ export class UploadFormHandler extends FormHandler {
   constructor(formId) {
     super(formId);
     this.locations = [];
+
+    // Store Flatpickr instances for programmatic access
+    this.flatpickrInstances = {};
+
+    // Build initial form fields via FormFieldBuilder
+    this.buildInitialFields();
+
+    // Setup upload-specific listeners
     this.setupUploadSpecificListeners();
+
+    // Initialize Flatpickr on initial fields (AFTER fields are built)
+    this.initializeFlatpickrFields();
+
+    // Cleanup Flatpickr instances when page unloads
+    window.addEventListener('beforeunload', () => this.destroy());
+  }
+
+  /**
+   * Build all initial form fields via FormFieldBuilder
+   * Creates sections for evidence, investigator, location-video, and additional info
+   */
+  buildInitialFields() {
+    this.buildEvidenceSection();
+    this.buildInvestigatorSection();
+    this.buildFirstLocationVideoGroup();
+    this.buildAdditionalSection();
+
+    // Attach validation listeners to all built fields
+    this.attachValidationListeners(this.form);
+
+    // Re-apply iOS keyboard fix for dynamically created fields
+    // The base class init() runs before buildInitialFields(), so dynamic fields miss the fix
+    this.setupKeyboardProgressBarFix();
+
+    // Apply autofill prevention to newly created dynamic fields
+    // The base class configureAutofill() runs in init() before buildInitialFields() creates these fields
+    if (CONFIG.FEATURES.BROWSER_AUTOFILL === false) {
+      this.applyAutofillPrevention(this.form.querySelectorAll('.form-control'));
+    }
+  }
+
+  /**
+   * Build evidence information section
+   * Creates: occNumber, occDate, offenceType, evidenceBag, lockerNumber, mediaType, mediaTypeOther
+   */
+  buildEvidenceSection() {
+    const container = document.getElementById('evidence-section-container');
+    if (!container) {
+      console.debug('[UploadForm] evidence-section-container not found - form may be using static HTML');
+      return;
+    }
+
+    // Add section heading
+    const heading = createElement('h2', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
+    }, 'Evidence Information');
+    container.appendChild(heading);
+
+    // Row 1: Occurrence Number + Date of Occurrence
+    container.appendChild(FormFieldBuilder.createFormRow(
+      FormFieldBuilder.createOccurrenceNumberField(),
+      FormFieldBuilder.createDateField('occDate', 0, 'Date of Occurrence', true, { maxDate: 'today' })
+    ));
+
+    // Row 2: Type of Offence + Evidence Bag
+    // NOTE: Upload form offenceType has NO "Other" option - just Homicide and Missing Person
+    const uploadOffenceOptions = [
+      { value: '', text: 'Select...' },
+      { value: 'Homicide', text: 'Homicide' },
+      { value: 'Missing Person', text: 'Missing Person' }
+    ];
+    container.appendChild(FormFieldBuilder.createFormRow(
+      FormFieldBuilder.createSelectField('offenceType', 0, 'Type of Offence', uploadOffenceOptions, true),
+      FormFieldBuilder.createTextField('evidenceBag', 0, 'Evidence Bag #', false, '', 'Evidence bag identification number')
+    ));
+
+    // Row 3: Locker Number + Media Type
+    container.appendChild(FormFieldBuilder.createFormRow(
+      FormFieldBuilder.createLockerNumberField(),
+      FormFieldBuilder.createSelectField('mediaType', 0, 'Type of Media Submitted', CONFIG.MEDIA_TYPE_OPTIONS, true)
+    ));
+
+    // Conditional: Media Type Other
+    container.appendChild(FormFieldBuilder.createOtherField('mediaTypeOther', 0, 'Media Type'));
+  }
+
+  /**
+   * Build investigator section
+   * Reuses the shared createInvestigatorSection() from FormFieldBuilder
+   */
+  buildInvestigatorSection() {
+    const container = document.getElementById('investigator-section-container');
+    if (!container) {
+      console.debug('[UploadForm] investigator-section-container not found - form may be using static HTML');
+      return;
+    }
+
+    // Reuse the Analysis form's investigator section - IT'S IDENTICAL!
+    container.appendChild(FormFieldBuilder.createInvestigatorSection());
+  }
+
+  /**
+   * Build first location-video group
+   * Uses the shared createLocationVideoGroup() method for index 0
+   */
+  buildFirstLocationVideoGroup() {
+    const container = document.getElementById('location-video-container');
+    if (!container) {
+      console.debug('[UploadForm] location-video-container not found - form may be using static HTML');
+      return;
+    }
+
+    // Use the shared method for index 0
+    const locationVideoGroup = this.createLocationVideoGroup(0);
+    container.appendChild(locationVideoGroup);
+  }
+
+  /**
+   * Build additional information section
+   * Creates: otherInfo textarea
+   */
+  buildAdditionalSection() {
+    const container = document.getElementById('additional-section-container');
+    if (!container) {
+      console.debug('[UploadForm] additional-section-container not found - form may be using static HTML');
+      return;
+    }
+
+    // Add section heading
+    const heading = createElement('h2', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
+    }, 'Additional Information');
+    container.appendChild(heading);
+
+    // Other info textarea
+    container.appendChild(FormFieldBuilder.createTextareaField(
+      'otherInfo', 0, 'Other Information', false,
+      'Any additional information relevant to this submission', 4
+    ));
+  }
+
+  /**
+   * Create a location-video group (used for both initial and dynamic)
+   * @param {number} index - Group index (0 for first)
+   * @returns {HTMLElement} Location-video group element
+   */
+  createLocationVideoGroup(index) {
+    const locationVideoGroup = createElement('div', {
+      className: 'location-video-group',
+      dataset: { groupIndex: index },
+      style: 'background: var(--glass-bg); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; border: 2px solid var(--color-primary);'
+    });
+
+    // Header
+    const header = createElement('h2', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem; text-align: center; font-size: 1.5rem;'
+    }, `Location ${index + 1}`);
+    locationVideoGroup.appendChild(header);
+
+    // Location section
+    const locationSection = createElement('section', { className: 'form-section' });
+    locationSection.innerHTML = '<h3 style="color: var(--color-primary); margin-bottom: 1.5rem;">Location Information</h3>';
+
+    locationSection.appendChild(FormFieldBuilder.createLocationField('businessName', index, 'Business Name', false));
+    locationSection.appendChild(FormFieldBuilder.createLocationField('locationAddress', index, 'Location Address', true));
+    locationSection.appendChild(FormFieldBuilder.createCityField(index));
+    locationVideoGroup.appendChild(locationSection);
+
+    // Video timeframe section
+    const videoSection = createElement('section', { className: 'form-section' });
+    videoSection.innerHTML = '<h3 style="color: var(--color-primary); margin-bottom: 1.5rem;">Video Timeframe</h3>';
+
+    // Use Flatpickr-based datetime fields
+    videoSection.appendChild(FormFieldBuilder.createFormRow(
+      FormFieldBuilder.createDateTimeField('videoStartTime', index, 'Video Start Time', true, 'When the relevant video begins'),
+      FormFieldBuilder.createDateTimeField('videoEndTime', index, 'Video End Time', true, 'When the relevant video ends')
+    ));
+
+    videoSection.appendChild(FormFieldBuilder.createTimeSyncField(index));
+    videoSection.appendChild(FormFieldBuilder.createDvrDateField(index, (e) => this.handleRetentionChange(e, index)));
+    locationVideoGroup.appendChild(videoSection);
+
+    // Remove button (only for index > 0)
+    if (index > 0) {
+      const removeBtn = createElement('button', {
+        type: 'button',
+        className: 'btn btn-danger',
+        style: 'margin-top: 1rem; width: 100%;',
+        onclick: () => this.removeLocationVideo(locationVideoGroup)
+      }, '× Remove This Location');
+      locationVideoGroup.appendChild(removeBtn);
+    }
+
+    return locationVideoGroup;
+  }
+
+  /**
+   * Handle DVR retention date change to show retention calculation
+   * @param {Event} e - Change event
+   * @param {number} index - Location group index
+   */
+  handleRetentionChange(e, index) {
+    const retentionId = index === 0 ? 'retentionCalculation' : `retentionCalculation_${index}`;
+    const retentionEl = document.getElementById(retentionId);
+    if (e.target.value && retentionEl) {
+      const retention = calculateRetentionDays(e.target.value);
+      retentionEl.textContent = retention.message;
+      retentionEl.className = 'text-info mt-2';
+    } else if (retentionEl) {
+      retentionEl.textContent = '';
+    }
+  }
+
+  /**
+   * Attach validation event listeners to all form-control elements
+   * Ensures sliding green checkmark validation UI works on all dynamically built fields
+   * @param {HTMLElement} container - Container with fields
+   */
+  attachValidationListeners(container) {
+    const fields = container.querySelectorAll('.form-control');
+
+    fields.forEach(field => {
+      // Blur validation for all fields
+      field.addEventListener('blur', () => this.validateSingleField(field));
+
+      // Real-time validation for phone and email fields (debounced)
+      if (field.type === 'tel' || field.name === CONFIG.FIELD_NAMES.OFFICER_EMAIL) {
+        field.addEventListener('input', debounce(() => this.validateSingleField(field), 500));
+      }
+
+      // Locker number real-time validation
+      if (field.name === 'lockerNumber') {
+        field.addEventListener('input', debounce(() => this.validateSingleField(field), 500));
+      }
+    });
+  }
+
+  /**
+   * Initialize Flatpickr on all date/datetime fields
+   * Must be called AFTER buildInitialFields() so DOM elements exist
+   */
+  initializeFlatpickrFields() {
+    // Date of Occurrence field (required, past dates only)
+    const occDateField = this.form.querySelector('#occDate');
+    if (occDateField && typeof window !== 'undefined' && window.flatpickr) {
+      this.flatpickrInstances.occDate = window.flatpickr(occDateField, {
+        ...CONFIG.FLATPICKR_CONFIG.DATE,
+        maxDate: 'today', // Prevent future dates
+        onChange: (selectedDates, dateStr) => {
+          this.validateSingleField(occDateField);
+        }
+      });
+    }
+
+    // Initialize Flatpickr for the first location group
+    const firstLocationGroup = this.form.querySelector('.location-video-group');
+    if (firstLocationGroup) {
+      this.initializeFlatpickrInContainer(firstLocationGroup, 0);
+    }
+  }
+
+  /**
+   * Initialize Flatpickr on datetime fields within a container
+   * @param {HTMLElement} container - Container with datetime fields
+   * @param {number} index - Location group index
+   */
+  initializeFlatpickrInContainer(container, index) {
+    if (typeof window === 'undefined' || !window.flatpickr) return;
+
+    const startTimeId = index === 0 ? 'videoStartTime' : `videoStartTime_${index}`;
+    const endTimeId = index === 0 ? 'videoEndTime' : `videoEndTime_${index}`;
+
+    const startTimeField = container.querySelector(`#${startTimeId}`);
+    const endTimeField = container.querySelector(`#${endTimeId}`);
+
+    if (startTimeField) {
+      this.flatpickrInstances[startTimeId] = window.flatpickr(startTimeField, {
+        ...CONFIG.FLATPICKR_CONFIG.DATETIME,
+        onChange: (selectedDates, dateStr) => {
+          this.validateSingleField(startTimeField);
+        }
+      });
+    }
+
+    if (endTimeField) {
+      this.flatpickrInstances[endTimeId] = window.flatpickr(endTimeField, {
+        ...CONFIG.FLATPICKR_CONFIG.DATETIME,
+        onChange: (selectedDates, dateStr) => {
+          this.validateSingleField(endTimeField);
+        }
+      });
+    }
+  }
+
+  /**
+   * Override populateForm to sync Flatpickr display with loaded draft values
+   * Flatpickr maintains its own internal state separate from the input value,
+   * so setting field.value directly doesn't update the visual display.
+   * @param {Object} data - Form data to populate
+   */
+  populateForm(data) {
+    // Let base class populate all standard fields
+    super.populateForm(data);
+
+    // Sync Flatpickr instances with their underlying input values
+    // This ensures the visual picker display matches the loaded draft
+    Object.keys(this.flatpickrInstances).forEach(key => {
+      if (data[key] && this.flatpickrInstances[key]) {
+        // setDate(date, triggerChange) - second param triggers onChange callback
+        this.flatpickrInstances[key].setDate(data[key], true);
+      }
+    });
+  }
+
+  /**
+   * Override clearFormAfterSubmission to also clear Flatpickr instances
+   * The base class sets field.value = '' but Flatpickr maintains its own
+   * internal state, so we must explicitly call clear() on each instance.
+   */
+  clearFormAfterSubmission() {
+    // Let base class handle standard form clearing
+    super.clearFormAfterSubmission();
+
+    // Clear all Flatpickr instances to sync their display
+    Object.values(this.flatpickrInstances).forEach(instance => {
+      if (instance && typeof instance.clear === 'function') {
+        instance.clear();
+      }
+    });
+  }
+
+  /**
+   * Cleanup Flatpickr instances to prevent memory leaks
+   * Should be called when the form is destroyed or page is unloaded
+   */
+  destroy() {
+    Object.values(this.flatpickrInstances).forEach(instance => {
+      if (instance && typeof instance.destroy === 'function') {
+        instance.destroy();
+      }
+    });
+    this.flatpickrInstances = {};
   }
 
   setupUploadSpecificListeners() {
@@ -32,27 +373,11 @@ export class UploadFormHandler extends FormHandler {
     // Setup listeners for the first location-video group
     this.setupLocationVideoListeners(0);
 
-    // DVR retention calculation
-    const dvrDateField = this.form.querySelector('#dvrEarliestDate');
-    if (dvrDateField) {
-      dvrDateField.addEventListener('change', (e) => {
-        const retentionEl = document.getElementById('retentionCalculation');
-        if (e.target.value) {
-          const retention = calculateRetentionDays(e.target.value);
-          retentionEl.textContent = retention.message;
-          retentionEl.className = 'text-info mt-2';
-        } else {
-          retentionEl.textContent = '';
-        }
-      });
-    }
-
     // Add location button
     const addLocationBtn = document.getElementById('addLocationBtn');
     if (addLocationBtn) {
       addLocationBtn.addEventListener('click', () => this.addLocationVideo());
     }
-
   }
 
   setupLocationVideoListeners(index) {
@@ -81,12 +406,16 @@ export class UploadFormHandler extends FormHandler {
         if (e.target.value === 'Yes') {
           toggleElement(warningEl, true);
           toggleElement(offsetGroup, false);
-          offsetField.removeAttribute('required');
-          offsetField.value = '';
+          if (offsetField) {
+            offsetField.removeAttribute('required');
+            offsetField.value = '';
+          }
         } else {
           toggleElement(warningEl, false);
           toggleElement(offsetGroup, true);
-          offsetField.setAttribute('required', 'required');
+          if (offsetField) {
+            offsetField.setAttribute('required', 'required');
+          }
         }
       });
     });
@@ -96,78 +425,26 @@ export class UploadFormHandler extends FormHandler {
     const container = document.getElementById('location-video-container');
     const index = container.children.length;
 
-    const locationVideoGroup = createElement('div', {
-      className: 'location-video-group',
-      dataset: { groupIndex: index },
-      style: 'background: var(--glass-bg); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; border: 2px solid var(--color-primary); opacity: 0;'
-    });
-
-    // Location header (like "DVR 1")
-    const header = createElement('h2', {
-      style: 'color: var(--color-primary); margin-bottom: 1.5rem; text-align: center; font-size: 1.5rem;'
-    }, `Location ${index + 1}`);
-    locationVideoGroup.appendChild(header);
-
-    // Create location section
-    const locationSection = createElement('section', { className: 'form-section' });
-    locationSection.innerHTML = `
-      <h3 style="color: var(--color-primary); margin-bottom: 1.5rem;">Location Information</h3>
-    `;
-
-    // Location fields
-    const businessNameGroup = FormFieldBuilder.createLocationField('businessName', index, 'Business Name', false);
-    const addressGroup = FormFieldBuilder.createLocationField('locationAddress', index, 'Location Address', true);
-    const cityGroup = FormFieldBuilder.createCityField(index);
-
-    locationSection.appendChild(businessNameGroup);
-    locationSection.appendChild(addressGroup);
-    locationSection.appendChild(cityGroup);
-
-    // Create video timeframe section
-    const videoSection = createElement('section', { className: 'form-section' });
-    videoSection.innerHTML = `
-      <h3 style="color: var(--color-primary); margin-bottom: 1.5rem;">Video Timeframe</h3>
-    `;
-
-    // Video timeframe fields
-    const startTimeGroup = FormFieldBuilder.createTimeField('videoStartTime', index, 'Video Start Time', true);
-    const endTimeGroup = FormFieldBuilder.createTimeField('videoEndTime', index, 'Video End Time', true);
-    const timeSyncGroup = FormFieldBuilder.createTimeSyncField(index);
-    const dvrDateGroup = FormFieldBuilder.createDvrDateField(index, (e) => {
-      if (e.target.value) {
-        const retentionId = index === 0 ? 'retentionCalculation' : `retentionCalculation_${index}`;
-        const retentionDiv = document.getElementById(retentionId);
-        const retention = calculateRetentionDays(e.target.value);
-        retentionDiv.textContent = retention.message;
-        retentionDiv.className = 'text-info mt-2';
-      }
-    });
-
-    videoSection.appendChild(startTimeGroup);
-    videoSection.appendChild(endTimeGroup);
-    videoSection.appendChild(timeSyncGroup);
-    videoSection.appendChild(dvrDateGroup);
-
-    // Remove button
-    const removeBtn = createElement('button', {
-      type: 'button',
-      className: 'btn btn-danger',
-      style: 'margin-top: 1rem; width: 100%;',
-      onclick: () => this.removeLocationVideo(locationVideoGroup)
-    }, '× Remove This Location');
-
-    locationVideoGroup.appendChild(locationSection);
-    locationVideoGroup.appendChild(videoSection);
-    locationVideoGroup.appendChild(removeBtn);
+    // Use the shared method
+    const locationVideoGroup = this.createLocationVideoGroup(index);
+    locationVideoGroup.style.opacity = '0';
 
     container.appendChild(locationVideoGroup);
 
     // Apply autofill prevention to the newly created fields
-    const newFields = locationVideoGroup.querySelectorAll('input, select, textarea');
-    this.applyAutofillPrevention(newFields);
+    this.applyAutofillPrevention(locationVideoGroup.querySelectorAll('input, select, textarea'));
 
-    // Setup listeners for the new group
+    // Attach validation listeners to new fields
+    this.attachValidationListeners(locationVideoGroup);
+
+    // Initialize Flatpickr on new datetime fields
+    this.initializeFlatpickrInContainer(locationVideoGroup, index);
+
+    // Setup conditional field listeners
     this.setupLocationVideoListeners(index);
+
+    // Re-apply iOS keyboard fix for new fields
+    this.setupKeyboardProgressBarFix();
 
     // Animate in
     requestAnimationFrame(() => {
@@ -183,6 +460,23 @@ export class UploadFormHandler extends FormHandler {
   }
 
   removeLocationVideo(locationVideoGroup) {
+    // Get the index of the group being removed to clean up Flatpickr instances
+    const index = parseInt(locationVideoGroup.dataset.groupIndex, 10);
+
+    // Destroy Flatpickr instances for this group
+    const startTimeId = index === 0 ? 'videoStartTime' : `videoStartTime_${index}`;
+    const endTimeId = index === 0 ? 'videoEndTime' : `videoEndTime_${index}`;
+
+    if (this.flatpickrInstances[startTimeId]) {
+      this.flatpickrInstances[startTimeId].destroy();
+      delete this.flatpickrInstances[startTimeId];
+    }
+    if (this.flatpickrInstances[endTimeId]) {
+      this.flatpickrInstances[endTimeId].destroy();
+      delete this.flatpickrInstances[endTimeId];
+    }
+
+    // Animate out
     locationVideoGroup.style.transition = 'all 0.3s ease';
     locationVideoGroup.style.opacity = '0';
     locationVideoGroup.style.transform = 'scale(0.95)';
@@ -361,25 +655,25 @@ export class UploadFormHandler extends FormHandler {
 
     locationVideoGroups.forEach((group, index) => {
       const location = {
-        businessName: group.querySelector(`[name^="businessName"]`).value,
-        locationAddress: group.querySelector(`[name^="locationAddress"]`).value,
-        city: group.querySelector(`[name^="city"]`).value
+        businessName: group.querySelector(`[name^="businessName"]`)?.value || '',
+        locationAddress: group.querySelector(`[name^="locationAddress"]`)?.value || '',
+        city: group.querySelector(`[name^="city"]`)?.value || ''
       };
 
       if (location.city === 'Other') {
-        location.cityOther = group.querySelector(`[name^="cityOther"]`).value;
+        location.cityOther = group.querySelector(`[name^="cityOther"]`)?.value || '';
       }
 
       // Add video timeframe data
-      location.videoStartTime = group.querySelector(`[name^="videoStartTime"]`).value;
-      location.videoEndTime = group.querySelector(`[name^="videoEndTime"]`).value;
+      location.videoStartTime = group.querySelector(`[name^="videoStartTime"]`)?.value || '';
+      location.videoEndTime = group.querySelector(`[name^="videoEndTime"]`)?.value || '';
       location.isTimeDateCorrect = group.querySelector(`[name^="isTimeDateCorrect"]:checked`)?.value || '';
 
       if (location.isTimeDateCorrect === 'No') {
-        location.timeOffset = group.querySelector(`[name^="timeOffset"]`).value;
+        location.timeOffset = group.querySelector(`[name^="timeOffset"]`)?.value || '';
       }
 
-      location.dvrEarliestDate = group.querySelector(`[name^="dvrEarliestDate"]`).value;
+      location.dvrEarliestDate = group.querySelector(`[name^="dvrEarliestDate"]`)?.value || '';
 
       data.locations.push(location);
     });
@@ -426,9 +720,9 @@ export class UploadFormHandler extends FormHandler {
 
       // Collect location data for validation
       locations.push({
-        locationAddress: group.querySelector('[name^="locationAddress"]').value,
-        city: group.querySelector('[name^="city"]').value,
-        cityOther: group.querySelector('[name^="cityOther"]')?.value
+        locationAddress: group.querySelector('[name^="locationAddress"]')?.value || '',
+        city: group.querySelector('[name^="city"]')?.value || '',
+        cityOther: group.querySelector('[name^="cityOther"]')?.value || ''
       });
     });
 
@@ -440,12 +734,14 @@ export class UploadFormHandler extends FormHandler {
       // Show location errors
       Object.entries(locationErrors).forEach(([index, errors]) => {
         const group = locationVideoGroups[index];
-        Object.entries(errors).forEach(([fieldName, error]) => {
-          const field = group.querySelector(`[name^="${fieldName}"]`);
-          if (field) {
-            this.showFieldValidation(field, error);
-          }
-        });
+        if (group) {
+          Object.entries(errors).forEach(([fieldName, error]) => {
+            const field = group.querySelector(`[name^="${fieldName}"]`);
+            if (field) {
+              this.showFieldValidation(field, error);
+            }
+          });
+        }
       });
     }
 
