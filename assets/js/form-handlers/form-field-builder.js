@@ -8,6 +8,21 @@ import { createElement } from '../utils.js';
 
 export class FormFieldBuilder {
   // =========================================================================
+  // HELPER METHODS
+  // =========================================================================
+
+  /**
+   * Create a form row containing the provided field elements
+   * @param {...HTMLElement} fields - Field elements to add to the row
+   * @returns {HTMLElement} Form row element
+   */
+  static createFormRow(...fields) {
+    const row = createElement('div', { className: 'form-row' });
+    fields.forEach(field => row.appendChild(field));
+    return row;
+  }
+
+  // =========================================================================
   // GENERIC FIELD CREATION METHODS (Analysis form and shared)
   // =========================================================================
 
@@ -397,17 +412,10 @@ export class FormFieldBuilder {
     section.appendChild(heading);
 
     // Row: Occurrence Number + Type of Offence
-    const row = createElement('div', { className: 'form-row' });
-
-    // Occurrence Number
-    row.appendChild(this.createOccurrenceNumberField());
-
-    // Type of Offence (with Other conditional)
-    const offenceGroup = this.createSelectField('offenceType', 0, 'Type of Offence',
-      CONFIG.OFFENCE_TYPE_OPTIONS, true);
-    row.appendChild(offenceGroup);
-
-    section.appendChild(row);
+    section.appendChild(this.createFormRow(
+      this.createOccurrenceNumberField(),
+      this.createSelectField('offenceType', 0, 'Type of Offence', CONFIG.OFFENCE_TYPE_OPTIONS, true)
+    ));
 
     // Offence Type Other (hidden by default)
     section.appendChild(this.createOtherField('offenceTypeOther', 0, 'Offence Type'));
@@ -428,33 +436,21 @@ export class FormFieldBuilder {
     section.appendChild(heading);
 
     // Row 1: Video Location + Video Seized From
-    const row1 = createElement('div', { className: 'form-row' });
-
-    const locationGroup = this.createSelectField('videoLocation', 0, 'Where is the Video Currently Stored?',
-      CONFIG.VIDEO_LOCATION_OPTIONS, true);
-    row1.appendChild(locationGroup);
-
-    // Seized From field
-    row1.appendChild(this.createTextField('videoSeizedFrom', 0, 'Video Seized From',
-      false, 'Location/business where video was obtained'));
-
-    section.appendChild(row1);
+    section.appendChild(this.createFormRow(
+      this.createSelectField('videoLocation', 0, 'Where is the Video Currently Stored?', CONFIG.VIDEO_LOCATION_OPTIONS, true),
+      this.createTextField('videoSeizedFrom', 0, 'Video Seized From', false, 'Location/business where video was obtained')
+    ));
 
     // Video Location Other (hidden by default)
     section.appendChild(this.createOtherField('videoLocationOther', 0, 'Storage Location'));
 
     // Locker Info Group (hidden by default, shows when "Locker" selected)
-    const lockerGroup = createElement('div', {
-      className: 'form-row d-none',
-      id: 'lockerInfoGroup'
-    });
-
-    // bagNumber - OPTIONAL field (no required attribute)
-    lockerGroup.appendChild(this.createTextField('bagNumber', 0, 'Evidence Bag Number',
-      false, 'Bag number containing the evidence'));
-
-    // lockerNumber - OPTIONAL field
-    lockerGroup.appendChild(this.createLockerNumberField());
+    const lockerGroup = this.createFormRow(
+      this.createTextField('bagNumber', 0, 'Evidence Bag Number', false, 'Bag number containing the evidence'),
+      this.createLockerNumberField()
+    );
+    lockerGroup.classList.add('d-none');
+    lockerGroup.id = 'lockerInfoGroup';
 
     section.appendChild(lockerGroup);
 
@@ -517,16 +513,16 @@ export class FormFieldBuilder {
     section.appendChild(heading);
 
     // Row 1: Name + Badge
-    const row1 = createElement('div', { className: 'form-row' });
-    row1.appendChild(this.createTextField('rName', 0, 'Submitting Investigator', true, '', 'Last name or full name'));
-    row1.appendChild(this.createTextField('badge', 0, 'Badge Number', true, '', 'Investigator badge number'));
-    section.appendChild(row1);
+    section.appendChild(this.createFormRow(
+      this.createTextField('rName', 0, 'Submitting Investigator', true, '', 'Last name or full name'),
+      this.createTextField('badge', 0, 'Badge Number', true, '', 'Investigator badge number')
+    ));
 
     // Row 2: Phone + Email
-    const row2 = createElement('div', { className: 'form-row' });
-    row2.appendChild(this.createPhoneField('requestingPhone', 0, 'Contact Phone', true));
-    row2.appendChild(this.createEmailField('requestingEmail', 0, 'Email Address', true));
-    section.appendChild(row2);
+    section.appendChild(this.createFormRow(
+      this.createPhoneField('requestingPhone', 0, 'Contact Phone', true),
+      this.createEmailField('requestingEmail', 0, 'Email Address', true)
+    ));
 
     return section;
   }
