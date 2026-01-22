@@ -247,6 +247,55 @@ export class FormFieldBuilder {
   }
 
   /**
+   * Create datetime field with Flatpickr (24-hour format)
+   * Uses type="text" for Flatpickr compatibility - Flatpickr will be initialized
+   * by the form handler after DOM insertion.
+   * @param {string} baseName - Field base name (e.g., 'videoStartTime')
+   * @param {number} index - Field index (0 for first, N for additional)
+   * @param {string} label - Field label text
+   * @param {boolean} required - Whether field is required
+   * @param {string} helpText - Optional help text below field
+   * @returns {HTMLElement} Form group element
+   */
+  static createDateTimeField(baseName, index, label, required, helpText = '') {
+    const fieldName = index === 0 ? baseName : `${baseName}_${index}`;
+    const fieldId = fieldName;
+
+    const group = createElement('div', { className: 'form-group' });
+
+    const labelEl = createElement('label', {
+      htmlFor: fieldId,
+      className: 'form-label'
+    });
+    labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
+
+    // Use type="text" for Flatpickr initialization
+    // Flatpickr will be initialized by the form handler after DOM insertion
+    const input = createElement('input', {
+      type: 'text',
+      className: 'form-control',
+      id: fieldId,
+      name: fieldName
+    });
+
+    if (required) {
+      input.setAttribute('required', 'required');
+    }
+
+    group.appendChild(labelEl);
+    group.appendChild(input);
+
+    if (helpText) {
+      const small = createElement('small', { className: 'form-text' }, helpText);
+      group.appendChild(small);
+    }
+
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
+
+  /**
    * Create date input field
    * @param {string} baseName - Field base name
    * @param {number} index - Field index
