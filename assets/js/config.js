@@ -219,6 +219,17 @@ export const CONFIG = {
       allowInput: true,
       closeOnSelect: true,
       defaultDate: null
+    },
+
+    // DateTime picker with 24-hour format for Upload form time fields
+    DATETIME: {
+      enableTime: true,
+      time_24hr: true,
+      dateFormat: 'Y-m-d H:i',
+      altInput: true,
+      altFormat: 'M j, Y H:i',
+      allowInput: true,
+      minuteIncrement: 1
     }
   },
 
@@ -376,3 +387,4 @@ Object.freeze(CONFIG.PDF_LAYOUT.SECTION);
 Object.freeze(CONFIG.PDF_LAYOUT.FONTS);
 Object.freeze(CONFIG.FLATPICKR_CONFIG);
 Object.freeze(CONFIG.FLATPICKR_CONFIG.DATE);
+Object.freeze(CONFIG.FLATPICKR_CONFIG.DATETIME);
