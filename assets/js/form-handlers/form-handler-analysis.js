@@ -219,6 +219,24 @@ export class AnalysisFormHandler extends FormHandler {
     this.flatpickrInstances = {};
   }
 
+  /**
+   * Override populateForm to sync Flatpickr display with loaded draft values
+   * Flatpickr maintains its own internal state separate from the input value,
+   * so setting field.value directly doesn't update the visual display.
+   * @param {Object} data - Form data to populate
+   */
+  populateForm(data) {
+    // Let base class populate all standard fields
+    super.populateForm(data);
+
+    // Sync Flatpickr instances with their underlying input values
+    // This ensures the visual picker display matches the loaded draft
+    if (data.recordingDate && this.flatpickrInstances.recordingDate) {
+      // setDate(date, triggerChange) - second param triggers onChange callback
+      this.flatpickrInstances.recordingDate.setDate(data.recordingDate, true);
+    }
+  }
+
   collectFormData() {
     const data = super.collectFormData();
 
