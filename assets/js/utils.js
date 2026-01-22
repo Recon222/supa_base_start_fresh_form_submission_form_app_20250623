@@ -145,7 +145,9 @@ export function createElement(tag, attrs = {}, content = null) {
       element.addEventListener(key.slice(2).toLowerCase(), value);
     } else if (key === 'htmlFor') {
       // htmlFor is the DOM property that maps to the 'for' HTML attribute
-      element.setAttribute('for', value);
+      if (typeof value === 'string' && value) {
+        element.setAttribute('for', value);
+      }
     } else {
       element.setAttribute(key, value);
     }
