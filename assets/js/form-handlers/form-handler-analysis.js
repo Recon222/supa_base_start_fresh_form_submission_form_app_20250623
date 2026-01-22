@@ -237,6 +237,23 @@ export class AnalysisFormHandler extends FormHandler {
     }
   }
 
+  /**
+   * Override clearFormAfterSubmission to also clear Flatpickr instances
+   * The base class sets field.value = '' but Flatpickr maintains its own
+   * internal state, so we must explicitly call clear() on each instance.
+   */
+  clearFormAfterSubmission() {
+    // Let base class handle standard form clearing
+    super.clearFormAfterSubmission();
+
+    // Clear all Flatpickr instances to sync their display
+    Object.values(this.flatpickrInstances).forEach(instance => {
+      if (instance && typeof instance.clear === 'function') {
+        instance.clear();
+      }
+    });
+  }
+
   collectFormData() {
     const data = super.collectFormData();
 
