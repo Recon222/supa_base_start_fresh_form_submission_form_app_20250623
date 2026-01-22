@@ -32,6 +32,23 @@ export class FormHandler {
     this.init();
   }
 
+  /**
+   * Initialize the form handler
+   *
+   * TODO: Tech Debt - Initialization Order Issue
+   * The init() method is called by the constructor before subclass constructors
+   * can build dynamic fields. This means:
+   * - setupKeyboardProgressBarFix() runs before dynamic fields exist
+   * - configureAutofill() runs before dynamic fields exist
+   *
+   * Current workaround: Subclasses re-call these methods after buildInitialFields().
+   *
+   * Future improvement: Consider refactoring to a two-phase initialization:
+   * - Phase 1 (preInit): Setup that doesn't depend on DOM fields
+   * - Phase 2 (postInit): Setup that requires all fields to exist
+   *
+   * Or use an event/hook pattern where subclasses can signal when fields are ready.
+   */
   init() {
     // Save session start
     saveSessionStart();
