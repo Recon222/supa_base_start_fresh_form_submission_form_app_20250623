@@ -400,6 +400,34 @@ export class FormFieldBuilder {
   // =========================================================================
 
   /**
+   * Create occurrence date field (Date of Occurrence)
+   * @returns {HTMLElement} Form group element
+   */
+  static createOccurrenceDateField() {
+    const group = createElement('div', { className: 'form-group' });
+
+    const label = createElement('label', {
+      htmlFor: 'occDate',
+      className: 'form-label'
+    });
+    label.innerHTML = 'Date of Occurrence <span class="required">*</span>';
+
+    const input = createElement('input', {
+      type: 'date',
+      className: 'form-control',
+      id: 'occDate',
+      name: 'occDate',
+      required: 'required'
+    });
+
+    group.appendChild(label);
+    group.appendChild(input);
+    group.appendChild(createElement('div', { className: 'invalid-feedback' }));
+
+    return group;
+  }
+
+  /**
    * Create case information section for Analysis form
    * @returns {HTMLElement} Section element with case fields
    */
@@ -411,11 +439,14 @@ export class FormFieldBuilder {
     }, 'Case Information');
     section.appendChild(heading);
 
-    // Row: Occurrence Number + Type of Offence
+    // Row 1: Occurrence Number + Date of Occurrence
     section.appendChild(this.createFormRow(
       this.createOccurrenceNumberField(),
-      this.createSelectField('offenceType', 0, 'Type of Offence', CONFIG.OFFENCE_TYPE_OPTIONS, true)
+      this.createOccurrenceDateField()
     ));
+
+    // Row 2: Type of Offence (full width)
+    section.appendChild(this.createSelectField('offenceType', 0, 'Type of Offence', CONFIG.OFFENCE_TYPE_OPTIONS, true));
 
     // Offence Type Other (hidden by default)
     section.appendChild(this.createOtherField('offenceTypeOther', 0, 'Offence Type'));

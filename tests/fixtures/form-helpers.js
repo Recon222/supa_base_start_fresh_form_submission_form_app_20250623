@@ -7,12 +7,22 @@ import { expect } from '@playwright/test';
 
 /**
  * Fill officer information fields
+ *
+ * IMPORTANT: The application uses autofill prevention which sets fields to readonly
+ * initially. We need to click fields first to remove the readonly attribute before filling.
  */
 export async function fillOfficerInfo(page, data) {
-  if (data.rName) await page.fill('[name="rName"]', data.rName);
-  if (data.badge) await page.fill('[name="badge"]', data.badge);
-  if (data.requestingEmail) await page.fill('[name="requestingEmail"]', data.requestingEmail);
-  if (data.requestingPhone) await page.fill('[name="requestingPhone"]', data.requestingPhone);
+  // Helper to click and fill (handles readonly fields from autofill prevention)
+  async function clickAndFill(selector, value) {
+    const field = page.locator(selector);
+    await field.click();
+    await field.fill(value);
+  }
+
+  if (data.rName) await clickAndFill('[name="rName"]', data.rName);
+  if (data.badge) await clickAndFill('[name="badge"]', data.badge);
+  if (data.requestingEmail) await clickAndFill('[name="requestingEmail"]', data.requestingEmail);
+  if (data.requestingPhone) await clickAndFill('[name="requestingPhone"]', data.requestingPhone);
 }
 
 /**
@@ -81,60 +91,111 @@ export async function fillUploadForm(page, data) {
 
 /**
  * Fill analysis form specific fields
+ *
+ * Analysis Form REQUIRED Fields:
+ * - occNumber, occDate, offenceType, videoLocation
+ * - rName, badge, requestingPhone, requestingEmail
+ * - jobRequired, fileNames, serviceRequired, requestDetails
+ *
+ * Analysis Form OPTIONAL Fields:
+ * - videoSeizedFrom, recordingDate, bagNumber, lockerNumber, additionalInfo
+ *
+ * Analysis Form CONDITIONAL Fields:
+ * - offenceTypeOther (when offenceType = "Other")
+ * - videoLocationOther (when videoLocation = "Other")
+ * - serviceRequiredOther (when serviceRequired = "Other")
+ * - bagNumber, lockerNumber (when videoLocation = "Locker")
+ *
+ * NOTE: Analysis form has NO city fields
+ *
+ * IMPORTANT: The application uses autofill prevention which sets fields to readonly
+ * initially. We need to click fields first to remove the readonly attribute before filling.
  */
 export async function fillAnalysisForm(page, data) {
-  // Officer info
-  if (data.rName) await page.fill('[name="rName"]', data.rName);
-  if (data.badge) await page.fill('[name="badge"]', data.badge);
-  if (data.requestingEmail) await page.fill('[name="requestingEmail"]', data.requestingEmail);
-  if (data.requestingPhone) await page.fill('[name="requestingPhone"]', data.requestingPhone);
+  // Helper to click and fill (handles readonly fields from autofill prevention)
+  async function clickAndFill(selector, value) {
+    const field = page.locator(selector);
+    await field.click();
+    await field.fill(value);
+  }
 
-  // Evidence info
-  if (data.occNumber) await page.fill('[name="occNumber"]', data.occNumber);
+  // Officer info (Investigator Section)
+  if (data.rName) await clickAndFill('#rName', data.rName);
+  if (data.badge) await clickAndFill('#badge', data.badge);
+  if (data.requestingEmail) await clickAndFill('#requestingEmail', data.requestingEmail);
+  if (data.requestingPhone) await clickAndFill('#requestingPhone', data.requestingPhone);
 
-  // Offence type
+  // Case information
+  if (data.occNumber) await clickAndFill('#occNumber', data.occNumber);
+
+  // Date of Occurrence (REQUIRED) - uses Flatpickr, so we need to set via JS API
+  if (data.occDate) {
+    await page.evaluate((dateValue) => {
+      const field = document.querySelector('#occDate');
+      if (field._flatpickr) {
+        field._flatpickr.setDate(dateValue, true);
+      } else {
+        field.value = dateValue;
+      }
+    }, data.occDate);
+  }
+
+  // Offence type with conditional Other field
   if (data.offenceType) {
-    await page.selectOption('[name="offenceType"]', data.offenceType);
+    await page.selectOption('#offenceType', data.offenceType);
     if (data.offenceType === 'Other' && data.offenceTypeOther) {
-      await page.fill('[name="offenceTypeOther"]', data.offenceTypeOther);
+      await clickAndFill('#offenceTypeOther', data.offenceTypeOther);
     }
   }
 
-  // Video location
+  // Video location with conditional Other field and Locker fields
   if (data.videoLocation) {
-    await page.selectOption('[name="videoLocation"]', data.videoLocation);
+    await page.selectOption('#videoLocation', data.videoLocation);
     if (data.videoLocation === 'Other' && data.videoLocationOther) {
-      await page.fill('[name="videoLocationOther"]', data.videoLocationOther);
+      await clickAndFill('#videoLocationOther', data.videoLocationOther);
+    }
+    // Locker-specific fields (optional even when Locker selected)
+    if (data.videoLocation === 'Locker') {
+      if (data.bagNumber) await clickAndFill('#bagNumber', data.bagNumber);
+      if (data.lockerNumber) await clickAndFill('#lockerNumber', data.lockerNumber);
     }
   }
 
-  // Video seized from
-  if (data.videoSeizedFrom) await page.fill('[name="videoSeizedFrom"]', data.videoSeizedFrom);
+  // Video seized from (OPTIONAL)
+  if (data.videoSeizedFrom) await clickAndFill('#videoSeizedFrom', data.videoSeizedFrom);
 
-  // City
-  if (data.city) {
-    await page.selectOption('[name="city"]', data.city);
-    if (data.city === 'Other' && data.cityOther) {
-      await page.fill('[name="cityOther"]', data.cityOther);
-    }
+  // Recording date (OPTIONAL) - uses Flatpickr, so we need to set via JS API
+  if (data.recordingDate) {
+    await page.evaluate((dateValue) => {
+      const field = document.querySelector('#recordingDate');
+      if (field._flatpickr) {
+        field._flatpickr.setDate(dateValue, true);
+      } else {
+        field.value = dateValue;
+      }
+    }, data.recordingDate);
   }
 
-  // Recording date
-  if (data.recordingDate) await page.fill('[name="recordingDate"]', data.recordingDate);
+  // Work Request Section
+  // Job required (REQUIRED)
+  if (data.jobRequired) await clickAndFill('#jobRequired', data.jobRequired);
 
-  // Service required
+  // File names (REQUIRED)
+  if (data.fileNames) await clickAndFill('#fileNames', data.fileNames);
+
+  // Service required with conditional Other field
   if (data.serviceRequired) {
-    await page.selectOption('[name="serviceRequired"]', data.serviceRequired);
+    await page.selectOption('#serviceRequired', data.serviceRequired);
     if (data.serviceRequired === 'Other' && data.serviceRequiredOther) {
-      await page.fill('[name="serviceRequiredOther"]', data.serviceRequiredOther);
+      await clickAndFill('#serviceRequiredOther', data.serviceRequiredOther);
     }
   }
 
-  // File names
-  if (data.fileNames) await page.fill('[name="fileNames"]', data.fileNames);
+  // Request details (REQUIRED)
+  if (data.requestDetails) await clickAndFill('#requestDetails', data.requestDetails);
 
-  // Request details
-  if (data.rfsDetails) await page.fill('[name="requestDetails"]', data.rfsDetails);
+  // Additional information (OPTIONAL)
+  if (data.additionalInfo) await clickAndFill('#additionalInfo', data.additionalInfo);
 }
 
 /**
@@ -457,9 +518,10 @@ export async function addTimeFrame(page, dvrIndex = 0, count = 1) {
  * Get progress bar percentage
  */
 export async function getProgressPercentage(page) {
-  const progressText = page.locator('[class*="progress"], .progress-text');
+  // Use a more specific selector for the progress percentage text
+  const progressText = page.locator('#progress-percentage');
   const text = await progressText.textContent();
-  const match = text?.match(/(\d+)%/);
+  const match = text?.match(/(\d+)%?/);
   return match ? parseInt(match[1]) : 0;
 }
 
@@ -486,4 +548,23 @@ export async function waitForAutoSave(page, timeoutMs = 3500) {
 export async function setOfflineMode(page, offline = true) {
   await page.context().setOffline(offline);
   await page.waitForTimeout(500);
+}
+
+/**
+ * Dismiss PWA update banner if visible
+ * The banner can intercept pointer events and block form interactions
+ */
+export async function dismissPWABanner(page) {
+  // Wait a bit for the banner to potentially appear (it's created asynchronously)
+  await page.waitForTimeout(500);
+
+  const banner = page.locator('#pwa-update-banner');
+  if (await banner.isVisible({ timeout: 500 }).catch(() => false)) {
+    const laterButton = banner.locator('button:has-text("Later")');
+    if (await laterButton.isVisible({ timeout: 500 }).catch(() => false)) {
+      await laterButton.click();
+      // Wait for banner to be removed
+      await expect(banner).not.toBeVisible({ timeout: 1000 }).catch(() => {});
+    }
+  }
 }

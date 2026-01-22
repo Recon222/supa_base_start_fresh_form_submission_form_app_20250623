@@ -74,12 +74,13 @@ export const uploadFormWithOtherCity = {
 export const analysisFormValidData = {
   ...validOfficerData,
   occNumber: 'PR2024004234',
+  occDate: '2024-01-10',
   offenceType: 'Homicide',
-  videoLocation: 'Evidence.com Locker',
+  videoLocation: 'Evidence.com',
   videoSeizedFrom: 'Scene Investigation',
-  city: 'Brampton',
   recordingDate: '2024-01-08',
   serviceRequired: 'Video/Image Clarification',
+  jobRequired: 'Enhancement of suspect vehicle registration plate in footage',
   requestDetails: 'Need enhancement of vehicle registration plate',
   fileNames: 'evidence_video_1.mp4\nevidence_video_2.avi'
 };
@@ -87,29 +88,32 @@ export const analysisFormValidData = {
 export const analysisFormWithOtherOffence = {
   ...validOfficerData,
   occNumber: 'PR2024005234',
+  occDate: '2024-01-07',
   offenceType: 'Other',
   offenceTypeOther: 'Fraud Investigation',
   videoLocation: 'NAS Storage',
   videoSeizedFrom: 'Financial Crime Unit',
-  city: 'Toronto',
   recordingDate: '2024-01-05',
-  serviceRequired: 'Timeline Creation',
-  requestDetails: 'Create detailed timeline of events'
+  serviceRequired: 'Timeline',
+  jobRequired: 'Create detailed timeline of events from footage',
+  requestDetails: 'Create detailed timeline of events',
+  fileNames: 'fraud_evidence_01.mp4'
 };
 
-export const analysisFormWithOtherCity = {
+export const analysisFormWithOtherVideoLocation = {
   ...validOfficerData,
   occNumber: 'PR2024006234',
-  offenceType: 'Sexual Assault',
+  occDate: '2024-01-05',
+  offenceType: 'Homicide',
   videoLocation: 'Other',
   videoLocationOther: 'Cloud Storage',
   videoSeizedFrom: 'Investigation Team',
-  city: 'Other',
-  cityOther: 'Caledon',
   recordingDate: '2024-01-03',
   serviceRequired: 'Other',
   serviceRequiredOther: 'Custom Analysis',
-  requestDetails: 'Perform custom analysis'
+  jobRequired: 'Custom video analysis task',
+  requestDetails: 'Perform custom analysis',
+  fileNames: 'cloud_video_001.mp4'
 };
 
 export const recoveryFormValidData = {

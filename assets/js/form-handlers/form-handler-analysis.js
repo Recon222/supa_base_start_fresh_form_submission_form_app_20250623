@@ -191,6 +191,20 @@ export class AnalysisFormHandler extends FormHandler {
    * Must be called AFTER buildInitialFields() so DOM elements exist
    */
   initializeFlatpickrFields() {
+    // Date of Occurrence field (required, past dates only)
+    const occDateField = this.form.querySelector('#occDate');
+    if (occDateField && typeof window !== 'undefined' && window.flatpickr) {
+      this.flatpickrInstances.occDate = window.flatpickr(occDateField, {
+        ...CONFIG.FLATPICKR_CONFIG.DATE,
+        maxDate: 'today', // Prevent future dates
+
+        // Trigger validation on change
+        onChange: (selectedDates, dateStr) => {
+          this.validateSingleField(occDateField);
+        }
+      });
+    }
+
     // Recording date field with past-date restriction
     const recordingDateField = this.form.querySelector('#recordingDate');
     if (recordingDateField && typeof window !== 'undefined' && window.flatpickr) {
@@ -231,6 +245,10 @@ export class AnalysisFormHandler extends FormHandler {
 
     // Sync Flatpickr instances with their underlying input values
     // This ensures the visual picker display matches the loaded draft
+    if (data.occDate && this.flatpickrInstances.occDate) {
+      // setDate(date, triggerChange) - second param triggers onChange callback
+      this.flatpickrInstances.occDate.setDate(data.occDate, true);
+    }
     if (data.recordingDate && this.flatpickrInstances.recordingDate) {
       // setDate(date, triggerChange) - second param triggers onChange callback
       this.flatpickrInstances.recordingDate.setDate(data.recordingDate, true);
