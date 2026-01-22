@@ -128,6 +128,8 @@ export const CONFIG = {
     OFFENCE_OTHER_REQUIRED: 'Please specify the offence type',
     VIDEO_LOCATION_OTHER_REQUIRED: 'Please specify the storage location',
     SERVICE_OTHER_REQUIRED: 'Please specify the service required',
+    INVALID_LOCKER_FORMAT: 'Locker number must be a number',
+    INVALID_LOCKER_RANGE: 'Locker number must be between 1 and 28',
     DRAFT_SAVED: 'Draft saved',
     DRAFT_LOADED: 'Draft loaded',
     SUBMISSION_SUCCESS: 'Request submitted successfully',

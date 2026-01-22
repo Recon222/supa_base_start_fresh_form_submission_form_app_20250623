@@ -120,13 +120,13 @@ function validateLockerNumber(lockerNumber) {
   // Must be digits only (no letters, decimals, special chars, or spaces in between)
   // This pattern matches strings that contain ONLY digits from start to end
   if (!/^\d+$/.test(trimmed)) {
-    return 'Locker number must be a number';
+    return CONFIG.MESSAGES.INVALID_LOCKER_FORMAT;
   }
 
   const num = parseInt(trimmed, 10);
 
   if (num < 1 || num > 28) {
-    return 'Locker number must be between 1 and 28';
+    return CONFIG.MESSAGES.INVALID_LOCKER_RANGE;
   }
 
   return null;
