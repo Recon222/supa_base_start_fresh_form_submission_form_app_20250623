@@ -378,18 +378,42 @@ export class FormHandler {
   showFieldValidation(field, error) {
     const feedbackElement = field.parentElement.querySelector('.invalid-feedback');
 
+    // Get the Flatpickr alternate input if this field has one
+    // When altInput: true, Flatpickr hides the original input and creates a visible altInput
+    const flatpickrAltInput = field._flatpickr?.altInput;
+
     if (error) {
       field.classList.add('is-invalid');
       field.classList.remove('is-valid');
+
+      // Also apply to Flatpickr's visible alternate input
+      if (flatpickrAltInput) {
+        flatpickrAltInput.classList.add('is-invalid');
+        flatpickrAltInput.classList.remove('is-valid');
+      }
+
       if (feedbackElement) {
         feedbackElement.textContent = error;
       }
     } else {
       field.classList.remove('is-invalid');
 
+      // Also clear from Flatpickr's visible alternate input
+      if (flatpickrAltInput) {
+        flatpickrAltInput.classList.remove('is-invalid');
+      }
+
       // Only show valid state for required fields with values
       if (field.hasAttribute('required') && field.value.trim()) {
         field.classList.add('is-valid');
+
+        // Also apply valid state to Flatpickr's visible alternate input
+        if (flatpickrAltInput) {
+          flatpickrAltInput.classList.add('is-valid');
+        }
+      } else if (flatpickrAltInput) {
+        // Remove valid class if conditions not met
+        flatpickrAltInput.classList.remove('is-valid');
       }
 
       if (feedbackElement) {
@@ -652,9 +676,15 @@ export class FormHandler {
     // Clear draft
     clearDraft(this.formType);
 
-    // Clear validation states
+    // Clear validation states (including Flatpickr altInputs)
     this.form.querySelectorAll('.form-control').forEach(field => {
       field.classList.remove('is-valid', 'is-invalid');
+
+      // Also clear from Flatpickr's visible alternate input if present
+      const flatpickrAltInput = field._flatpickr?.altInput;
+      if (flatpickrAltInput) {
+        flatpickrAltInput.classList.remove('is-valid', 'is-invalid');
+      }
     });
 
     // Reset the form
@@ -682,6 +712,12 @@ export class FormHandler {
         field.value = '';
       }
       field.classList.remove('is-valid', 'is-invalid');
+
+      // Also clear from Flatpickr's visible alternate input if present
+      const flatpickrAltInput = field._flatpickr?.altInput;
+      if (flatpickrAltInput) {
+        flatpickrAltInput.classList.remove('is-valid', 'is-invalid');
+      }
 
       // Clear any error messages
       const feedback = field.parentElement.querySelector('.invalid-feedback');
