@@ -78,6 +78,9 @@
   <link rel="stylesheet" href="assets/css/header.css">
   <link rel="stylesheet" href="assets/css/notifications.css">
 
+  <!-- Flatpickr CSS (bundled locally for security - no CDN) -->
+  <link rel="stylesheet" href="lib/flatpickr.min.css">
+
   <!-- Early theme initialization to prevent FOUC -->
   <script>
     // Prevent flash of unstyled content by setting theme before body renders
@@ -109,333 +112,24 @@
       <!-- <input type="hidden" name="session_verify" value="<?php echo session_id(); ?>"> -->
 
       <!-- Evidence Information Section -->
-      <section class="form-section">
-        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Evidence Information</h2>
-
-        <!-- Row 1: Occurrence Number + Date of Occurrence -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="occNumber" class="form-label">
-              Occurrence Number <span class="required">*</span>
-            </label>
-            <input type="text"
-                   class="form-control"
-                   id="occNumber"
-                   name="occNumber"
-                   placeholder="e.g., PR240368708"
-                   required>
-            <small class="form-text">Format: PR followed by numbers</small>
-            <div class="invalid-feedback"></div>
-          </div>
-
-          <div class="form-group">
-            <label for="occDate" class="form-label">
-              Date of Occurrence <span class="required">*</span>
-            </label>
-            <input type="date"
-                   class="form-control"
-                   id="occDate"
-                   name="occDate"
-                   required>
-            <div class="invalid-feedback"></div>
-          </div>
-        </div>
-
-        <!-- Row 2: Type of Offence + Evidence Bag -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="offenceType" class="form-label">
-              Type of Offence <span class="required">*</span>
-            </label>
-            <select class="form-control" id="offenceType" name="offenceType" required>
-              <option value="">Select...</option>
-              <option value="Homicide">Homicide</option>
-              <option value="Missing Person">Missing Person</option>
-            </select>
-            <div class="invalid-feedback"></div>
-          </div>
-
-          <div class="form-group">
-            <label for="evidenceBag" class="form-label">Evidence Bag #</label>
-            <input type="text"
-                   class="form-control"
-                   id="evidenceBag"
-                   name="evidenceBag"
-                   placeholder="Evidence bag identification number">
-          </div>
-        </div>
-
-        <!-- Row 3: Locker Number + Media Type -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="lockerNumber" class="form-label">Locker Number</label>
-            <input type="text"
-                   class="form-control"
-                   id="lockerNumber"
-                   name="lockerNumber"
-                   inputmode="numeric"
-                   placeholder="1-28">
-            <small class="form-text">Evidence locker number (1-28)</small>
-          </div>
-
-          <div class="form-group">
-            <label for="mediaType" class="form-label">
-              Type of Media Submitted <span class="required">*</span>
-            </label>
-            <select class="form-control" id="mediaType" name="mediaType" required>
-              <option value="">Select media type</option>
-              <option value="USB">USB</option>
-              <option value="Hard Drive">Hard Drive</option>
-              <option value="SD Card">SD Card</option>
-              <option value="CD/DVD">CD/DVD</option>
-              <option value="Other">Other</option>
-            </select>
-            <div class="invalid-feedback"></div>
-          </div>
-        </div>
-
-        <!-- Conditional field for Other media type -->
-        <div class="form-group d-none" id="mediaTypeOtherGroup">
-          <label for="mediaTypeOther" class="form-label">
-            Specify Media Type <span class="required">*</span>
-          </label>
-          <input type="text"
-                 class="form-control"
-                 id="mediaTypeOther"
-                 name="mediaTypeOther"
-                 placeholder="Please specify the media type">
-          <div class="invalid-feedback"></div>
-        </div>
+      <section class="form-section" id="evidence-section-container">
+        <!-- Built by JS via FormFieldBuilder -->
       </section>
 
       <!-- Submitting Investigator Information Section -->
-      <section class="form-section">
-        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Submitting Investigator Information</h2>
-
-        <!-- Row 1: Investigator Name + Badge -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="rName" class="form-label">
-              Submitting Investigator <span class="required">*</span>
-            </label>
-            <input type="text"
-                   class="form-control"
-                   id="rName"
-                   name="rName"
-                   placeholder="Last name or full name"
-                   required>
-            <div class="invalid-feedback"></div>
-          </div>
-
-          <div class="form-group">
-            <label for="badge" class="form-label">
-              Badge Number <span class="required">*</span>
-            </label>
-            <input type="text"
-                   class="form-control"
-                   id="badge"
-                   name="badge"
-                   placeholder="Investigator badge number"
-                   required>
-            <div class="invalid-feedback"></div>
-          </div>
-        </div>
-
-        <!-- Row 2: Phone + Email -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="requestingPhone" class="form-label">
-              Contact Number <span class="required">*</span>
-            </label>
-            <input type="tel"
-                   class="form-control"
-                   id="requestingPhone"
-                   name="requestingPhone"
-                   placeholder="XXX-XXX-XXXX"
-                   required>
-            <small class="form-text">10 digits required (dashes optional)</small>
-            <div class="invalid-feedback"></div>
-          </div>
-
-          <div class="form-group">
-            <label for="requestingEmail" class="form-label">
-              Email Address <span class="required">*</span>
-            </label>
-            <input type="email"
-                   class="form-control"
-                   id="requestingEmail"
-                   name="requestingEmail"
-                   placeholder="investigator@peelpolice.ca"
-                   required>
-            <div class="invalid-feedback"></div>
-          </div>
-        </div>
-
-        <!-- Clear investigator info button -->
-        <div class="form-group text-right">
-          <button type="button"
-                  class="btn btn-sm btn-secondary"
-                  id="clearOfficerInfo">
-            Clear Investigator Info
-          </button>
-          <small class="form-text d-block mt-1">
-            Removes saved investigator information from this browser
-          </small>
-        </div>
+      <section class="form-section" id="investigator-section-container">
+        <!-- Built by JS via FormFieldBuilder -->
       </section>
 
-      <!-- Location & Video Information Container -->
+      <!-- Location & Video Information -->
       <div id="location-video-container">
-        <!-- First location-video group (always present) -->
-        <div class="location-video-group" data-group-index="0" style="background: var(--glass-bg); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; border: 2px solid var(--color-primary);">
-          <h2 style="color: var(--color-primary); margin-bottom: 1.5rem; text-align: center; font-size: 1.5rem;">Location 1</h2>
-
-          <!-- Location Information Section -->
-          <section class="form-section">
-            <h3 style="color: var(--color-primary); margin-bottom: 1.5rem;">Location Information</h3>
-
-            <div class="form-group">
-              <label for="businessName" class="form-label">Business Name</label>
-              <input type="text"
-                     class="form-control"
-                     id="businessName"
-                     name="businessName"
-                     placeholder="Leave blank if none">
-              <small class="form-text">Name of the business where video was collected</small>
-            </div>
-
-            <div class="form-group">
-              <label for="locationAddress" class="form-label">
-                Location Address <span class="required">*</span>
-              </label>
-              <input type="text"
-                     class="form-control"
-                     id="locationAddress"
-                     name="locationAddress"
-                     placeholder="Full address"
-                     required>
-              <div class="invalid-feedback"></div>
-            </div>
-
-            <div class="form-group">
-              <label for="city" class="form-label">
-                City <span class="required">*</span>
-              </label>
-              <select class="form-control" id="city" name="city" required>
-                <option value="">Select city</option>
-                <option value="Brampton">Brampton</option>
-                <option value="Mississauga">Mississauga</option>
-                <option value="Toronto">Toronto</option>
-                <option value="Other">Other</option>
-              </select>
-              <div class="invalid-feedback"></div>
-            </div>
-
-            <!-- Conditional field for Other city -->
-            <div class="form-group d-none" id="cityOtherGroup">
-              <label for="cityOther" class="form-label">
-                Specify City <span class="required">*</span>
-              </label>
-              <input type="text"
-                     class="form-control"
-                     id="cityOther"
-                     name="cityOther"
-                     placeholder="Enter city name">
-              <small class="form-text">Please enter the city name</small>
-              <div class="invalid-feedback"></div>
-            </div>
-          </section>
-
-          <!-- Video Timeframe Section -->
-          <section class="form-section">
-            <h3 style="color: var(--color-primary); margin-bottom: 1.5rem;">Video Timeframe</h3>
-
-            <!-- Row 1: Start Time + End Time -->
-            <div class="form-row">
-              <div class="form-group">
-                <label for="videoStartTime" class="form-label">
-                  Video Start Time <span class="required">*</span>
-                </label>
-                <input type="datetime-local"
-                       class="form-control"
-                       id="videoStartTime"
-                       name="videoStartTime"
-                       required>
-                <small class="form-text">When the relevant video begins</small>
-                <div class="invalid-feedback"></div>
-              </div>
-
-              <div class="form-group">
-                <label for="videoEndTime" class="form-label">
-                  Video End Time <span class="required">*</span>
-                </label>
-                <input type="datetime-local"
-                       class="form-control"
-                       id="videoEndTime"
-                       name="videoEndTime"
-                       required>
-                <small class="form-text">When the relevant video ends</small>
-                <div class="invalid-feedback"></div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">
-                Is the Time & Date correct? <span class="required">*</span>
-              </label>
-              <small class="form-text mb-2 d-block">Is the DVR time synchronized with actual time?</small>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectYes" value="Yes" required>
-                <label class="form-check-label" for="timeCorrectYes">
-                  Yes
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="isTimeDateCorrect" id="timeCorrectNo" value="No" required>
-                <label class="form-check-label" for="timeCorrectNo">
-                  No
-                </label>
-              </div>
-              <div class="invalid-feedback"></div>
-            </div>
-
-            <!-- Time sync warning (conditional) -->
-            <div class="alert alert-warning d-none" id="timeSyncWarning" style="margin-top: 1rem;">
-              <strong>Important:</strong> Your confirmation of correct timestamp becomes part of the evidence.
-              If the timestamp conflicts with other evidence or DVR timestamps, this could affect the evidence validity.
-            </div>
-
-            <!-- Time offset field (conditional) -->
-            <div class="form-group d-none" id="timeOffsetGroup">
-              <label for="timeOffset" class="form-label">
-                Time Offset <span class="required">*</span>
-              </label>
-              <input type="text"
-                     class="form-control"
-                     id="timeOffset"
-                     name="timeOffset"
-                     placeholder="e.g., DVR is 1hr 5min 30sec AHEAD of real time">
-              <small class="form-text">Describe how the DVR time differs from actual time</small>
-              <div class="invalid-feedback"></div>
-            </div>
-
-            <div class="form-group">
-              <label for="dvrEarliestDate" class="form-label">Earliest Recorded Date on DVR</label>
-              <input type="date"
-                     class="form-control"
-                     id="dvrEarliestDate"
-                     name="dvrEarliestDate">
-              <small class="form-text">The earliest date available on the DVR system</small>
-              <div id="retentionCalculation" class="text-info mt-2"></div>
-            </div>
-          </section>
-        </div>
+        <!-- All location-video groups (including first) built by JS -->
       </div>
 
-      <!-- Add Location & Video Button -->
-      <div style="text-align: center; margin: 2rem 0;">
-        <button type="button" class="btn btn-primary" id="addLocationBtn" style="min-width: 250px; font-size: 1.1rem; padding: 0.75rem 2rem;">
-          + Add Another Location
+      <!-- Add Location Button -->
+      <div class="text-center" style="margin-top: 2rem; margin-bottom: 2rem;">
+        <button type="button" id="addLocationBtn" class="btn btn-primary" style="min-width: 250px; font-size: 1.1rem; padding: 0.75rem 2rem;">
+          <span style="font-size: 1.2em;">+</span> Add Another Location
         </button>
         <small class="form-text d-block mt-2">
           Add if the USB contains video from multiple locations with different timeframes
@@ -443,17 +137,8 @@
       </div>
 
       <!-- Additional Information Section -->
-      <section class="form-section">
-        <h2 style="color: var(--color-primary); margin-bottom: 1.5rem;">Additional Information</h2>
-
-        <div class="form-group">
-          <label for="otherInfo" class="form-label">Other Information</label>
-          <textarea class="form-control"
-                    id="otherInfo"
-                    name="otherInfo"
-                    rows="4"
-                    placeholder="Any additional information relevant to this submission"></textarea>
-        </div>
+      <section class="form-section" id="additional-section-container">
+        <!-- Built by JS via FormFieldBuilder -->
       </section>
 
       <!-- Form Actions -->
@@ -477,6 +162,9 @@
       </div>
     </div>
   </main>
+
+  <!-- Flatpickr JS (bundled locally for security - no CDN) -->
+  <script src="lib/flatpickr.min.js"></script>
 
   <!-- JavaScript Modules -->
   <script type="module">
