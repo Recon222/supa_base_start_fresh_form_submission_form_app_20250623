@@ -28,6 +28,9 @@ export class AnalysisFormHandler extends FormHandler {
 
     // Initialize Flatpickr on date fields (AFTER fields are built)
     this.initializeFlatpickrFields();
+
+    // Cleanup Flatpickr instances when page unloads
+    window.addEventListener('beforeunload', () => this.destroy());
   }
 
   /**
