@@ -49,6 +49,12 @@ export class AnalysisFormHandler extends FormHandler {
     // Re-apply iOS keyboard fix for dynamically created fields
     // The base class init() runs before buildInitialFields(), so dynamic fields miss the fix
     this.setupKeyboardProgressBarFix();
+
+    // Apply autofill prevention to newly created dynamic fields
+    // The base class configureAutofill() runs in init() before buildInitialFields() creates these fields
+    if (CONFIG.FEATURES.BROWSER_AUTOFILL === false) {
+      this.applyAutofillPrevention(this.form.querySelectorAll('.form-control'));
+    }
   }
 
   /**
