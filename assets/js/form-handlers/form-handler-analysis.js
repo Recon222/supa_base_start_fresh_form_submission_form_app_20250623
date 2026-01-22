@@ -63,9 +63,8 @@ export class AnalysisFormHandler extends FormHandler {
   buildCaseSection() {
     const container = document.getElementById('case-section-container');
     if (!container) {
-      // Expected during Phase 2 - HTML still has hardcoded fields
-      // Phase 3 will add container divs and remove hardcoded fields
-      console.debug('[AnalysisForm] case-section-container not found - using hardcoded HTML fields');
+      // Container not present - form may be using static HTML fields
+      console.debug('[AnalysisForm] case-section-container not found - form may be using static HTML');
       return;
     }
 
@@ -79,7 +78,7 @@ export class AnalysisFormHandler extends FormHandler {
   buildInvestigatorSection() {
     const container = document.getElementById('investigator-section-container');
     if (!container) {
-      console.debug('[AnalysisForm] investigator-section-container not found - using hardcoded HTML fields');
+      console.debug('[AnalysisForm] investigator-section-container not found - form may be using static HTML');
       return;
     }
 
@@ -93,7 +92,7 @@ export class AnalysisFormHandler extends FormHandler {
   buildVideoSourceSection() {
     const container = document.getElementById('video-source-section-container');
     if (!container) {
-      console.debug('[AnalysisForm] video-source-section-container not found - using hardcoded HTML fields');
+      console.debug('[AnalysisForm] video-source-section-container not found - form may be using static HTML');
       return;
     }
 
@@ -107,7 +106,7 @@ export class AnalysisFormHandler extends FormHandler {
   buildWorkRequestSection() {
     const container = document.getElementById('work-request-section-container');
     if (!container) {
-      console.debug('[AnalysisForm] work-request-section-container not found - using hardcoded HTML fields');
+      console.debug('[AnalysisForm] work-request-section-container not found - form may be using static HTML');
       return;
     }
 
@@ -144,14 +143,12 @@ export class AnalysisFormHandler extends FormHandler {
     const conditionalHandler = new ConditionalFieldHandler(this);
 
     // Setup all "Other" fields - standard pattern
-    // Note: offenceType "Other" option will be added in Phase 3 via FormFieldBuilder
     conditionalHandler.setupOtherField('offenceType', 'offenceTypeOtherGroup', 'offenceTypeOther');
     conditionalHandler.setupOtherField('videoLocation', 'videoLocationOtherGroup', 'videoLocationOther');
     conditionalHandler.setupOtherField('serviceRequired', 'serviceRequiredOtherGroup', 'serviceRequiredOther');
 
     // Special handling for "Locker" selection in videoLocation
     // This shows bagNumber and lockerNumber fields (both OPTIONAL)
-    // Note: lockerInfoGroup container will be added in Phase 3 via FormFieldBuilder
     const videoLocationSelect = this.form.querySelector('#videoLocation');
     if (videoLocationSelect) {
       videoLocationSelect.addEventListener('change', (e) => {
