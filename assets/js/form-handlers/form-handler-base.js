@@ -7,7 +7,7 @@ import { CONFIG } from '../config.js';
 import { validateField, validateConditionalFields, calculateFormCompletion, formatPhone } from '../validators.js';
 import { saveDraft, loadDraft, clearDraft, getDraftAge, saveSessionStart } from '../storage.js';
 import { saveOfficerInfo, loadOfficerInfo, isFirstTimeUse, acknowledgeStorage, clearOfficerInfo } from '../officer-storage.js';
-import { debounce, scrollToElement, showToast } from '../utils.js';
+import { debounce, scrollToElement, showToast, downloadBlob } from '../utils.js';
 import { generatePDF } from '../pdf-generator.js';
 import { generateJSON } from '../json-generator.js';
 import { showConfirmModal } from '../notifications.js';
@@ -547,22 +547,42 @@ export class FormHandler {
     }
   }
 
+  /**
+   * Get the PDF filename for this form type
+   * Override in subclasses to provide form-specific filenames
+   * @param {Object} formData - The collected form data
+   * @returns {string} The PDF filename
+   */
+  getPdfFilename(formData) {
+    return `FVU_Request_${formData.occNumber || 'NoOccNum'}.pdf`;
+  }
+
   async submitForm(formData) {
     // Save officer info automatically
     this.saveOfficerInfoFromFormData(formData);
 
-    // This will be overridden by specific form handlers
-    // But provide a base implementation for safety
     try {
+      // Generate PDF and JSON
       const [pdfBlob, jsonBlob] = await Promise.all([
         generatePDF(formData, this.formType),
         generateJSON(formData, this.formType)
       ]);
 
+      console.log(`${this.formType} form ready for submission:`, formData);
+      console.log('PDF generated:', pdfBlob.size, 'bytes');
+      console.log('JSON generated:', jsonBlob.size, 'bytes');
+
+      // Submit to API with retry logic (Supabase or PHP)
       const result = await submitWithRetry(formData, pdfBlob, jsonBlob);
 
       if (result.success) {
+        // Download PDF locally with form-specific filename
+        const pdfFilename = this.getPdfFilename(formData);
+        downloadBlob(pdfBlob, pdfFilename);
+
         showToast(`${CONFIG.MESSAGES.SUBMISSION_SUCCESS}. ID: ${result.submissionId || result.ticketNumber}`, 'success');
+
+        // Clear the form after successful submission
         this.clearFormAfterSubmission();
       } else {
         showToast(result.message || CONFIG.MESSAGES.SUBMISSION_ERROR, 'error');
@@ -574,7 +594,7 @@ export class FormHandler {
       const errorMessage = this.getErrorMessage(error);
       showToast(errorMessage, 'error');
 
-      // Always save draft on error
+      // Save draft on error
       this.saveDraftAuto();
     }
   }

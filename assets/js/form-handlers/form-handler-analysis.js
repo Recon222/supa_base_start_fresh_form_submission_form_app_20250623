@@ -6,10 +6,7 @@
 import { FormHandler } from './form-handler-base.js';
 import { FormFieldBuilder } from './form-field-builder.js';
 import { ConditionalFieldHandler } from './conditional-field-handler.js';
-import { generatePDF } from '../pdf-generator.js';
-import { generateJSON } from '../json-generator.js';
-import { submitWithRetry } from '../api-client.js';
-import { showToast, downloadBlob, toggleElement, debounce } from '../utils.js';
+import { toggleElement, debounce } from '../utils.js';
 import { CONFIG } from '../config.js';
 
 /**
@@ -396,47 +393,13 @@ export class AnalysisFormHandler extends FormHandler {
     return sections.join('\n\n');
   }
 
-  async submitForm(formData) {
-    // Save officer info using base class method
-    this.saveOfficerInfoFromFormData(formData);
-
-    try {
-      // Generate PDF and JSON
-      const [pdfBlob, jsonBlob] = await Promise.all([
-        generatePDF(formData, this.formType),
-        generateJSON(formData, this.formType)
-      ]);
-
-      console.log('Analysis form ready for submission:', formData);
-      console.log('PDF generated:', pdfBlob.size, 'bytes');
-      console.log('JSON generated:', jsonBlob.size, 'bytes');
-
-      // Submit to API with retry logic (Supabase or PHP)
-      const result = await submitWithRetry(formData, pdfBlob, jsonBlob);
-
-      if (result.success) {
-        // Download PDF locally
-        const pdfFilename = `FVU_Analysis_Request_${formData.occNumber || 'NoOccNum'}.pdf`;
-        downloadBlob(pdfBlob, pdfFilename);
-
-        showToast(`${CONFIG.MESSAGES.SUBMISSION_SUCCESS}. ID: ${result.submissionId || result.ticketNumber}`, 'success');
-
-        // Clear the form after successful submission
-        this.clearFormAfterSubmission();
-      } else {
-        showToast(result.message || CONFIG.MESSAGES.SUBMISSION_ERROR, 'error');
-      }
-
-    } catch (error) {
-      console.error('Error during submission:', error);
-
-      // Determine specific error type and show appropriate message
-      const errorMessage = this.getErrorMessage(error);
-      showToast(errorMessage, 'error');
-
-      // Save draft on error
-      this.saveDraftAuto();
-    }
+  /**
+   * Get the PDF filename for analysis form
+   * @param {Object} formData - The collected form data
+   * @returns {string} The PDF filename
+   */
+  getPdfFilename(formData) {
+    return `FVU_Analysis_Request_${formData.occNumber || 'NoOccNum'}.pdf`;
   }
 }
 
