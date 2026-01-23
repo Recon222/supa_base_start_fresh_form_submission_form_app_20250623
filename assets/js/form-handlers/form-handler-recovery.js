@@ -18,8 +18,598 @@ import { CONFIG } from '../config.js';
 export class RecoveryFormHandler extends FormHandler {
   constructor(formId) {
     super(formId);
+
+    // Store Flatpickr instances for programmatic access
+    this.flatpickrInstances = {};
+
+    // Build initial form fields via FormFieldBuilder
+    this.buildInitialFields();
+
+    // Setup recovery-specific listeners
     this.setupRecoverySpecificListeners();
+
+    // Initialize Flatpickr on initial fields (AFTER fields are built)
+    this.initializeFlatpickrFields();
+
+    // Cleanup Flatpickr instances when page unloads
+    window.addEventListener('beforeunload', () => this.destroy());
   }
+
+  // ===========================================================================
+  // INITIAL FIELD BUILDING
+  // ===========================================================================
+
+  /**
+   * Build all initial form fields via FormFieldBuilder
+   * Creates sections for case, investigator, location, first DVR, and incident
+   */
+  buildInitialFields() {
+    this.buildCaseSection();
+    this.buildInvestigatorSection();
+    this.buildLocationSection();
+    this.buildInitialDVRGroup();
+    this.buildIncidentSection();
+
+    // Attach validation listeners to all built fields
+    this.attachValidationListeners(this.form);
+
+    // Re-apply iOS keyboard fix for dynamically created fields
+    this.setupKeyboardProgressBarFix();
+
+    // Apply autofill prevention to newly created dynamic fields
+    if (CONFIG.FEATURES.BROWSER_AUTOFILL === false) {
+      this.applyAutofillPrevention(this.form.querySelectorAll('.form-control'));
+    }
+  }
+
+  /**
+   * Build case information section
+   */
+  buildCaseSection() {
+    const container = document.getElementById('case-section-container');
+    if (!container) {
+      console.debug('[RecoveryForm] case-section-container not found');
+      return;
+    }
+
+    container.appendChild(FormFieldBuilder.createRecoveryCaseSection());
+  }
+
+  /**
+   * Build investigator section
+   */
+  buildInvestigatorSection() {
+    const container = document.getElementById('investigator-section-container');
+    if (!container) {
+      console.debug('[RecoveryForm] investigator-section-container not found');
+      return;
+    }
+
+    container.appendChild(FormFieldBuilder.createRecoveryInvestigatorSection());
+  }
+
+  /**
+   * Build location section
+   */
+  buildLocationSection() {
+    const container = document.getElementById('location-section-container');
+    if (!container) {
+      console.debug('[RecoveryForm] location-section-container not found');
+      return;
+    }
+
+    container.appendChild(FormFieldBuilder.createRecoveryLocationSection());
+  }
+
+  /**
+   * Build initial DVR group (index 0)
+   * Uses the shared createDVRGroup method
+   */
+  buildInitialDVRGroup() {
+    const container = document.getElementById('dvr-container');
+    if (!container) {
+      console.debug('[RecoveryForm] dvr-container not found');
+      return;
+    }
+
+    // Create the first DVR group
+    const dvrGroup = this.createDVRGroup(0);
+    container.appendChild(dvrGroup);
+  }
+
+  /**
+   * Build incident description section
+   */
+  buildIncidentSection() {
+    const container = document.getElementById('incident-section-container');
+    if (!container) {
+      console.debug('[RecoveryForm] incident-section-container not found');
+      return;
+    }
+
+    container.appendChild(FormFieldBuilder.createIncidentDescriptionSection());
+  }
+
+  // ===========================================================================
+  // DVR AND TIMEFRAME CREATION
+  // ===========================================================================
+
+  /**
+   * Create a DVR group with all fields
+   * @param {number} dvrIndex - DVR index (0 for first)
+   * @returns {HTMLElement} DVR group element
+   */
+  createDVRGroup(dvrIndex) {
+    const isFirst = dvrIndex === 0;
+
+    const dvrGroup = createElement('div', {
+      className: 'dvr-group',
+      dataset: { dvrIndex: dvrIndex.toString() },
+      style: 'background: var(--glass-bg); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; border: 2px solid var(--color-primary);'
+    });
+
+    // DVR Header
+    const header = createElement('h2', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem; text-align: center; font-size: 1.5rem;'
+    }, `DVR ${dvrIndex + 1}`);
+    dvrGroup.appendChild(header);
+
+    // DVR Information Section
+    const dvrInfoSection = createElement('section', { className: 'form-section' });
+    const dvrInfoHeading = createElement('h3', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
+    }, 'DVR Information');
+    dvrInfoSection.appendChild(dvrInfoHeading);
+
+    // Add DVR fields
+    dvrInfoSection.appendChild(FormFieldBuilder.createDVRMakeModelField(dvrIndex));
+    dvrInfoSection.appendChild(FormFieldBuilder.createDVRTimeSyncField(dvrIndex));
+    dvrInfoSection.appendChild(FormFieldBuilder.createDVRRetentionField(dvrIndex, (e) => this.handleRetentionChange(e, dvrIndex)));
+    dvrInfoSection.appendChild(FormFieldBuilder.createDVRVideoMonitorField(dvrIndex));
+    dvrGroup.appendChild(dvrInfoSection);
+
+    // Extraction Timeframe Container for this DVR
+    const extractionContainer = createElement('div', {
+      className: 'extraction-timeframe-container',
+      dataset: { dvrIndex: dvrIndex.toString() }
+    });
+
+    // First timeframe group (always present)
+    const timeframeGroup = this.createTimeframeGroup(0, dvrIndex);
+    extractionContainer.appendChild(timeframeGroup);
+    dvrGroup.appendChild(extractionContainer);
+
+    // Add Time Frame Button
+    const addTimeFrameBtn = createElement('div', {
+      style: 'text-align: center; margin: 1.5rem 0;'
+    });
+    const btn = createElement('button', {
+      type: 'button',
+      className: 'btn btn-secondary add-timeframe-btn',
+      dataset: { dvrIndex: dvrIndex.toString() },
+      style: 'min-width: 200px;'
+    }, '+ Add Additional Time Frame');
+    const btnSmall = createElement('small', {
+      className: 'form-text d-block mt-2'
+    }, 'Add if you need to extract video from multiple time periods for this DVR');
+    addTimeFrameBtn.appendChild(btn);
+    addTimeFrameBtn.appendChild(btnSmall);
+    dvrGroup.appendChild(addTimeFrameBtn);
+
+    // Access Information Section
+    const accessSection = createElement('section', { className: 'form-section' });
+    const accessHeading = createElement('h3', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
+    }, 'Access Information');
+    accessSection.appendChild(accessHeading);
+
+    const accessRow = createElement('div', { className: 'form-row' });
+    accessRow.appendChild(FormFieldBuilder.createDVRUsernameField(dvrIndex));
+    accessRow.appendChild(FormFieldBuilder.createDVRPasswordField(dvrIndex));
+    accessSection.appendChild(accessRow);
+    dvrGroup.appendChild(accessSection);
+
+    // Remove button (only for additional DVRs, not the first)
+    if (!isFirst) {
+      const removeBtn = createElement('button', {
+        type: 'button',
+        className: 'btn btn-danger',
+        style: 'margin-top: 1rem; width: 100%;'
+      }, `× Remove DVR ${dvrIndex + 1}`);
+      removeBtn.addEventListener('click', () => this.removeDVRGroup(dvrGroup, dvrIndex));
+      dvrGroup.appendChild(removeBtn);
+    }
+
+    return dvrGroup;
+  }
+
+  /**
+   * Create a timeframe group with Flatpickr datetime fields
+   * @param {number} timeframeIndex - Timeframe index within DVR (0 for first)
+   * @param {number} dvrIndex - DVR index (0 for first)
+   * @returns {HTMLElement} Timeframe group element
+   */
+  createTimeframeGroup(timeframeIndex, dvrIndex) {
+    const timeFrameGroup = createElement('div', {
+      className: 'extraction-timeframe-group',
+      dataset: { groupIndex: timeframeIndex.toString(), dvrIndex: dvrIndex.toString() },
+      style: 'background: rgba(255,255,255,0.05); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color);'
+    });
+
+    const section = createElement('section', { className: 'form-section' });
+    const heading = createElement('h4', {
+      style: 'color: var(--color-secondary); margin-bottom: 1.5rem;'
+    }, timeframeIndex === 0 ? 'Video Extraction Details' : `Video Extraction Details - Time Frame ${timeframeIndex + 1}`);
+    section.appendChild(heading);
+
+    // Build field IDs using complex naming convention
+    const startTimeId = this.getTimeframeFieldId('extractionStartTime', dvrIndex, timeframeIndex);
+    const endTimeId = this.getTimeframeFieldId('extractionEndTime', dvrIndex, timeframeIndex);
+    const timePeriodName = this.getTimeframeFieldId('timePeriodType', dvrIndex, timeframeIndex);
+    const cameraName = this.getTimeframeFieldId('cameraDetails', dvrIndex, timeframeIndex);
+
+    // Build radio button IDs
+    const dvrRadioId = this.getTimeframeFieldId('timeDVR', dvrIndex, timeframeIndex);
+    const actualRadioId = this.getTimeframeFieldId('timeActual', dvrIndex, timeframeIndex);
+
+    // Time Period Row (Start + End with Flatpickr)
+    const formRow = createElement('div', { className: 'form-row' });
+
+    // Start Time
+    const startTimeGroup = createElement('div', { className: 'form-group' });
+    const startLabel = createElement('label', {
+      htmlFor: startTimeId,
+      className: 'form-label'
+    });
+    startLabel.innerHTML = 'Time Period From <span class="required">*</span>';
+    const startInput = createElement('input', {
+      type: 'text',
+      className: 'form-control',
+      id: startTimeId,
+      name: startTimeId,
+      required: 'required'
+    });
+    const startSmall = createElement('small', { className: 'form-text' }, 'Start of video period to extract');
+    startTimeGroup.appendChild(startLabel);
+    startTimeGroup.appendChild(startInput);
+    startTimeGroup.appendChild(startSmall);
+    startTimeGroup.appendChild(createElement('div', { className: 'invalid-feedback' }));
+    formRow.appendChild(startTimeGroup);
+
+    // End Time
+    const endTimeGroup = createElement('div', { className: 'form-group' });
+    const endLabel = createElement('label', {
+      htmlFor: endTimeId,
+      className: 'form-label'
+    });
+    endLabel.innerHTML = 'Time Period To <span class="required">*</span>';
+    const endInput = createElement('input', {
+      type: 'text',
+      className: 'form-control',
+      id: endTimeId,
+      name: endTimeId,
+      required: 'required'
+    });
+    const endSmall = createElement('small', { className: 'form-text' }, 'End of video period to extract');
+    endTimeGroup.appendChild(endLabel);
+    endTimeGroup.appendChild(endInput);
+    endTimeGroup.appendChild(endSmall);
+    endTimeGroup.appendChild(createElement('div', { className: 'invalid-feedback' }));
+    formRow.appendChild(endTimeGroup);
+
+    section.appendChild(formRow);
+
+    // Time Period Type Radio Buttons
+    const timePeriodGroup = createElement('div', { className: 'form-group' });
+    const timePeriodLabel = createElement('label', { className: 'form-label' });
+    timePeriodLabel.innerHTML = 'Time Period Type <span class="required">*</span>';
+    const timePeriodSmall = createElement('small', { className: 'form-text mb-2 d-block' },
+      'Are the times above in DVR time or actual time?');
+
+    const dvrCheckDiv = createElement('div', { className: 'form-check' });
+    const dvrRadio = createElement('input', {
+      className: 'form-check-input',
+      type: 'radio',
+      name: timePeriodName,
+      id: dvrRadioId,
+      value: 'DVR Time',
+      required: 'required'
+    });
+    const dvrRadioLabel = createElement('label', {
+      className: 'form-check-label',
+      htmlFor: dvrRadioId
+    }, 'DVR Time');
+    dvrCheckDiv.appendChild(dvrRadio);
+    dvrCheckDiv.appendChild(dvrRadioLabel);
+
+    const actualCheckDiv = createElement('div', { className: 'form-check' });
+    const actualRadio = createElement('input', {
+      className: 'form-check-input',
+      type: 'radio',
+      name: timePeriodName,
+      id: actualRadioId,
+      value: 'Actual Time',
+      required: 'required'
+    });
+    const actualRadioLabel = createElement('label', {
+      className: 'form-check-label',
+      htmlFor: actualRadioId
+    }, 'Actual Time');
+    actualCheckDiv.appendChild(actualRadio);
+    actualCheckDiv.appendChild(actualRadioLabel);
+
+    timePeriodGroup.appendChild(timePeriodLabel);
+    timePeriodGroup.appendChild(timePeriodSmall);
+    timePeriodGroup.appendChild(dvrCheckDiv);
+    timePeriodGroup.appendChild(actualCheckDiv);
+    timePeriodGroup.appendChild(createElement('div', { className: 'invalid-feedback' }));
+    section.appendChild(timePeriodGroup);
+
+    // Camera Details Textarea
+    const cameraGroup = createElement('div', { className: 'form-group' });
+    const cameraLabel = createElement('label', {
+      htmlFor: cameraName,
+      className: 'form-label'
+    });
+    cameraLabel.innerHTML = 'Camera Details <span class="required">*</span>';
+    const cameraTextarea = createElement('textarea', {
+      className: 'form-control',
+      id: cameraName,
+      name: cameraName,
+      rows: '4',
+      placeholder: 'List camera locations/angles needed (e.g., Front entrance, Cash register, Parking lot west side)',
+      required: 'required'
+    });
+    const cameraSmall = createElement('small', { className: 'form-text' },
+      'Please list specific cameras or areas to be extracted');
+    cameraGroup.appendChild(cameraLabel);
+    cameraGroup.appendChild(cameraTextarea);
+    cameraGroup.appendChild(cameraSmall);
+    cameraGroup.appendChild(createElement('div', { className: 'invalid-feedback' }));
+    section.appendChild(cameraGroup);
+
+    timeFrameGroup.appendChild(section);
+
+    // Remove button (only for index > 0)
+    if (timeframeIndex > 0) {
+      const removeBtn = createElement('button', {
+        type: 'button',
+        className: 'btn btn-danger',
+        style: 'margin-top: 1rem; width: 100%;'
+      }, `× Remove Time Frame ${timeframeIndex + 1}`);
+      removeBtn.addEventListener('click', () => this.removeTimeFrame(timeFrameGroup, dvrIndex));
+      timeFrameGroup.appendChild(removeBtn);
+    }
+
+    return timeFrameGroup;
+  }
+
+  /**
+   * Get field ID/name for timeframe fields using complex naming convention
+   *
+   * Naming Pattern:
+   * - DVR 0, TF 0: baseName (e.g., extractionStartTime)
+   * - DVR 0, TF N: baseName_N (e.g., extractionStartTime_1)
+   * - DVR N, TF 0: baseName_dvrN (e.g., extractionStartTime_dvr1)
+   * - DVR N, TF M: baseName_dvrN_M (e.g., extractionStartTime_dvr1_1)
+   *
+   * @param {string} baseName - Base field name
+   * @param {number} dvrIndex - DVR index (0-based)
+   * @param {number} timeframeIndex - Timeframe index within DVR (0-based)
+   * @returns {string} Full field ID/name
+   */
+  getTimeframeFieldId(baseName, dvrIndex, timeframeIndex) {
+    if (dvrIndex === 0) {
+      return timeframeIndex === 0 ? baseName : `${baseName}_${timeframeIndex}`;
+    }
+    return timeframeIndex === 0
+      ? `${baseName}_dvr${dvrIndex}`
+      : `${baseName}_dvr${dvrIndex}_${timeframeIndex}`;
+  }
+
+  // ===========================================================================
+  // FLATPICKR LIFECYCLE
+  // ===========================================================================
+
+  /**
+   * Initialize Flatpickr on all date/datetime fields
+   * Must be called AFTER buildInitialFields() so DOM elements exist
+   */
+  initializeFlatpickrFields() {
+    // Initialize Flatpickr for the first DVR group
+    const firstDvrGroup = this.form.querySelector('.dvr-group');
+    if (firstDvrGroup) {
+      this.initializeFlatpickrInContainer(firstDvrGroup, 0);
+    }
+  }
+
+  /**
+   * Initialize Flatpickr on datetime fields within a container
+   * @param {HTMLElement} container - Container with datetime fields
+   * @param {number} dvrIndex - DVR index for this container
+   */
+  initializeFlatpickrInContainer(container, dvrIndex) {
+    if (typeof window === 'undefined' || !window.flatpickr) return;
+
+    // Find all timeframe groups in this container
+    const timeframeGroups = container.querySelectorAll('.extraction-timeframe-group');
+
+    timeframeGroups.forEach((group) => {
+      const timeframeIndex = parseInt(group.dataset.groupIndex, 10);
+
+      const startTimeId = this.getTimeframeFieldId('extractionStartTime', dvrIndex, timeframeIndex);
+      const endTimeId = this.getTimeframeFieldId('extractionEndTime', dvrIndex, timeframeIndex);
+
+      const startTimeField = group.querySelector(`#${startTimeId}`);
+      const endTimeField = group.querySelector(`#${endTimeId}`);
+
+      if (startTimeField && !this.flatpickrInstances[startTimeId]) {
+        this.flatpickrInstances[startTimeId] = window.flatpickr(startTimeField, {
+          ...CONFIG.FLATPICKR_CONFIG.DATETIME,
+          onChange: (selectedDates, dateStr) => {
+            this.validateSingleField(startTimeField);
+            // Revalidate end time if it has a value
+            if (endTimeField && endTimeField.value) {
+              this.validateTimeRange(endTimeField);
+            }
+          }
+        });
+      }
+
+      if (endTimeField && !this.flatpickrInstances[endTimeId]) {
+        this.flatpickrInstances[endTimeId] = window.flatpickr(endTimeField, {
+          ...CONFIG.FLATPICKR_CONFIG.DATETIME,
+          onChange: (selectedDates, dateStr) => {
+            this.validateSingleField(endTimeField);
+            this.validateTimeRange(endTimeField);
+          }
+        });
+      }
+    });
+
+    // Also initialize DVR retention date field if present
+    const retentionId = dvrIndex === 0 ? 'dvrRetention' : `dvrRetention_${dvrIndex}`;
+    const retentionField = container.querySelector(`#${retentionId}`);
+    if (retentionField && !this.flatpickrInstances[retentionId]) {
+      this.flatpickrInstances[retentionId] = window.flatpickr(retentionField, {
+        ...CONFIG.FLATPICKR_CONFIG.DATE,
+        maxDate: 'today',
+        onChange: (selectedDates, dateStr) => {
+          this.handleRetentionChange({ target: retentionField }, dvrIndex);
+          this.validateSingleField(retentionField);
+        }
+      });
+    }
+  }
+
+  /**
+   * Handle DVR retention date change
+   * @param {Event} e - Change event
+   * @param {number} dvrIndex - DVR index
+   */
+  handleRetentionChange(e, dvrIndex) {
+    const retentionCalcId = dvrIndex === 0 ? 'retentionCalculation' : `retentionCalculation_${dvrIndex}`;
+    const retentionEl = document.getElementById(retentionCalcId);
+    const field = e.target;
+
+    if (field.value && retentionEl) {
+      const retention = calculateRetentionDays(field.value);
+
+      if (retention.days < 0) {
+        this.showFieldValidation(field, 'DVR retention date cannot be in the future');
+        retentionEl.textContent = '';
+        retentionEl.className = 'text-info mt-2';
+      } else {
+        this.showFieldValidation(field, null);
+        retentionEl.textContent = retention.message;
+
+        if (retention.days <= 4) {
+          retentionEl.className = 'text-danger mt-2';
+          retentionEl.style.fontWeight = 'bold';
+        } else {
+          retentionEl.className = 'text-info mt-2';
+          retentionEl.style.fontWeight = 'normal';
+        }
+      }
+    } else if (retentionEl) {
+      retentionEl.textContent = '';
+      retentionEl.className = 'text-info mt-2';
+      this.showFieldValidation(field, null);
+    }
+  }
+
+  /**
+   * Validate time range (end > start)
+   * @param {HTMLElement} endField - The end time field
+   */
+  validateTimeRange(endField) {
+    const endFieldName = endField.name;
+    const startFieldName = endFieldName.replace('EndTime', 'StartTime');
+    const startField = this.form.querySelector(`[name="${startFieldName}"]`);
+
+    if (startField && startField.value && endField.value) {
+      const dateError = validateDateRange(startField.value, endField.value);
+      if (dateError) {
+        this.showFieldValidation(endField, dateError);
+      } else {
+        this.showFieldValidation(endField, null);
+      }
+    }
+  }
+
+  /**
+   * Override populateForm to sync Flatpickr display with loaded draft values
+   * @param {Object} data - Form data to populate
+   */
+  populateForm(data) {
+    // Let base class populate all standard fields
+    super.populateForm(data);
+
+    // Sync Flatpickr instances with their underlying input values
+    Object.keys(this.flatpickrInstances).forEach(key => {
+      if (data[key] && this.flatpickrInstances[key]) {
+        this.flatpickrInstances[key].setDate(data[key], true);
+      }
+    });
+  }
+
+  /**
+   * Override clearFormAfterSubmission to also clear Flatpickr instances
+   */
+  clearFormAfterSubmission() {
+    super.clearFormAfterSubmission();
+
+    // Clear all Flatpickr instances to sync their display
+    Object.values(this.flatpickrInstances).forEach(instance => {
+      if (instance && typeof instance.clear === 'function') {
+        instance.clear();
+      }
+    });
+  }
+
+  /**
+   * Cleanup Flatpickr instances to prevent memory leaks
+   */
+  destroy() {
+    Object.values(this.flatpickrInstances).forEach(instance => {
+      if (instance && typeof instance.destroy === 'function') {
+        instance.destroy();
+      }
+    });
+    this.flatpickrInstances = {};
+  }
+
+  // ===========================================================================
+  // VALIDATION LISTENERS
+  // ===========================================================================
+
+  /**
+   * Attach validation event listeners to all form-control elements
+   * Ensures sliding green checkmark validation UI works on all dynamically built fields
+   * @param {HTMLElement} container - Container with fields
+   */
+  attachValidationListeners(container) {
+    const fields = container.querySelectorAll('.form-control');
+
+    fields.forEach(field => {
+      // Blur validation for all fields
+      field.addEventListener('blur', () => this.validateSingleField(field));
+
+      // Real-time validation for phone and email fields (debounced)
+      if (field.type === 'tel' || field.name === CONFIG.FIELD_NAMES.OFFICER_EMAIL) {
+        field.addEventListener('input', debounce(() => this.validateSingleField(field), 500));
+      }
+
+      // Location contact phone real-time validation
+      if (field.name === 'locationContactPhone') {
+        field.addEventListener('input', debounce(() => this.validateSingleField(field), 500));
+      }
+    });
+  }
+
+  // ===========================================================================
+  // RECOVERY-SPECIFIC LISTENERS (EXISTING)
+  // ===========================================================================
 
   setupRecoverySpecificListeners() {
     // Initialize conditional field handler
@@ -153,107 +743,29 @@ export class RecoveryFormHandler extends FormHandler {
   }
 
   addDVRGroup() {
-    const container = document.getElementById('dvr-group-container');
+    const container = document.getElementById('dvr-container');
     const dvrIndex = container.children.length;
 
-    const dvrGroup = createElement('div', {
-      className: 'dvr-group',
-      dataset: { dvrIndex: dvrIndex },
-      style: 'background: var(--glass-bg); border-radius: var(--border-radius); padding: 2rem; margin-bottom: 2rem; border: 2px solid var(--color-primary); opacity: 0;'
-    });
-
-    // DVR Header
-    const header = createElement('h2', {
-      style: 'color: var(--color-primary); margin-bottom: 1.5rem; text-align: center; font-size: 1.5rem;'
-    }, `DVR ${dvrIndex + 1}`);
-    dvrGroup.appendChild(header);
-
-    // DVR Information Section
-    const dvrInfoSection = createElement('section', { className: 'form-section' });
-    const dvrInfoHeading = createElement('h3', {
-      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
-    }, 'DVR Information');
-    dvrInfoSection.appendChild(dvrInfoHeading);
-
-    // Add DVR fields
-    dvrInfoSection.appendChild(FormFieldBuilder.createDVRMakeModelField(dvrIndex));
-    dvrInfoSection.appendChild(FormFieldBuilder.createDVRTimeSyncField(dvrIndex));
-    dvrInfoSection.appendChild(FormFieldBuilder.createDVRRetentionField(dvrIndex, (e) => {
-      if (e.target.value) {
-        const retentionCalcId = `retentionCalculation_${dvrIndex}`;
-        const retentionEl = document.getElementById(retentionCalcId);
-        const retention = calculateRetentionDays(e.target.value);
-        retentionEl.textContent = retention.message;
-        if (retention.days <= 4) {
-          retentionEl.className = 'text-danger mt-2';
-          retentionEl.style.fontWeight = 'bold';
-        } else {
-          retentionEl.className = 'text-info mt-2';
-          retentionEl.style.fontWeight = 'normal';
-        }
-      }
-    }));
-    dvrInfoSection.appendChild(FormFieldBuilder.createDVRVideoMonitorField(dvrIndex));
-    dvrGroup.appendChild(dvrInfoSection);
-
-    // Extraction Timeframe Container for this DVR
-    const extractionContainer = createElement('div', {
-      className: 'extraction-timeframe-container',
-      dataset: { dvrIndex: dvrIndex }
-    });
-
-    // First timeframe group (always present)
-    const timeframeGroup = this.createTimeFrameGroup(0, dvrIndex);
-    extractionContainer.appendChild(timeframeGroup);
-    dvrGroup.appendChild(extractionContainer);
-
-    // Add Time Frame Button
-    const addTimeFrameBtn = createElement('div', {
-      style: 'text-align: center; margin: 1.5rem 0;'
-    });
-    const btn = createElement('button', {
-      type: 'button',
-      className: 'btn btn-secondary add-timeframe-btn',
-      dataset: { dvrIndex: dvrIndex },
-      style: 'min-width: 200px;'
-    }, '+ Add Additional Time Frame');
-    const btnSmall = createElement('small', {
-      className: 'form-text d-block mt-2'
-    }, 'Add if you need to extract video from multiple time periods for this DVR');
-    addTimeFrameBtn.appendChild(btn);
-    addTimeFrameBtn.appendChild(btnSmall);
-    dvrGroup.appendChild(addTimeFrameBtn);
-
-    // Access Information Section
-    const accessSection = createElement('section', { className: 'form-section' });
-    const accessHeading = createElement('h3', {
-      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
-    }, 'Access Information');
-    accessSection.appendChild(accessHeading);
-
-    const accessRow = createElement('div', { className: 'form-row' });
-    accessRow.appendChild(FormFieldBuilder.createDVRUsernameField(dvrIndex));
-    accessRow.appendChild(FormFieldBuilder.createDVRPasswordField(dvrIndex));
-    accessSection.appendChild(accessRow);
-    dvrGroup.appendChild(accessSection);
-
-    // Remove button
-    const removeBtn = createElement('button', {
-      type: 'button',
-      className: 'btn btn-danger',
-      style: 'margin-top: 1rem; width: 100%;',
-      onclick: () => this.removeDVRGroup(dvrGroup)
-    }, `× Remove DVR ${dvrIndex + 1}`);
-    dvrGroup.appendChild(removeBtn);
+    // Use the shared createDVRGroup method
+    const dvrGroup = this.createDVRGroup(dvrIndex);
+    dvrGroup.style.opacity = '0';
 
     container.appendChild(dvrGroup);
 
     // Apply autofill prevention to the newly created fields
-    const newFields = dvrGroup.querySelectorAll('input, select, textarea');
-    this.applyAutofillPrevention(newFields);
+    this.applyAutofillPrevention(dvrGroup.querySelectorAll('input, select, textarea'));
+
+    // Attach validation listeners to new fields
+    this.attachValidationListeners(dvrGroup);
+
+    // Initialize Flatpickr on new datetime fields
+    this.initializeFlatpickrInContainer(dvrGroup, dvrIndex);
 
     // Setup listeners for the new DVR
     this.setupDVRListeners(dvrIndex);
+
+    // Re-apply iOS keyboard fix for new fields
+    this.setupKeyboardProgressBarFix();
 
     // Animate in
     requestAnimationFrame(() => {
@@ -268,7 +780,32 @@ export class RecoveryFormHandler extends FormHandler {
     this.updateProgress();
   }
 
-  removeDVRGroup(dvrGroup) {
+  removeDVRGroup(dvrGroup, dvrIndex) {
+    // Destroy Flatpickr instances for this DVR group
+    const timeframeGroups = dvrGroup.querySelectorAll('.extraction-timeframe-group');
+    timeframeGroups.forEach((group) => {
+      const tfIndex = parseInt(group.dataset.groupIndex, 10);
+      const startTimeId = this.getTimeframeFieldId('extractionStartTime', dvrIndex, tfIndex);
+      const endTimeId = this.getTimeframeFieldId('extractionEndTime', dvrIndex, tfIndex);
+
+      if (this.flatpickrInstances[startTimeId]) {
+        this.flatpickrInstances[startTimeId].destroy();
+        delete this.flatpickrInstances[startTimeId];
+      }
+      if (this.flatpickrInstances[endTimeId]) {
+        this.flatpickrInstances[endTimeId].destroy();
+        delete this.flatpickrInstances[endTimeId];
+      }
+    });
+
+    // Destroy retention date Flatpickr
+    const retentionId = dvrIndex === 0 ? 'dvrRetention' : `dvrRetention_${dvrIndex}`;
+    if (this.flatpickrInstances[retentionId]) {
+      this.flatpickrInstances[retentionId].destroy();
+      delete this.flatpickrInstances[retentionId];
+    }
+
+    // Animate out
     dvrGroup.style.transition = 'all 0.3s ease';
     dvrGroup.style.opacity = '0';
     dvrGroup.style.transform = 'scale(0.95)';
@@ -277,180 +814,6 @@ export class RecoveryFormHandler extends FormHandler {
       dvrGroup.remove();
       this.updateProgress();
     }, 300);
-  }
-
-  createTimeFrameGroup(index, dvrIndex) {
-    const timeFrameGroup = createElement('div', {
-      className: 'extraction-timeframe-group',
-      dataset: { groupIndex: index, dvrIndex: dvrIndex },
-      style: 'background: rgba(255,255,255,0.05); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color);'
-    });
-
-    const section = createElement('section', { className: 'form-section' });
-    const heading = createElement('h4', {
-      style: 'color: var(--color-secondary); margin-bottom: 1.5rem;'
-    }, index === 0 ? 'Video Extraction Details' : `Video Extraction Details - Time Frame ${index + 1}`);
-    section.appendChild(heading);
-
-    // Create form row for start and end times
-    const formRow = createElement('div', { className: 'form-row' });
-
-    // Build field IDs
-    let startTimeId, endTimeId, startTimeName, endTimeName;
-    if (dvrIndex === 0) {
-      startTimeId = index === 0 ? 'extractionStartTime' : `extractionStartTime_${index}`;
-      endTimeId = index === 0 ? 'extractionEndTime' : `extractionEndTime_${index}`;
-      startTimeName = startTimeId;
-      endTimeName = endTimeId;
-    } else {
-      startTimeId = index === 0 ? `extractionStartTime_dvr${dvrIndex}` : `extractionStartTime_dvr${dvrIndex}_${index}`;
-      endTimeId = index === 0 ? `extractionEndTime_dvr${dvrIndex}` : `extractionEndTime_dvr${dvrIndex}_${index}`;
-      startTimeName = startTimeId;
-      endTimeName = endTimeId;
-    }
-
-    const startTimeGroup = createElement('div', { className: 'form-group' });
-    const startLabel = createElement('label', {
-      htmlFor: startTimeId,
-      className: 'form-label'
-    });
-    startLabel.innerHTML = 'Time Period From <span class="required">*</span>';
-    const startInput = createElement('input', {
-      type: 'datetime-local',
-      className: 'form-control',
-      id: startTimeId,
-      name: startTimeName,
-      required: 'required'
-    });
-    const startSmall = createElement('small', { className: 'form-text' }, 'Start of video period to extract');
-    startTimeGroup.appendChild(startLabel);
-    startTimeGroup.appendChild(startInput);
-    startTimeGroup.appendChild(startSmall);
-    startTimeGroup.appendChild(createElement('div', { className: 'invalid-feedback' }));
-
-    const endTimeGroup = createElement('div', { className: 'form-group' });
-    const endLabel = createElement('label', {
-      htmlFor: endTimeId,
-      className: 'form-label'
-    });
-    endLabel.innerHTML = 'Time Period To <span class="required">*</span>';
-    const endInput = createElement('input', {
-      type: 'datetime-local',
-      className: 'form-control',
-      id: endTimeId,
-      name: endTimeName,
-      required: 'required'
-    });
-    const endSmall = createElement('small', { className: 'form-text' }, 'End of video period to extract');
-    endTimeGroup.appendChild(endLabel);
-    endTimeGroup.appendChild(endInput);
-    endTimeGroup.appendChild(endSmall);
-    endTimeGroup.appendChild(createElement('div', { className: 'invalid-feedback' }));
-
-    formRow.appendChild(startTimeGroup);
-    formRow.appendChild(endTimeGroup);
-    section.appendChild(formRow);
-
-    // Add time period type field
-    const timePeriodName = dvrIndex === 0
-      ? (index === 0 ? 'timePeriodType' : `timePeriodType_${index}`)
-      : (index === 0 ? `timePeriodType_dvr${dvrIndex}` : `timePeriodType_dvr${dvrIndex}_${index}`);
-    const dvrRadioId = dvrIndex === 0
-      ? (index === 0 ? 'timeDVR' : `timeDVR_${index}`)
-      : (index === 0 ? `timeDVR_dvr${dvrIndex}` : `timeDVR_dvr${dvrIndex}_${index}`);
-    const actualRadioId = dvrIndex === 0
-      ? (index === 0 ? 'timeActual' : `timeActual_${index}`)
-      : (index === 0 ? `timeActual_dvr${dvrIndex}` : `timeActual_dvr${dvrIndex}_${index}`);
-
-    const timePeriodGroup = createElement('div', { className: 'form-group' });
-    const timePeriodLabel = createElement('label', { className: 'form-label' });
-    timePeriodLabel.innerHTML = 'Time Period Type <span class="required">*</span>';
-    const timePeriodSmall = createElement('small', { className: 'form-text mb-2 d-block' },
-      'Are the times above in DVR time or actual time?'
-    );
-
-    const dvrCheckDiv = createElement('div', { className: 'form-check' });
-    const dvrRadio = createElement('input', {
-      className: 'form-check-input',
-      type: 'radio',
-      name: timePeriodName,
-      id: dvrRadioId,
-      value: 'DVR Time',
-      required: 'required'
-    });
-    const dvrRadioLabel = createElement('label', {
-      className: 'form-check-label',
-      htmlFor: dvrRadioId
-    }, 'DVR Time');
-    dvrCheckDiv.appendChild(dvrRadio);
-    dvrCheckDiv.appendChild(dvrRadioLabel);
-
-    const actualCheckDiv = createElement('div', { className: 'form-check' });
-    const actualRadio = createElement('input', {
-      className: 'form-check-input',
-      type: 'radio',
-      name: timePeriodName,
-      id: actualRadioId,
-      value: 'Actual Time',
-      required: 'required'
-    });
-    const actualRadioLabel = createElement('label', {
-      className: 'form-check-label',
-      htmlFor: actualRadioId
-    }, 'Actual Time');
-    actualCheckDiv.appendChild(actualRadio);
-    actualCheckDiv.appendChild(actualRadioLabel);
-
-    timePeriodGroup.appendChild(timePeriodLabel);
-    timePeriodGroup.appendChild(timePeriodSmall);
-    timePeriodGroup.appendChild(dvrCheckDiv);
-    timePeriodGroup.appendChild(actualCheckDiv);
-    timePeriodGroup.appendChild(createElement('div', { className: 'invalid-feedback' }));
-    section.appendChild(timePeriodGroup);
-
-    // Add camera details field
-    const cameraName = dvrIndex === 0
-      ? (index === 0 ? 'cameraDetails' : `cameraDetails_${index}`)
-      : (index === 0 ? `cameraDetails_dvr${dvrIndex}` : `cameraDetails_dvr${dvrIndex}_${index}`);
-    const cameraId = cameraName;
-
-    const cameraGroup = createElement('div', { className: 'form-group' });
-    const cameraLabel = createElement('label', {
-      htmlFor: cameraId,
-      className: 'form-label'
-    });
-    cameraLabel.innerHTML = 'Camera Details <span class="required">*</span>';
-    const cameraTextarea = createElement('textarea', {
-      className: 'form-control',
-      id: cameraId,
-      name: cameraName,
-      rows: '4',
-      placeholder: 'List camera locations/angles needed (e.g., Front entrance, Cash register, Parking lot west side)',
-      required: 'required'
-    });
-    const cameraSmall = createElement('small', { className: 'form-text' },
-      'Please list specific cameras or areas to be extracted'
-    );
-    cameraGroup.appendChild(cameraLabel);
-    cameraGroup.appendChild(cameraTextarea);
-    cameraGroup.appendChild(cameraSmall);
-    cameraGroup.appendChild(createElement('div', { className: 'invalid-feedback' }));
-    section.appendChild(cameraGroup);
-
-    timeFrameGroup.appendChild(section);
-
-    // Add remove button if not the first timeframe
-    if (index > 0) {
-      const removeBtn = createElement('button', {
-        type: 'button',
-        className: 'btn btn-danger',
-        style: 'margin-top: 1rem; width: 100%;',
-        onclick: () => this.removeTimeFrame(timeFrameGroup)
-      }, `× Remove Time Frame ${index + 1}`);
-      timeFrameGroup.appendChild(removeBtn);
-    }
-
-    return timeFrameGroup;
   }
 
   addTimeFrame(dvrIndex = 0) {
@@ -466,19 +829,25 @@ export class RecoveryFormHandler extends FormHandler {
 
     if (!container) return;
 
-    const index = container.children.length;
-    const timeFrameGroup = this.createTimeFrameGroup(index, dvrIndex);
+    const timeframeIndex = container.children.length;
 
-    // Set initial opacity for animation
+    // Use the shared createTimeframeGroup method
+    const timeFrameGroup = this.createTimeframeGroup(timeframeIndex, dvrIndex);
     timeFrameGroup.style.opacity = '0';
+
     container.appendChild(timeFrameGroup);
 
     // Apply autofill prevention to the newly created fields
-    const newFields = timeFrameGroup.querySelectorAll('input, select, textarea');
-    this.applyAutofillPrevention(newFields);
+    this.applyAutofillPrevention(timeFrameGroup.querySelectorAll('input, select, textarea'));
+
+    // Attach validation listeners to new fields
+    this.attachValidationListeners(timeFrameGroup);
+
+    // Initialize Flatpickr on new datetime fields
+    this.initializeFlatpickrInContainer(container.closest('.dvr-group'), dvrIndex);
 
     // Setup listeners for the new time frame
-    this.setupTimeFrameListeners(index, dvrIndex);
+    this.setupTimeFrameListeners(timeframeIndex, dvrIndex);
 
     // Animate in
     requestAnimationFrame(() => {
@@ -493,7 +862,24 @@ export class RecoveryFormHandler extends FormHandler {
     this.updateProgress();
   }
 
-  removeTimeFrame(timeFrameGroup) {
+  removeTimeFrame(timeFrameGroup, dvrIndex) {
+    // Get the timeframe index to clean up Flatpickr instances
+    const timeframeIndex = parseInt(timeFrameGroup.dataset.groupIndex, 10);
+
+    const startTimeId = this.getTimeframeFieldId('extractionStartTime', dvrIndex, timeframeIndex);
+    const endTimeId = this.getTimeframeFieldId('extractionEndTime', dvrIndex, timeframeIndex);
+
+    // Destroy Flatpickr instances for this timeframe
+    if (this.flatpickrInstances[startTimeId]) {
+      this.flatpickrInstances[startTimeId].destroy();
+      delete this.flatpickrInstances[startTimeId];
+    }
+    if (this.flatpickrInstances[endTimeId]) {
+      this.flatpickrInstances[endTimeId].destroy();
+      delete this.flatpickrInstances[endTimeId];
+    }
+
+    // Animate out
     timeFrameGroup.style.transition = 'all 0.3s ease';
     timeFrameGroup.style.opacity = '0';
     timeFrameGroup.style.transform = 'scale(0.95)';
