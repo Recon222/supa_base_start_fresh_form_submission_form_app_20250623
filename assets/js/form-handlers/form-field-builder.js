@@ -608,6 +608,127 @@ export class FormFieldBuilder {
   }
 
   // =========================================================================
+  // RECOVERY FORM SECTION BUILDERS
+  // =========================================================================
+
+  /**
+   * Create case information section for Recovery form
+   * Note: Recovery uses free-text offenceType (not select like Analysis/Upload)
+   * @returns {HTMLElement} Section element
+   */
+  static createRecoveryCaseSection() {
+    const section = createElement('section', { className: 'form-section' });
+
+    const heading = createElement('h2', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
+    }, 'Case Information');
+    section.appendChild(heading);
+
+    // Row: Occurrence Number + Offence Type (free text)
+    section.appendChild(this.createFormRow(
+      this.createOccurrenceNumberField(),
+      this.createTextField('offenceType', 0, 'Type of Offence', true, '', 'e.g., Robbery, Assault, Break and Enter')
+    ));
+
+    return section;
+  }
+
+  /**
+   * Create investigator section for Recovery form
+   * Includes Unit field not present in other forms
+   * @returns {HTMLElement} Section element
+   */
+  static createRecoveryInvestigatorSection() {
+    const section = createElement('section', { className: 'form-section' });
+
+    const heading = createElement('h2', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
+    }, 'Submitting Investigator Information');
+    section.appendChild(heading);
+
+    // Row 1: Name + Badge
+    section.appendChild(this.createFormRow(
+      this.createTextField('rName', 0, 'Submitting Investigator', true, '', 'Last name or full name'),
+      this.createTextField('badge', 0, 'Badge Number', true)
+    ));
+
+    // Row 2: Unit + Phone
+    section.appendChild(this.createFormRow(
+      this.createTextField('unit', 0, 'Unit', true, '', 'Your unit/division'),
+      this.createPhoneField('requestingPhone', 0, 'Contact Number', true)
+    ));
+
+    // Row 3: Email (full width)
+    section.appendChild(this.createEmailField('requestingEmail', 0, 'Email Address', true));
+
+    // Clear button
+    const clearGroup = createElement('div', { className: 'form-group text-right' });
+    const clearBtn = createElement('button', {
+      type: 'button',
+      className: 'btn btn-sm btn-secondary',
+      id: 'clearOfficerInfo'
+    }, 'Clear Investigator Info');
+    const clearSmall = createElement('small', {
+      className: 'form-text d-block mt-1'
+    }, 'Removes saved investigator information from this browser');
+    clearGroup.appendChild(clearBtn);
+    clearGroup.appendChild(clearSmall);
+    section.appendChild(clearGroup);
+
+    return section;
+  }
+
+  /**
+   * Create location information section for Recovery form
+   * Single location with contact person fields
+   * @returns {HTMLElement} Section element
+   */
+  static createRecoveryLocationSection() {
+    const section = createElement('section', { className: 'form-section' });
+
+    const heading = createElement('h2', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
+    }, 'Location Information');
+    section.appendChild(heading);
+
+    // Row 1: Business Name + Address
+    section.appendChild(this.createFormRow(
+      this.createTextField('businessName', 0, 'Business Name', true, '', 'Name of the business/location'),
+      this.createTextField('locationAddress', 0, 'Location Address', true, '', 'Full street address')
+    ));
+
+    // Row 2: City (with Other conditional)
+    section.appendChild(this.createCityField(0));
+
+    // Row 3: Contact Person + Phone
+    section.appendChild(this.createFormRow(
+      this.createTextField('locationContact', 0, 'Contact Person', false, '', 'Name of the person to contact at location'),
+      this.createPhoneField('locationContactPhone', 0, 'Contact Phone', false)
+    ));
+
+    return section;
+  }
+
+  /**
+   * Create incident description section for Recovery form
+   * @returns {HTMLElement} Section element
+   */
+  static createIncidentDescriptionSection() {
+    const section = createElement('section', { className: 'form-section' });
+
+    const heading = createElement('h2', {
+      style: 'color: var(--color-primary); margin-bottom: 1.5rem;'
+    }, 'Incident Description');
+    section.appendChild(heading);
+
+    section.appendChild(this.createTextareaField('incidentDescription', 0,
+      'Description of Incident', true,
+      'Provide a detailed description of the incident and what video evidence is being sought'));
+
+    return section;
+  }
+
+  // =========================================================================
   // EXISTING METHODS (Upload/Recovery forms)
   // =========================================================================
 
