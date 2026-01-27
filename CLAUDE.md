@@ -4,224 +4,109 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-FVU (Forensic Video Unit) Request System for Peel Regional Police. A static HTML/JavaScript form application with three form types:
-- **Analysis** (`analysis.html`) - Request in-office video analysis
-- **Upload** (`upload.html`) - Submit video evidence for processing
-- **Recovery** (`recovery.html`) - Request on-site DVR video recovery (most complex - supports multiple DVR systems with independent time frames)
+FVU (Forensic Video Unit) Request System - A PWA for Peel Regional Police to submit three types of forensic video requests: Upload, Analysis, and Recovery. Each form has distinct validation rules, conditional fields, and DVR/time-handling logic.
 
-## Commands
+## Development Commands
 
-### Development
 ```bash
-npm run serve          # Start local server on port 3000
-```
+# Run dev server
+npm run serve              # Starts http-server on port 3000
 
-### Testing (Playwright e2e - 260+ tests)
-```bash
-npm test               # Run all tests across all browsers
-npm run test:ui        # Interactive UI mode for debugging
-npm run test:headed    # See browser windows during tests
-npm run test:debug     # Use Playwright Inspector
+# Testing - Playwright E2E (260+ tests across 3 browsers)
+npm test                   # Run all Playwright tests
+npm run test:ui            # Interactive UI mode
+npm run test:headed        # See browser windows
+npm run test:debug         # Playwright Inspector
+npm run test:upload        # Upload form tests only
+npm run test:analysis      # Analysis form tests only
+npm run test:recovery      # Recovery form tests only
+npm run test:cross         # Cross-form behavior tests
+npx playwright test -g "pattern"  # Run tests matching pattern
 
-# Single form tests
-npm run test:upload    # Upload form only
-npm run test:analysis  # Analysis form only
-npm run test:recovery  # Recovery form only
-npm run test:cross     # Cross-form behavior tests
+# Testing - Vitest Unit/Integration
+npm run test:unit          # Run unit tests
+npm run test:unit:watch    # Watch mode
+npm run test:integration   # Run integration tests
+npm run test:all           # Run unit + integration + e2e
+npm run coverage           # Generate coverage report
 
-# Single browser
-npm run test:chrome    # Chromium only
-npm run test:firefox   # Firefox only
-npm run test:safari    # WebKit only
-
-# Pattern matching
-npx playwright test -g "1.2"  # Tests matching pattern
-npm run report         # View HTML test report
-```
-
-### Production Build
-```powershell
-.\scripts\build-php.ps1   # Converts HTML to PHP, outputs to deploy/
+# View reports
+npm run report             # Open Playwright HTML report
 ```
 
 ## Architecture
 
-### Header Component (JS-Injected)
+### Form Handler Inheritance Pattern
 
-Unlike the rest of the UI which uses inline HTML, the header is dynamically injected via JavaScript. This allows a single source of truth for the header across all forms.
-
-**Usage in form HTML:**
-```html
-<script type="module">
-  import { initHeader } from './assets/js/header-component.js';
-  initHeader('Form Title');
-</script>
+```
+FormHandler (base class - form-handler-base.js)
+    ├── UploadFormHandler (form-handler-upload.js)
+    ├── AnalysisFormHandler (form-handler-analysis.js)
+    └── RecoveryFormHandler (form-handler-recovery.js)
 ```
 
-**Important:** The header requires a `.background-animation` element to exist in the DOM - it injects itself immediately after this element. The build script converts `.html` links to `.php` in the header for production.
+Each form handler:
+1. Extends `FormHandler` base class
+2. Calls `super(formId)` which runs `init()` (before subclass fields exist)
+3. Builds dynamic fields via `FormFieldBuilder`
+4. Re-applies iOS keyboard fix and autofill prevention after field creation
 
-### Form Handler Hierarchy
+**Known Tech Debt**: Base `init()` runs before subclass constructors build dynamic fields. Subclasses must re-call `setupKeyboardProgressBarFix()` and `configureAutofill()` after `buildInitialFields()`.
+
+### FormFieldBuilder (form-field-builder.js)
+
+Static class providing reusable field creation methods:
+- `createTextField()`, `createTextareaField()`, `createSelectField()`
+- `createDatetimeField()`, `createRadioGroup()`
+- Form-specific section builders for each form type
+
+### Key Modules
+
+| File | Purpose |
+|------|---------|
+| `config.js` | All constants, validation patterns, field names, messages |
+| `validators.js` | Field validation logic, phone/email/occurrence formats |
+| `storage.js` | Draft save/load, session management |
+| `officer-storage.js` | Cross-form officer info persistence |
+| `calculations.js` | DVR retention calculations, urgency alerts |
+| `utils.js` | DOM utilities, debounce, toast notifications |
+| `api-client.js` | Submission with retry logic |
+
+### HTML Structure
+
+Each form HTML (`upload.html`, `analysis.html`, `recovery.html`) contains:
+- Empty container divs with IDs like `evidence-section-container`
+- FormFieldBuilder dynamically populates these containers
+- Container pattern replaces static HTML with programmatic field generation
+
+### Validation Requirements
+
+- **Email**: Must be `@peelpolice.ca` domain
+- **Phone**: Exactly 10 digits (formatting handled separately)
+- **Occurrence Number**: Must start with `PR` followed by numbers
+- **Conditional fields**: "Other" text fields appear when "Other" selected in dropdowns/radios
+
+### Test Structure
+
 ```
-FormHandler (form-handler-base.js)     # Base class: validation, drafts, progress, submission
-  ├── UploadFormHandler                # Extends: add/remove locations, DVR retention calc
-  ├── AnalysisFormHandler              # Extends: conditional "Other" fields
-  └── RecoveryFormHandler              # Extends: multi-DVR systems, time frames per DVR
-```
-
-### Key Modules (`assets/js/`)
-- `config.js` - All configuration constants (frozen objects)
-- `validators.js` - Field validation with patterns from config
-- `storage.js` - Draft auto-save (localStorage, 2s debounce)
-- `officer-storage.js` - Persistent investigator info across forms
-- `api-client.js` - Submission logic (see below)
-- `pdf-generator.js` / `pdf-templates.js` - Uses pdfmake (`lib/pdfmake.min.js`)
-- `supabase.js` - Supabase integration (toggle via `CONFIG.USE_SUPABASE`)
-
-### API Client (`api-client.js`)
-
-Handles form submission with:
-- **Retry logic**: Exponential backoff (1s, 2s, 4s), max 3 attempts
-- **Smart retry**: Skips retry for 4xx client errors (validation failures)
-- **Dual path**: Routes to Supabase or PHP based on `CONFIG.USE_SUPABASE`
-- **File attachments**: PDF as `fileAttachmentA`, JSON as `fileAttachmentB`
-- **Dev mode**: Mock submission with simulated delay and random success/failure
-- **Error handling**: Custom `APIError` class, offline detection, timeout handling
-
-**Third-party field mapping (Phil's FAT system):**
-
-Field mappings happen in two places:
-1. **Form handlers** (`collectFormData()`) - field renames, flattening nested data (e.g., Recovery flattens first DVR to root level)
-2. **api-client.js** - ID lookups and hardcoded values
-
-Key mappings in api-client.js:
-```javascript
-// requestDetails → rfsDetails (field rename)
-formData.rfsDetails = formData.requestDetails
-
-// occType → fat_occTypes table
-'homicide' → '1'
-'missing person' → '2'
-
-// reqArea → fat_servicing table (always 36 = "Homicide and Missing Persons")
-formData.reqArea = '36'
-
-// ticketStatus → fat_rfs_types table
-'analysis' → '1'  // Video Analysis
-'recovery' → '2'  // Video Extraction
-'upload' → '4'    // Video Upload
-
-// rfsHeader (File Desc)
-'upload' → 'FVU Upload Request'
-'analysis' → 'FVU Analysis Request'
-'recovery' → 'FVU Recovery Request'
+tests/
+├── *.spec.js          # Playwright E2E tests
+├── unit/              # Vitest unit tests
+├── integration/       # Vitest integration tests
+├── fixtures/
+│   ├── test-data.js   # Reusable test data
+│   └── form-helpers.js # Helper functions
+└── setup/             # Vitest setup files
 ```
 
-### fileDetails Generation
+## Configuration
 
-Each form handler implements `generateFileDetails(data)` which creates a structured text summary sent to Phil's FAT system. This is the primary human-readable description of the request.
+- **Vitest**: `vitest.config.js` - Uses happy-dom, coverage thresholds at 80%
+- **Playwright**: `playwright.config.js` - Tests against Chromium, Firefox, WebKit
+- **App Config**: `assets/js/config.js` - All constants centralized here
 
-**Architecture:**
-- Each form handler overrides `generateFileDetails()` with form-specific logic
-- Called during `collectFormData()` before submission
-- Output is a multi-line formatted string with section headers
+## External Dependencies
 
-**Format pattern:**
-```
-========================================
-         VIDEO EVIDENCE UPLOAD REQUEST
-========================================
-=== EVIDENCE ===
-Occurrence: PR12345
-Evidence Bag: 123456
-Media Type: USB
-
-=== INVESTIGATOR ===
-Name: John Smith (Badge: 1234)
-Phone: 905-555-1234
-Email: john.smith@peelpolice.ca
-
-=== LOCATION 1 ===
-Business: Example Store
-Address: 123 Main St, Mississauga
-Video Period: Dec 15, 2025 10:00 to Dec 15, 2025 14:00
-...
-```
-
-Each form type has different sections (Upload has locations, Recovery has DVR systems with time frames, Analysis has video source info).
-
-### Dual Backend Support
-- **Supabase**: Set `USE_SUPABASE: true` in config.js (default for development)
-- **PHP**: Set `USE_SUPABASE: false`, submits to `rfs_request_process.php`
-
-The build script automatically sets `USE_SUPABASE: false` for production.
-
-### Validation Patterns
-- Email: `@peelpolice.ca` domain required
-- Phone: 10 digits (formatting handled separately)
-- Occurrence: Must start with `PR` followed by numbers
-
-## Test Infrastructure
-
-- Config: `playwright.config.js` - Multi-browser, auto-starts http-server
-- Test data: `tests/fixtures/test-data.js`
-- Helpers: `tests/fixtures/form-helpers.js` (fillOfficerInfo, addDVRSystem, etc.)
-- Server: Uses `http-server` (NOT `serve`) to avoid SPA routing issues
-
-## Form Features
-
-All forms share:
-- Auto-save drafts (2s debounce, 7-day expiry)
-- Progress bar with color coding (red→yellow→green)
-- Theme toggle (dark/light, persists via localStorage)
-- Officer info persistence across forms and sessions
-- PDF generation on submission
-
-## Feature Flags (`config.js` → `CONFIG.FEATURES`)
-
-- `BROWSER_AUTOFILL` - Controls browser autofill suggestions (default: `false` for production)
-
-## Deployment
-
-| Task            | Status                                                            |
-|-----------------|-------------------------------------------------------------------|
-| VM SSH access   | `ssh -p 2211 fvuadmin@72.142.23.10`                               |
-| SFTP to Phil    | `sftp -P 2109 peeluploader@3.96.182.77`                           |
-| Build script    | Handles: .html→.php, lib/, supabase removal, header links, PWA    |
-| Deploy workflow | Build → SCP to VM → SSH to VM → SFTP to Phil's /intake/           |
-
-**When ready to redeploy:**
-
-1. Build:
-   ```powershell
-   .\scripts\build-php.ps1
-   ```
-
-2. SCP to VM (from local Windows machine):
-   ```cmd
-   scp -P 2211 -r "deploy\*" fvuadmin@72.142.23.10:/var/www/fvu/
-   ```
-
-3. SSH into VM:
-   ```cmd
-   ssh -p 2211 fvuadmin@72.142.23.10
-   ```
-
-4. SFTP to Phil's server (from VM):
-   ```bash
-   sftp -P 2109 peeluploader@3.96.182.77
-   cd intake
-   put /var/www/fvu/index.php
-   put /var/www/fvu/upload.php
-   put /var/www/fvu/analysis.php
-   put /var/www/fvu/recovery.php
-   put /var/www/fvu/manifest.json
-   put /var/www/fvu/sw.js
-   put -r /var/www/fvu/lib
-   put -r /var/www/fvu/assets
-   ```
-
-**Note:** The `assets/` folder includes PWA icons (`assets/images/icons/`) and iOS splash screens (`assets/images/splash/`).
-
-## MCP Integration
-
-This project has Supabase MCP configured for database operations during development. The MCP server provides direct database access for debugging and data inspection.
+- `pdfmake` - PDF generation (in `/lib`)
+- `flatpickr` - Date/time pickers (in `/lib`)
+- Supabase integration (toggleable via `CONFIG.USE_SUPABASE`)
