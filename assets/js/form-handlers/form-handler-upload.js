@@ -17,19 +17,12 @@ import { CONFIG } from '../config.js';
  */
 export class UploadFormHandler extends FormHandler {
   constructor(formId) {
+    // Call parent constructor - this triggers init() which calls buildFields()
+    // Note: buildFields() initializes flatpickrInstances and locations
     super(formId);
-    this.locations = [];
 
-    // Store Flatpickr instances for programmatic access
-    this.flatpickrInstances = {};
-
-    // Build initial form fields via FormFieldBuilder
-    this.buildInitialFields();
-
-    // Setup upload-specific listeners
+    // Post-initialization setup (things that need buildFields() to have run)
     this.setupUploadSpecificListeners();
-
-    // Initialize Flatpickr on initial fields (AFTER fields are built)
     this.initializeFlatpickrFields();
 
     // Cleanup Flatpickr instances when page unloads
@@ -37,10 +30,21 @@ export class UploadFormHandler extends FormHandler {
   }
 
   /**
-   * Build all initial form fields via FormFieldBuilder
-   * Creates sections for evidence, investigator, location-video, and additional info
+   * Build all form fields dynamically via FormFieldBuilder
+   * Implements the Template Method hook from FormHandler base class
+   *
+   * Creates sections for evidence, investigator, location-video, and additional info.
+   * Called by base class init() BEFORE field-dependent setup (autofill, keyboard fix, etc.)
+   *
+   * @override
    */
-  buildInitialFields() {
+  buildFields() {
+    // Initialize instance properties used by this handler
+    // Must be done here because buildFields() is called by super() before
+    // the subclass constructor body runs (JavaScript class semantics)
+    this.locations = [];
+    this.flatpickrInstances = {};
+
     this.buildEvidenceSection();
     this.buildInvestigatorSection();
     this.buildFirstLocationVideoGroup();
@@ -49,15 +53,8 @@ export class UploadFormHandler extends FormHandler {
     // Attach validation listeners to all built fields
     this.attachValidationListeners(this.form);
 
-    // Re-apply iOS keyboard fix for dynamically created fields
-    // The base class init() runs before buildInitialFields(), so dynamic fields miss the fix
-    this.setupKeyboardProgressBarFix();
-
-    // Apply autofill prevention to newly created dynamic fields
-    // The base class configureAutofill() runs in init() before buildInitialFields() creates these fields
-    if (CONFIG.FEATURES.BROWSER_AUTOFILL === false) {
-      this.applyAutofillPrevention(this.form.querySelectorAll('.form-control'));
-    }
+    // NOTE: setupKeyboardProgressBarFix() and configureAutofill() are now
+    // called by the base class init() AFTER this method returns
   }
 
   /**
@@ -258,7 +255,7 @@ export class UploadFormHandler extends FormHandler {
 
   /**
    * Initialize Flatpickr on all date/datetime fields
-   * Must be called AFTER buildInitialFields() so DOM elements exist
+   * Must be called AFTER buildFields() so DOM elements exist
    */
   initializeFlatpickrFields() {
     // Date of Occurrence field (required, past dates only)
