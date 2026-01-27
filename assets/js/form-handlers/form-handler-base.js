@@ -33,43 +33,50 @@ export class FormHandler {
   }
 
   /**
-   * Initialize the form handler
+   * Initialize the form handler using Template Method Pattern
    *
-   * TODO: Tech Debt - Initialization Order Issue
-   * The init() method is called by the constructor before subclass constructors
-   * can build dynamic fields. This means:
-   * - setupKeyboardProgressBarFix() runs before dynamic fields exist
-   * - configureAutofill() runs before dynamic fields exist
-   *
-   * Current workaround: Subclasses re-call these methods after buildInitialFields().
-   *
-   * Future improvement: Consider refactoring to a two-phase initialization:
-   * - Phase 1 (preInit): Setup that doesn't depend on DOM fields
-   * - Phase 2 (postInit): Setup that requires all fields to exist
-   *
-   * Or use an event/hook pattern where subclasses can signal when fields are ready.
+   * Initialization sequence:
+   * 1. Pre-field setup (no field dependencies)
+   * 2. Build fields via hook (subclasses implement)
+   * 3. Post-field setup (field-dependent configuration)
+   * 4. Load saved state
+   * 5. Update UI
    */
   init() {
-    // Save session start
+    // ===== PHASE 1: Pre-field setup (no dependencies) =====
     saveSessionStart();
 
-    // Disable browser autofill if feature flag is off
+    // ===== PHASE 2: Build fields via Template Method hook =====
+    // Subclasses override this to create dynamic fields
+    this.buildFields();
+
+    // ===== PHASE 3: Field-dependent setup =====
+    // These methods require all fields to exist in the DOM
     this.configureAutofill();
-
-    // Set up event listeners
     this.setupEventListeners();
-
-    // Set up iOS keyboard fix for progress bar
     this.setupKeyboardProgressBarFix();
 
-    // Load officer info if exists
+    // ===== PHASE 4: Load saved state =====
     this.loadOfficerInfoIfExists();
-
-    // Load draft if exists
     this.loadDraftIfExists();
 
-    // Initialize progress bar
+    // ===== PHASE 5: Update UI =====
     this.updateProgress();
+  }
+
+  /**
+   * Hook for subclasses to build dynamic form fields
+   * Called during initialization, BEFORE field-dependent setup runs
+   *
+   * Override this in subclasses that build fields dynamically via FormFieldBuilder.
+   * The base implementation is empty for backward compatibility with forms
+   * that use static HTML fields.
+   *
+   * @protected
+   */
+  buildFields() {
+    // Default: no-op for backward compatibility
+    // Subclasses override to build dynamic fields
   }
 
   /**
