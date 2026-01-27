@@ -47,11 +47,11 @@ FormHandler (base class - form-handler-base.js)
 
 Each form handler:
 1. Extends `FormHandler` base class
-2. Calls `super(formId)` which runs `init()` (before subclass fields exist)
-3. Builds dynamic fields via `FormFieldBuilder`
-4. Re-applies iOS keyboard fix and autofill prevention after field creation
+2. Overrides `buildFields()` hook to create dynamic fields
+3. Base class `init()` calls `buildFields()` THEN runs field-dependent setup
+4. Uses `FormFieldBuilder` static methods to create form elements
 
-**Known Tech Debt**: Base `init()` runs before subclass constructors build dynamic fields. Subclasses must re-call `setupKeyboardProgressBarFix()` and `configureAutofill()` after `buildInitialFields()`.
+**Template Method Pattern**: Base class orchestrates initialization sequence via `buildFields()` hook. Subclasses implement the hook - no workaround re-calls needed.
 
 ### FormFieldBuilder (form-field-builder.js)
 
@@ -110,3 +110,43 @@ tests/
 - `pdfmake` - PDF generation (in `/lib`)
 - `flatpickr` - Date/time pickers (in `/lib`)
 - Supabase integration (toggleable via `CONFIG.USE_SUPABASE`)
+
+## Deployment
+
+### Build & Deploy Steps
+
+```powershell
+# 1. Run build script (creates deploy/ folder with PHP files)
+.\scripts\build-php.ps1
+
+# 2. Upload to VM via SCP
+scp -P 2211 -r "D:\Work Coding Projects\Submission Forms for FAT\supa_base_start_fresh_form_submission_form_app_20250623\deploy\*" fvuadmin@72.142.23.10:/var/www/fvu/
+
+# 3. SSH into VM
+ssh -p 2211 fvuadmin@72.142.23.10
+
+# 4. From VM, SFTP to third-party server
+sftp -P 2109 peloton@3.96.182.77
+
+# 5. In SFTP, upload files
+cd /ext/intake
+put -r /var/www/fvu/*
+exit
+```
+
+### Credentials
+
+| Server | User | Password |
+|--------|------|----------|
+| VM SSH (72.142.23.10:2211) | fvuadmin | `VideoEdit$` or `VideoUnit!` |
+| Third-party SFTP (3.96.182.77:2109) | peloton | `UPLOAD-$$2025simple` |
+
+### Quick Commands
+
+| Task | Command |
+|------|---------|
+| SSH into VM | `ssh -p 2211 fvuadmin@72.142.23.10` |
+| Upload to VM | `scp -P 2211 -r "deploy/*" fvuadmin@72.142.23.10:/var/www/fvu/` |
+| SFTP to third-party | `sftp -P 2109 peloton@3.96.182.77` |
+| Check nginx | `sudo systemctl status nginx` |
+| Reload nginx | `sudo systemctl reload nginx` |
