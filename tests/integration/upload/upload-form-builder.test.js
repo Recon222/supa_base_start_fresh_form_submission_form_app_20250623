@@ -698,7 +698,7 @@ describe('Upload Form Builder', () => {
  * Summary of Upload Form Builder Requirements
  *
  * UploadFormHandler New Methods:
- * - buildInitialFields() - Builds all form sections
+ * - buildFields() - Builds all form sections (Template Method Pattern)
  * - buildEvidenceSection() - Evidence info fields
  * - buildInvestigatorSection() - Reuses createInvestigatorSection()
  * - buildFirstLocationVideoGroup() - First location (index 0)

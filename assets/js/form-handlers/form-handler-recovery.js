@@ -17,18 +17,12 @@ import { CONFIG } from '../config.js';
  */
 export class RecoveryFormHandler extends FormHandler {
   constructor(formId) {
+    // Call parent constructor - this triggers init() which calls buildFields()
+    // Note: buildFields() initializes flatpickrInstances
     super(formId);
 
-    // Store Flatpickr instances for programmatic access
-    this.flatpickrInstances = {};
-
-    // Build initial form fields via FormFieldBuilder
-    this.buildInitialFields();
-
-    // Setup recovery-specific listeners
+    // Post-initialization setup (things that need buildFields() to have run)
     this.setupRecoverySpecificListeners();
-
-    // Initialize Flatpickr on initial fields (AFTER fields are built)
     this.initializeFlatpickrFields();
 
     // Cleanup Flatpickr instances when page unloads
@@ -36,14 +30,24 @@ export class RecoveryFormHandler extends FormHandler {
   }
 
   // ===========================================================================
-  // INITIAL FIELD BUILDING
+  // FIELD BUILDING (Template Method Pattern)
   // ===========================================================================
 
   /**
-   * Build all initial form fields via FormFieldBuilder
-   * Creates sections for case, investigator, location, first DVR, and incident
+   * Build all form fields dynamically via FormFieldBuilder
+   * Implements the Template Method hook from FormHandler base class
+   *
+   * Creates sections for case, investigator, location, first DVR, and incident.
+   * Called by base class init() BEFORE field-dependent setup (autofill, keyboard fix, etc.)
+   *
+   * @override
    */
-  buildInitialFields() {
+  buildFields() {
+    // Initialize instance properties used by this handler
+    // Must be done here because buildFields() is called by super() before
+    // the subclass constructor body runs (JavaScript class semantics)
+    this.flatpickrInstances = {};
+
     this.buildCaseSection();
     this.buildInvestigatorSection();
     this.buildLocationSection();
@@ -53,13 +57,8 @@ export class RecoveryFormHandler extends FormHandler {
     // Attach validation listeners to all built fields
     this.attachValidationListeners(this.form);
 
-    // Re-apply iOS keyboard fix for dynamically created fields
-    this.setupKeyboardProgressBarFix();
-
-    // Apply autofill prevention to newly created dynamic fields
-    if (CONFIG.FEATURES.BROWSER_AUTOFILL === false) {
-      this.applyAutofillPrevention(this.form.querySelectorAll('.form-control'));
-    }
+    // NOTE: setupKeyboardProgressBarFix() and configureAutofill() are now
+    // called by the base class init() AFTER this method returns
   }
 
   /**
@@ -413,7 +412,7 @@ export class RecoveryFormHandler extends FormHandler {
 
   /**
    * Initialize Flatpickr on all date/datetime fields
-   * Must be called AFTER buildInitialFields() so DOM elements exist
+   * Must be called AFTER buildFields() so DOM elements exist
    */
   initializeFlatpickrFields() {
     // Initialize Flatpickr for the first DVR group

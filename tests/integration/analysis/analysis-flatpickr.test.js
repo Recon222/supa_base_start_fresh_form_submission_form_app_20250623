@@ -273,14 +273,15 @@ describe('Analysis Form Flatpickr Integration', () => {
   describe('Form Handler Flatpickr Integration', () => {
     describe('Initialization timing', () => {
       it('should initialize Flatpickr after form fields are built', () => {
-        // The form handler should call initializeFlatpickrFields() after buildInitialFields()
+        // The form handler should call initializeFlatpickrFields() after buildFields()
+        // Note: buildFields() is called by base class init() via Template Method Pattern
         const expectedMethodOrder = [
-          'buildInitialFields',
+          'buildFields',
           'initializeFlatpickrFields'
         ];
 
         // This documents the expected initialization order
-        expect(expectedMethodOrder[0]).toBe('buildInitialFields');
+        expect(expectedMethodOrder[0]).toBe('buildFields');
         expect(expectedMethodOrder[1]).toBe('initializeFlatpickrFields');
       });
     });
@@ -443,7 +444,7 @@ describe('Analysis Form Flatpickr Integration', () => {
  * ```
  *
  * Form Handler Integration:
- * - Initialize after buildInitialFields()
+ * - Initialize after buildFields() (called via Template Method Pattern)
  * - Store instance in this.flatpickrInstances.recordingDate
  * - Call validateSingleField on change
  * - Handle draft save/restore with setDate() and clear()

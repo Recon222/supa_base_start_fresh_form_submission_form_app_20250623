@@ -39,9 +39,9 @@ describe('Recovery Form Builder', () => {
   });
 
   // ===========================================================================
-  // RecoveryFormHandler.buildInitialFields()
+  // RecoveryFormHandler.buildFields() - Template Method Pattern
   // ===========================================================================
-  describe('RecoveryFormHandler.buildInitialFields()', () => {
+  describe('RecoveryFormHandler.buildFields()', () => {
     let RecoveryFormHandler;
 
     beforeEach(async () => {
@@ -50,8 +50,8 @@ describe('Recovery Form Builder', () => {
     });
 
     describe('Method existence', () => {
-      it('should have buildInitialFields method on RecoveryFormHandler prototype', () => {
-        expect(typeof RecoveryFormHandler.prototype.buildInitialFields).toBe('function');
+      it('should have buildFields method on RecoveryFormHandler prototype (Template Method Pattern)', () => {
+        expect(typeof RecoveryFormHandler.prototype.buildFields).toBe('function');
       });
     });
 
