@@ -412,7 +412,7 @@ a:hover {
   backdrop-filter: var(--glass-blur);
   border: var(--input-border-width) solid var(--border-color);
   border-radius: var(--border-radius-lg);
-  padding: var(--space-2xl);
+  padding: var(--space-xl);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   flex: 1; /* Take up full height of parent */
   display: flex; /* Make card-face flex to control content layout */
