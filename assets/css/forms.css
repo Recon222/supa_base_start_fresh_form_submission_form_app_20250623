@@ -174,9 +174,9 @@
   --surface-elevated: #ffffff;
   --text-primary: #212529;
   --text-secondary: #6c757d;
-  --border-color: rgba(0, 0, 0, 0.1);
-  --glass-bg: rgba(0, 0, 0, 0.02);
-  --glass-bg-hover: rgba(0, 0, 0, 0.04);
+  --border-color: rgba(0, 0, 0, 0.15);
+  --glass-bg: rgba(0, 0, 0, 0.03);
+  --glass-bg-hover: rgba(0, 0, 0, 0.06);
 }
 
 /* Light theme validation overrides */
@@ -205,6 +205,17 @@
 [data-theme="light"] select.form-control option:hover,
 [data-theme="light"] select.form-control option:checked {
   background-color: var(--surface-dark);
+}
+
+/* Light theme card improvements */
+[data-theme="light"] .card-face {
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .form-card:hover .card-face {
+  border-color: rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 /* ========================================
