@@ -431,8 +431,8 @@
       grid-template-columns: auto 1fr auto;
       align-items: center;
       justify-items: center;
-      gap: 4rem;
-      margin-bottom: 2rem;
+      gap: 2rem;
+      margin-bottom: 1rem;
     }
 
     /* On desktop, logos-row wrapper is invisible - logos act as direct grid items */
@@ -452,20 +452,34 @@
     }
 
     .header-logo {
-      width: 300px;
-      height: 300px;
+      width: 200px;
+      height: 200px;
       flex-shrink: 0;
+    }
+
+    /* Hide subtitle on desktop */
+    .hero-content > .text-muted {
+      display: none;
+    }
+
+    /* Add space at top for transparent header overlay */
+    .hero-section {
+      padding-top: 70px;
     }
 
     /* Tablet and small desktop */
     @media (max-width: 992px) {
       .logo-header {
-        gap: 2rem;
+        gap: 1.5rem;
       }
 
       .header-logo {
-        width: 200px;
-        height: 200px;
+        width: 160px;
+        height: 160px;
+      }
+
+      .hero-section {
+        padding-top: 60px;
       }
     }
 
@@ -645,7 +659,7 @@
   <!-- Main Content -->
   <main class="hero-section">
     <div class="container">
-      <div class="hero-content" style="margin-top: -2rem;">
+      <div class="hero-content">
         <!-- Logo Header Section -->
         <div class="logo-header">
           <div class="logos-row">
@@ -655,7 +669,7 @@
           <h2 class="hero-title" style="margin: 0;">FVU Request Portal</h2>
         </div>
         
-        <p class="text-muted" style="margin-bottom: 1.5rem; margin-top: 4rem;">Choose the appropriate form for your video evidence needs</p>
+        <p class="text-muted subtitle">Choose the appropriate form for your video evidence needs</p>
         
         <!-- Form Cards Grid - The 3D cards you love! -->
         <div class="form-cards">
