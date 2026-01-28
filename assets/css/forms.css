@@ -131,7 +131,7 @@
   --anim-fade-distance: 20px;
 
   /* Layout Values */
-  --card-min-width: 350px;
+  --card-min-width: 280px;
   --card-perspective: 1000px;
   --card-rotate-x: 5deg;
   --card-rotate-y: -5deg;
@@ -378,9 +378,9 @@ a:hover {
 .form-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(var(--card-min-width), 1fr));
-  gap: var(--space-2xl);
+  gap: var(--space-lg);
   max-width: var(--container-max-width);
-  margin: var(--space-3xl) auto 0;
+  margin: var(--space-2xl) auto 0;
   align-items: stretch; /* Ensure all cards stretch to same height */
 }
 
@@ -412,7 +412,7 @@ a:hover {
   backdrop-filter: var(--glass-blur);
   border: var(--input-border-width) solid var(--border-color);
   border-radius: var(--border-radius-lg);
-  padding: var(--space-2xl);
+  padding: var(--space-md) var(--space-xl) var(--space-xl);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   flex: 1; /* Take up full height of parent */
   display: flex; /* Make card-face flex to control content layout */
