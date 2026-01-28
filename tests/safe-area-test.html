@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" style="background-color: #0a0a0a;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>iOS Safe Area Test - FVU</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0a0a0a;
+      color: white;
+      min-height: 100dvh;
+      min-height: 100vh;
+      position: relative;
+      padding-right: env(safe-area-inset-right, 0);
+      padding-bottom: env(safe-area-inset-bottom, 0);
+      padding-left: env(safe-area-inset-left, 0);
+    }
+
+    /* Fixed header - respects safe area */
+    .test-header {
+      position: fixed;
+      top: env(safe-area-inset-top, 0);
+      left: env(safe-area-inset-left, 0);
+      right: env(safe-area-inset-right, 0);
+      background: rgba(27, 58, 107, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 1rem;
+      z-index: 100;
+      border-bottom: 2px solid #FFD100;
+    }
+
+    /* Body content accounts for header + safe area */
+    .content {
+      padding-top: calc(80px + env(safe-area-inset-top, 0));
+      padding-left: 1rem;
+      padding-right: 1rem;
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0));
+    }
+
+    .test-section {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      color: #FFD100;
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      color: #FFD100;
+      margin-bottom: 1rem;
+    }
+
+    .value {
+      font-family: 'Courier New', monospace;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin: 0.5rem 0;
+      word-break: break-all;
+    }
+
+    .label {
+      color: #9ca3af;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .indicator {
+      width: 100%;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin: 0.5rem 0;
+    }
+
+    .top-indicator {
+      background: linear-gradient(to bottom, #dc3545, transparent);
+      border: 2px solid #dc3545;
+    }
+
+    .bottom-indicator {
+      background: linear-gradient(to top, #28a745, transparent);
+      border: 2px solid #28a745;
+    }
+
+    .side-indicator {
+      background: linear-gradient(to right, #ffc107, transparent);
+      border: 2px solid #ffc107;
+    }
+
+    .status-good {
+      color: #28a745;
+    }
+
+    .status-bad {
+      color: #dc3545;
+    }
+
+    /* Fixed bottom bar test */
+    .bottom-bar {
+      position: fixed;
+      bottom: env(safe-area-inset-bottom, 0);
+      left: env(safe-area-inset-left, 0);
+      right: env(safe-area-inset-right, 0);
+      background: rgba(255, 209, 0, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 1rem;
+      color: #1B3A6B;
+      font-weight: bold;
+      text-align: center;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-header">
+    <h1>iOS Safe Area Test</h1>
+    <p style="font-size: 0.9rem; opacity: 0.8;">This header should NEVER be under the notch/Dynamic Island</p>
+  </div>
+
+  <div class="content">
+    <div class="test-section">
+      <h2>Safe Area Inset Values</h2>
+
+      <div class="label">Top (Notch/Dynamic Island):</div>
+      <div class="value" id="safe-top">Calculating...</div>
+
+      <div class="label">Bottom (Home Indicator):</div>
+      <div class="value" id="safe-bottom">Calculating...</div>
+
+      <div class="label">Left (Landscape Notch):</div>
+      <div class="value" id="safe-left">Calculating...</div>
+
+      <div class="label">Right (Landscape Notch):</div>
+      <div class="value" id="safe-right">Calculating...</div>
+    </div>
+
+    <div class="test-section">
+      <h2>Device Information</h2>
+
+      <div class="label">User Agent:</div>
+      <div class="value" id="user-agent">Calculating...</div>
+
+      <div class="label">Screen Size:</div>
+      <div class="value" id="screen-size">Calculating...</div>
+
+      <div class="label">Viewport Size:</div>
+      <div class="value" id="viewport-size">Calculating...</div>
+
+      <div class="label">Device Pixel Ratio:</div>
+      <div class="value" id="dpr">Calculating...</div>
+
+      <div class="label">Orientation:</div>
+      <div class="value" id="orientation">Calculating...</div>
+
+      <div class="label">Standalone Mode (PWA):</div>
+      <div class="value" id="standalone">Calculating...</div>
+    </div>
+
+    <div class="test-section">
+      <h2>Visual Indicators</h2>
+
+      <p style="margin-bottom: 1rem; opacity: 0.8;">
+        These colored bars show where safe areas should be. Rotate device to test landscape.
+      </p>
+
+      <div class="top-indicator">
+        TOP SAFE AREA
+      </div>
+
+      <div class="side-indicator">
+        LEFT/RIGHT SAFE AREAS (visible in landscape)
+      </div>
+
+      <div class="bottom-indicator">
+        BOTTOM SAFE AREA
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>Test Results</h2>
+
+      <div class="label">Viewport Fit Coverage:</div>
+      <div class="value">
+        <span id="viewport-fit-status">Checking...</span>
+      </div>
+
+      <div class="label">Safe Area Support:</div>
+      <div class="value">
+        <span id="safe-area-status">Checking...</span>
+      </div>
+
+      <div class="label">Dynamic Viewport Height (dvh):</div>
+      <div class="value">
+        <span id="dvh-status">Checking...</span>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>Instructions</h2>
+      <ol style="line-height: 1.8; opacity: 0.9;">
+        <li>Add this page to your home screen as a PWA</li>
+        <li>Launch from home screen (not Safari)</li>
+        <li>Verify header text is fully visible (not under notch)</li>
+        <li>Verify bottom yellow bar sits above home indicator</li>
+        <li>Rotate to landscape - check notch doesn't overlap content</li>
+        <li>Take screenshots and compare iOS 18.1 vs 18.2</li>
+      </ol>
+    </div>
+
+    <!-- Spacer for bottom bar -->
+    <div style="height: 100px;"></div>
+  </div>
+
+  <div class="bottom-bar">
+    This bar should sit ABOVE the home indicator
+  </div>
+
+  <script>
+    function updateValues() {
+      // Get computed safe area values
+      const root = document.documentElement;
+      const computedStyle = getComputedStyle(root);
+
+      // Safe area insets
+      const safeTop = computedStyle.getPropertyValue('--safe-area-inset-top') ||
+                      getComputedStyle(document.body).getPropertyValue('padding-top') || '0px';
+      const safeBottom = computedStyle.getPropertyValue('--safe-area-inset-bottom') || '0px';
+      const safeLeft = computedStyle.getPropertyValue('--safe-area-inset-left') || '0px';
+      const safeRight = computedStyle.getPropertyValue('--safe-area-inset-right') || '0px';
+
+      document.getElementById('safe-top').textContent = safeTop || 'Not available';
+      document.getElementById('safe-bottom').textContent = safeBottom || 'Not available';
+      document.getElementById('safe-left').textContent = safeLeft || 'Not available';
+      document.getElementById('safe-right').textContent = safeRight || 'Not available';
+
+      // Device info
+      document.getElementById('user-agent').textContent = navigator.userAgent;
+      document.getElementById('screen-size').textContent = `${screen.width}x${screen.height}`;
+      document.getElementById('viewport-size').textContent = `${window.innerWidth}x${window.innerHeight}`;
+      document.getElementById('dpr').textContent = window.devicePixelRatio;
+      document.getElementById('orientation').textContent = screen.orientation?.type ||
+        (window.innerWidth > window.innerHeight ? 'landscape' : 'portrait');
+
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                          window.navigator.standalone ||
+                          document.referrer.includes('android-app://');
+      document.getElementById('standalone').innerHTML = isStandalone ?
+        '<span class="status-good">✓ Yes (PWA Mode)</span>' :
+        '<span class="status-bad">✗ No (Browser Mode)</span>';
+
+      // Test results
+      const viewportMeta = document.querySelector('meta[name="viewport"]');
+      const hasViewportFit = viewportMeta?.content.includes('viewport-fit=cover');
+      document.getElementById('viewport-fit-status').innerHTML = hasViewportFit ?
+        '<span class="status-good">✓ viewport-fit=cover is set</span>' :
+        '<span class="status-bad">✗ viewport-fit=cover is missing</span>';
+
+      // Check if safe area is actually working
+      const hasSafeAreaSupport = safeTop !== '0px' || safeBottom !== '0px';
+      document.getElementById('safe-area-status').innerHTML = hasSafeAreaSupport ?
+        '<span class="status-good">✓ Safe areas detected</span>' :
+        '<span class="status-bad">⚠ No safe areas detected (may be normal on non-notch devices)</span>';
+
+      // Check dvh support
+      const testDiv = document.createElement('div');
+      testDiv.style.height = '100dvh';
+      document.body.appendChild(testDiv);
+      const hasDvh = testDiv.style.height === '100dvh';
+      document.body.removeChild(testDiv);
+
+      document.getElementById('dvh-status').innerHTML = hasDvh ?
+        '<span class="status-good">✓ Dynamic viewport height supported</span>' :
+        '<span class="status-bad">✗ Dynamic viewport height not supported</span>';
+    }
+
+    // Update on load and orientation change
+    updateValues();
+    window.addEventListener('resize', updateValues);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(updateValues, 100);
+    });
+
+    // Update every second to catch any changes
+    setInterval(updateValues, 1000);
+  </script>
+</body>
+</html>

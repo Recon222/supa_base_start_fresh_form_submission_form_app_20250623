@@ -502,19 +502,18 @@
       /* Hero takes exactly viewport height */
       .hero-section {
         position: fixed !important; /* Take out of flow completely */
-        top: 0;
+        top: env(safe-area-inset-top, 0) !important; /* Start below notch/Dynamic Island */
         left: 0;
         right: 0;
         bottom: 0;
-        height: 100dvh !important;
-        height: 100vh !important;
+        /* Use dvh (dynamic viewport height) for iOS compatibility */
+        height: calc(100dvh - env(safe-area-inset-top, 0)) !important;
         min-height: auto !important; /* Override forms.css min-height */
-        max-height: 100dvh !important;
-        max-height: 100vh !important;
+        max-height: calc(100dvh - env(safe-area-inset-top, 0)) !important;
         display: grid !important;
         grid-template-rows: 1fr; /* Single row, container fills it */
         padding: 0 !important;
-        padding-top: env(safe-area-inset-top) !important; /* iOS notch */
+        padding-bottom: env(safe-area-inset-bottom, 0) !important; /* iOS home indicator */
         overflow: hidden !important;
       }
 
@@ -598,7 +597,9 @@
         scrollbar-width: none; /* Firefox */
         -ms-overflow-style: none; /* IE/Edge */
         padding: 0.5rem !important;
-        padding-bottom: calc(2rem + env(safe-area-inset-bottom)) !important; /* Space for last card + safe area */
+        padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0)) !important; /* Space for last card + safe area */
+        padding-left: env(safe-area-inset-left, 0.5rem) !important;
+        padding-right: env(safe-area-inset-right, 0.5rem) !important;
         margin: 0 !important;
         min-height: 0; /* Critical for grid overflow */
       }

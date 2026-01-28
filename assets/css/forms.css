@@ -3,6 +3,22 @@
  * Clean, organized, and maintainable
  * Location: /css/forms.css
  * Approx 450 lines - Well under our 500 line limit
+ *
+ * iOS PWA Safe Area Strategy (Updated 2026-01-28):
+ * =================================================
+ * This app uses Apple's safe-area-inset environment variables to handle:
+ * - iPhone notch (iPhone X, 11, 12, 13)
+ * - Dynamic Island (iPhone 14 Pro, 15 Pro, 16 Pro)
+ * - Home indicator bar at bottom
+ *
+ * Key Implementation Points:
+ * 1. viewport-fit=cover in HTML meta tag (enables full-screen coverage)
+ * 2. Fixed elements use top: env(safe-area-inset-top) NOT top: 0
+ * 3. Use 100dvh (dynamic viewport height) instead of 100vh for iOS 18+
+ * 4. All safe-area-inset calls include fallback: env(safe-area-inset-top, 0)
+ * 5. Body padding accounts for safe areas on all sides
+ *
+ * This ensures consistent layout across iOS 18.1, 18.2, and future point releases.
  */
 
 /* ========================================
@@ -206,8 +222,8 @@ html {
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
   overscroll-behavior-x: none;
-  /* Extend page height to account for iOS safe area (notch) */
-  min-height: calc(100% + env(safe-area-inset-top));
+  /* Extend page height to account for iOS safe area (notch/Dynamic Island) */
+  min-height: calc(100% + env(safe-area-inset-top, 0));
 }
 
 body {
@@ -216,15 +232,17 @@ body {
   line-height: 1.5;
   color: var(--text-primary);
   background-color: var(--bg-dark);
-  min-height: 100vh;
+  /* Use dvh (dynamic viewport height) for iOS compatibility with Dynamic Island */
+  min-height: 100dvh;
+  min-height: 100vh; /* Fallback for older browsers */
   position: relative;
   overflow-x: hidden;
   overscroll-behavior-x: none;
   /* iOS safe area padding for notch and home indicator */
   /* Note: padding-top handled in header.css with var(--header-height) */
-  padding-right: env(safe-area-inset-right);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  padding-left: env(safe-area-inset-left, 0);
 }
 
 /* ========================================

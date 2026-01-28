@@ -51,11 +51,11 @@ body {
   backdrop-filter: var(--glass-blur);
   border-bottom: var(--input-border-width) solid var(--border-color);
 
-  /* FIXED POSITIONING - stays locked at top, no rubber banding */
+  /* FIXED POSITIONING - stays locked at top, respecting iOS safe area */
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: env(safe-area-inset-top, 0); /* Start below notch/Dynamic Island */
+  left: env(safe-area-inset-left, 0);
+  right: env(safe-area-inset-right, 0);
   z-index: var(--z-sticky);
 
   /* Smooth transition when becoming scrolled */
