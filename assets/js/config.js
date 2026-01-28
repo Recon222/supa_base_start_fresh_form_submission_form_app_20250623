@@ -11,6 +11,13 @@ export const CONFIG = {
   API_ENDPOINT: 'https://homicidefvu.fatsystems.ca/rfs_request_process.php',
   API_TIMEOUT: 30000, // 30 seconds
 
+  // PWA Configuration
+  // These paths are environment-specific and will be updated by build script
+  PWA: {
+    SW_PATH: '/sw.js',           // Dev: /sw.js | Production: /ext/intake/sw.js
+    SW_SCOPE: '/',               // Dev: / | Production: /ext/intake/
+  },
+
   // Supabase Configuration
   USE_SUPABASE: true, // Toggle between Supabase and PHP endpoint
   SUPABASE_ENABLED: true,
