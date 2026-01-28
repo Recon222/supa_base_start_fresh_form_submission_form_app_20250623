@@ -1,10 +1,11 @@
 /**
  * Header Component
  * Reusable header for all form pages
- * Handles rendering, theme toggle, and draft button behavior
+ * Handles rendering and draft button behavior
+ * Note: Theme is managed on landing page, persists via localStorage
  */
 
-import { initTheme, setupThemeToggle } from './theme-manager.js';
+import { initTheme } from './theme-manager.js';
 
 /**
  * Generate header HTML and inject into the DOM
@@ -32,9 +33,6 @@ export function createHeader(formTitle) {
               <rect x="6" y="11" width="8" height="3" stroke="currentColor" stroke-width="1.5"/>
             </svg>
             <span class="draft-text">Auto-save active</span>
-          </button>
-          <button class="theme-toggle" id="theme-toggle">
-            🌓
           </button>
         </div>
       </div>
@@ -76,9 +74,8 @@ function injectHeader(formTitle) {
   const header = createHeader(formTitle);
   backgroundAnim.insertAdjacentElement('afterend', header);
 
-  // Initialize theme
+  // Initialize theme (persists from landing page setting)
   initTheme();
-  setupThemeToggle();
 }
 
 /**
