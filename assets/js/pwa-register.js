@@ -442,9 +442,5 @@ export function initPWA() {
   }
 }
 
-// Auto-initialize if this script is loaded directly
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initPWA);
-} else {
-  initPWA();
-}
+// Note: Auto-initialization removed to prevent double-init race conditions.
+// Each HTML page explicitly calls initPWA() when ready.
