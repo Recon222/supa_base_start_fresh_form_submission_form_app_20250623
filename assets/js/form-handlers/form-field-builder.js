@@ -539,6 +539,10 @@ export class FormFieldBuilder {
       maxDate: 'today' // Prevent future dates
     }));
 
+    // File Names (moved from Work Request section)
+    section.appendChild(this.createTextareaField('fileNames', 0, 'File Name(s)',
+      true, 'List the specific file names to be analyzed'));
+
     return section;
   }
 
@@ -557,10 +561,6 @@ export class FormFieldBuilder {
     // Job Required
     section.appendChild(this.createTextareaField('jobRequired', 0, 'What is the Job Required?',
       true, 'Describe what you need done with the video'));
-
-    // File Names
-    section.appendChild(this.createTextareaField('fileNames', 0, 'File Name(s)',
-      true, 'List the specific file names to be analyzed'));
 
     // Service Required (with Other conditional)
     section.appendChild(this.createSelectField('serviceRequired', 0, 'Service Required',
