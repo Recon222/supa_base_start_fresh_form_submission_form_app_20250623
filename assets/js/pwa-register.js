@@ -192,7 +192,7 @@ function createInstallButton() {
   // Try to insert into landing header first (index.html)
   const landingHeaderContent = document.querySelector('.landing-header-content');
   if (landingHeaderContent) {
-    landingHeaderContent.appendChild(button);
+    landingHeaderContent.insertBefore(button, landingHeaderContent.firstChild);
   } else {
     // Fallback: Try to insert into form page header
     const headerRight = document.querySelector('.header-right');

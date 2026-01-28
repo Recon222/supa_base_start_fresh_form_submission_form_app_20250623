@@ -656,7 +656,7 @@
     .landing-header-content {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       height: 60px;
       max-width: 1200px;
       margin: 0 auto;
@@ -812,10 +812,10 @@
   <!-- Desktop Transparent Header (hidden on mobile) -->
   <header class="landing-header">
     <div class="landing-header-content">
+      <!-- PWA install button will be inserted here by pwa-register.js -->
       <button id="landing-theme-toggle" class="landing-theme-toggle" aria-label="Toggle theme">
         <span class="theme-icon">🌙</span>
       </button>
-      <!-- PWA install button will be inserted here by pwa-register.js -->
     </div>
   </header>
 
