@@ -649,8 +649,8 @@
     }
 
     [data-theme="light"] .landing-header {
-      background: rgba(255, 255, 255, 0.7);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.85);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     }
 
     .landing-header-content {
@@ -770,6 +770,26 @@
       .mobile-theme-toggle {
         display: none;
       }
+    }
+
+    /* ========================================
+       LIGHT THEME OVERRIDES FOR LANDING PAGE
+       ======================================== */
+    [data-theme="light"] html {
+      background-color: #f8f9fa !important;
+    }
+
+    [data-theme="light"] body {
+      background-color: #f8f9fa !important;
+    }
+
+    [data-theme="light"] .subtitle {
+      color: #6c757d !important;
+    }
+
+    /* Ensure background animation doesn't interfere */
+    [data-theme="light"] .background-animation {
+      background-color: #f8f9fa;
     }
   </style>
 </head>
