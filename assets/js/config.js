@@ -161,7 +161,7 @@ export const CONFIG = {
 
   // City Options
   CITY_OPTIONS: [
-    { value: '', text: 'Select city' },
+    { value: '_placeholder_', text: 'Select city' },
     { value: 'Brampton', text: 'Brampton' },
     { value: 'Mississauga', text: 'Mississauga' },
     { value: 'Toronto', text: 'Toronto' },
@@ -170,7 +170,7 @@ export const CONFIG = {
 
   // Media Type Options
   MEDIA_TYPE_OPTIONS: [
-    { value: '', text: 'Select media type' },
+    { value: '_placeholder_', text: 'Select media type' },
     { value: 'USB', text: 'USB' },
     { value: 'Hard Drive', text: 'Hard Drive' },
     { value: 'SD Card', text: 'SD Card' },
@@ -180,14 +180,14 @@ export const CONFIG = {
 
   // Analysis Form Options
   OFFENCE_TYPE_OPTIONS: [
-    { value: '', text: 'Select...' },
+    { value: '_placeholder_', text: 'Select...' },
     { value: 'Homicide', text: 'Homicide' },
     { value: 'Missing Person', text: 'Missing Person' },
     { value: 'Other', text: 'Other' }
   ],
 
   VIDEO_LOCATION_OPTIONS: [
-    { value: '', text: 'Select...' },
+    { value: '_placeholder_', text: 'Select...' },
     { value: 'NAS Storage', text: 'NAS Storage' },
     { value: 'Evidence.com', text: 'Evidence.com' },
     { value: 'Locker', text: 'Locker' },
@@ -199,7 +199,7 @@ export const CONFIG = {
   ],
 
   SERVICE_REQUIRED_OPTIONS: [
-    { value: '', text: 'Select...' },
+    { value: '_placeholder_', text: 'Select...' },
     { value: 'Video/Image Clarification', text: 'Video/Image Clarification' },
     { value: 'Audio Clarification', text: 'Audio Clarification' },
     { value: 'Comparator Analysis', text: 'Comparator Analysis' },

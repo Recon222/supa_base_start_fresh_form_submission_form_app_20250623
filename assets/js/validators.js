@@ -15,14 +15,17 @@ import { CONFIG } from './config.js';
 export function validateField(value, fieldName, required = false) {
   // Trim the value
   const trimmedValue = value?.trim() || '';
-  
+
+  // Treat _placeholder_ as empty
+  const isEmpty = !trimmedValue || trimmedValue === '_placeholder_';
+
   // Check required
-  if (required && !trimmedValue) {
+  if (required && isEmpty) {
     return CONFIG.MESSAGES.REQUIRED_FIELD;
   }
-  
+
   // If not required and empty, it's valid
-  if (!trimmedValue) {
+  if (isEmpty) {
     return null;
   }
   
@@ -185,38 +188,41 @@ export function validateDateRange(startTime, endTime) {
  */
 export function validateConditionalFields(formData) {
   const errors = {};
-  
+
+  // Helper function to check if value is empty or placeholder
+  const isEmpty = (value) => !value?.trim() || value.trim() === '_placeholder_';
+
   // Check media type "Other"
-  if (formData.mediaType === 'Other' && !formData.mediaTypeOther?.trim()) {
+  if (formData.mediaType === 'Other' && isEmpty(formData.mediaTypeOther)) {
     errors.mediaTypeOther = CONFIG.MESSAGES.MEDIA_OTHER_REQUIRED;
   }
-  
+
   // Check city "Other"
-  if (formData.city === 'Other' && !formData.cityOther?.trim()) {
+  if (formData.city === 'Other' && isEmpty(formData.cityOther)) {
     errors.cityOther = CONFIG.MESSAGES.CITY_OTHER_REQUIRED;
   }
-  
+
   // Check time offset if time is not correct
-  if (formData.isTimeDateCorrect === 'No' && !formData.timeOffset?.trim()) {
+  if (formData.isTimeDateCorrect === 'No' && isEmpty(formData.timeOffset)) {
     errors.timeOffset = CONFIG.MESSAGES.TIME_OFFSET_REQUIRED;
   }
-  
+
   // Analysis form specific conditionals
   // Check offence type "Other"
-  if (formData.offenceType === 'Other' && !formData.offenceTypeOther?.trim()) {
+  if (formData.offenceType === 'Other' && isEmpty(formData.offenceTypeOther)) {
     errors.offenceTypeOther = CONFIG.MESSAGES.OFFENCE_OTHER_REQUIRED;
   }
-  
+
   // Check video location "Other"
-  if (formData.videoLocation === 'Other' && !formData.videoLocationOther?.trim()) {
+  if (formData.videoLocation === 'Other' && isEmpty(formData.videoLocationOther)) {
     errors.videoLocationOther = CONFIG.MESSAGES.VIDEO_LOCATION_OTHER_REQUIRED;
   }
-  
+
   // Check service required "Other"
-  if (formData.serviceRequired === 'Other' && !formData.serviceRequiredOther?.trim()) {
+  if (formData.serviceRequired === 'Other' && isEmpty(formData.serviceRequiredOther)) {
     errors.serviceRequiredOther = CONFIG.MESSAGES.SERVICE_OTHER_REQUIRED;
   }
-  
+
   return errors;
 }
 
@@ -227,27 +233,30 @@ export function validateConditionalFields(formData) {
  */
 export function validateLocations(locations) {
   const errors = {};
-  
+
+  // Helper function to check if value is empty or placeholder
+  const isEmpty = (value) => !value?.trim() || value.trim() === '_placeholder_';
+
   locations.forEach((location, index) => {
     // Address is required
-    if (!location.locationAddress?.trim()) {
+    if (isEmpty(location.locationAddress)) {
       if (!errors[index]) errors[index] = {};
       errors[index].locationAddress = CONFIG.MESSAGES.REQUIRED_FIELD;
     }
-    
+
     // City is required
-    if (!location.city?.trim()) {
+    if (isEmpty(location.city)) {
       if (!errors[index]) errors[index] = {};
       errors[index].city = CONFIG.MESSAGES.REQUIRED_FIELD;
     }
-    
+
     // If city is "Other", cityOther is required
-    if (location.city === 'Other' && !location.cityOther?.trim()) {
+    if (location.city === 'Other' && isEmpty(location.cityOther)) {
       if (!errors[index]) errors[index] = {};
       errors[index].cityOther = CONFIG.MESSAGES.CITY_OTHER_REQUIRED;
     }
   });
-  
+
   return errors;
 }
 
@@ -259,10 +268,10 @@ export function validateLocations(locations) {
 export function calculateFormCompletion(form) {
   const requiredFields = form.querySelectorAll('[required]');
   let filledCount = 0;
-  
+
   requiredFields.forEach(field => {
     const value = field.value?.trim();
-    
+
     // Special handling for radio buttons
     if (field.type === 'radio') {
       const radioGroup = form.querySelectorAll(`[name="${field.name}"]`);
@@ -270,7 +279,7 @@ export function calculateFormCompletion(form) {
       if (isChecked) {
         filledCount++;
       }
-    } else if (value) {
+    } else if (value && value !== '_placeholder_') {
       filledCount++;
     }
   });

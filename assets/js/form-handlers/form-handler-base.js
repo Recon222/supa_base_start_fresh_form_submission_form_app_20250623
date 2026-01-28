@@ -313,14 +313,9 @@ export class FormHandler {
     // Reset button
     this.form.addEventListener('reset', (e) => this.handleReset(e));
 
-    // Field validation on blur
+    // Field validation on blur only
     this.form.querySelectorAll('.form-control').forEach(field => {
       field.addEventListener('blur', () => this.validateSingleField(field));
-
-      // Real-time validation for certain fields
-      if (field.type === 'tel' || field.name === CONFIG.FIELD_NAMES.OFFICER_EMAIL) {
-        field.addEventListener('input', debounce(() => this.validateSingleField(field), 500));
-      }
     });
 
     // Track first input to switch button state immediately

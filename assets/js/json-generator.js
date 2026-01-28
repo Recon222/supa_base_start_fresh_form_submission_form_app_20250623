@@ -36,17 +36,17 @@ export function generateJSON(formData, formType) {
  */
 function cleanFormData(formData) {
   const cleaned = {};
-  
+
   Object.entries(formData).forEach(([key, value]) => {
     // Skip internal fields
     if (key.startsWith('_') || key === 'formType') {
       return;
     }
-    
-    // Convert empty strings to null
-    cleaned[key] = value === '' ? null : value;
+
+    // Convert empty strings and placeholder values to null
+    cleaned[key] = (value === '' || value === '_placeholder_') ? null : value;
   });
-  
+
   return cleaned;
 }
 
