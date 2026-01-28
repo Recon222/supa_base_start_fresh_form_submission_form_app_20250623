@@ -106,8 +106,13 @@ if (Test-Path $ConfigPath) {
     # Set USE_SUPABASE to false
     $configContent = $configContent -replace 'USE_SUPABASE:\s*true', 'USE_SUPABASE: false'
 
+    # Update PWA paths for production
+    $configContent = $configContent -replace "SW_PATH: '/sw\.js'", "SW_PATH: '/ext/intake/sw.js'"
+    $configContent = $configContent -replace "SW_SCOPE: '/'", "SW_SCOPE: '/ext/intake/'"
+
     Set-Content -Path $ConfigPath -Value $configContent -NoNewline
     Write-Host "  [OK] USE_SUPABASE set to false" -ForegroundColor Green
+    Write-Host "  [OK] PWA paths updated for production" -ForegroundColor Green
 }
 
 # Remove supabase import from api-client.js
