@@ -126,11 +126,18 @@ scp -P 2211 -r "D:\Work Coding Projects\Submission Forms for FAT\supa_base_start
 ssh -p 2211 fvuadmin@72.142.23.10
 
 # 4. From VM, SFTP to third-party server
-sftp -P 2109 peloton@3.96.182.77
+sftp -P 2109 peeluploader@3.96.182.77
 
 # 5. In SFTP, upload files
-cd /ext/intake
-put -r /var/www/fvu/*
+cd intake
+put /var/www/fvu/index.php
+put /var/www/fvu/upload.php
+put /var/www/fvu/analysis.php
+put /var/www/fvu/recovery.php
+put /var/www/fvu/manifest.json
+put /var/www/fvu/sw.js
+put -r /var/www/fvu/lib
+put -r /var/www/fvu/assets
 exit
 ```
 
@@ -139,7 +146,7 @@ exit
 | Server | User | Password |
 |--------|------|----------|
 | VM SSH (72.142.23.10:2211) | fvuadmin | `VideoEdit$` or `VideoUnit!` |
-| Third-party SFTP (3.96.182.77:2109) | peloton | `UPLOAD-$$2025simple` |
+| Third-party SFTP (3.96.182.77:2109) | peeluploader | `UPLOAD-$$2025simple` |
 
 ### Quick Commands
 
@@ -147,6 +154,6 @@ exit
 |------|---------|
 | SSH into VM | `ssh -p 2211 fvuadmin@72.142.23.10` |
 | Upload to VM | `scp -P 2211 -r "deploy/*" fvuadmin@72.142.23.10:/var/www/fvu/` |
-| SFTP to third-party | `sftp -P 2109 peloton@3.96.182.77` |
+| SFTP to third-party | `sftp -P 2109 peeluploader@3.96.182.77` |
 | Check nginx | `sudo systemctl status nginx` |
 | Reload nginx | `sudo systemctl reload nginx` |
