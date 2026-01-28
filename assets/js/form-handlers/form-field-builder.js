@@ -558,16 +558,16 @@ export class FormFieldBuilder {
     }, 'Work Request');
     section.appendChild(heading);
 
-    // Job Required
-    section.appendChild(this.createTextareaField('jobRequired', 0, 'What is the Job Required?',
-      true, 'Describe what you need done with the video'));
-
-    // Service Required (with Other conditional)
+    // Service Required (with Other conditional) - moved to top
     section.appendChild(this.createSelectField('serviceRequired', 0, 'Service Required',
       CONFIG.SERVICE_REQUIRED_OPTIONS, true));
 
     // Service Required Other (hidden by default)
     section.appendChild(this.createOtherField('serviceRequiredOther', 0, 'Service Type'));
+
+    // Job Required
+    section.appendChild(this.createTextareaField('jobRequired', 0, 'What is the Job Required?',
+      true, 'Describe what you need done with the video'));
 
     // Request Details
     section.appendChild(this.createTextareaField('requestDetails', 0, 'Request Details',
