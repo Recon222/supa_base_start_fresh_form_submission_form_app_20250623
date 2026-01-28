@@ -629,6 +629,148 @@
         gap: 1rem;
       }
     }
+
+    /* ========================================
+       LANDING PAGE HEADER - Desktop Only
+       ======================================== */
+    .landing-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      height: 60px;
+      padding-top: env(safe-area-inset-top, 0);
+      background: rgba(10, 10, 10, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    [data-theme="light"] .landing-header {
+      background: rgba(255, 255, 255, 0.7);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .landing-header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      gap: 1rem;
+    }
+
+    .landing-theme-toggle {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      font-size: 1.5rem;
+    }
+
+    [data-theme="light"] .landing-theme-toggle {
+      background: rgba(0, 0, 0, 0.03);
+      border: 2px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .landing-theme-toggle:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #FFD100;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 209, 0, 0.2);
+    }
+
+    [data-theme="light"] .landing-theme-toggle:hover {
+      background: rgba(0, 0, 0, 0.06);
+      border-color: #1B3A6B;
+      box-shadow: 0 4px 12px rgba(27, 58, 107, 0.2);
+    }
+
+    .landing-theme-toggle:active {
+      transform: translateY(0);
+    }
+
+    .landing-theme-toggle .theme-icon {
+      display: block;
+      line-height: 1;
+    }
+
+    /* Mobile Theme Toggle - Top Right Corner */
+    .mobile-theme-toggle {
+      position: fixed;
+      top: calc(12px + env(safe-area-inset-top, 0));
+      right: calc(12px + env(safe-area-inset-right, 0));
+      z-index: 100;
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: none; /* Hidden by default, shown on mobile */
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    [data-theme="light"] .mobile-theme-toggle {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(0, 0, 0, 0.15);
+    }
+
+    .mobile-theme-toggle:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #FFD100;
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(255, 209, 0, 0.3);
+    }
+
+    [data-theme="light"] .mobile-theme-toggle:hover {
+      background: rgba(0, 0, 0, 0.05);
+      border-color: #1B3A6B;
+      box-shadow: 0 4px 12px rgba(27, 58, 107, 0.2);
+    }
+
+    .mobile-theme-toggle:active {
+      transform: scale(0.95);
+    }
+
+    .mobile-theme-toggle .theme-icon {
+      display: block;
+      line-height: 1;
+    }
+
+    /* Hide desktop header on mobile, show mobile toggle */
+    @media (max-width: 768px) {
+      .landing-header {
+        display: none;
+      }
+
+      .mobile-theme-toggle {
+        display: flex;
+      }
+    }
+
+    /* Hide mobile toggle on desktop */
+    @media (min-width: 769px) {
+      .mobile-theme-toggle {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body style="background-color: #0a0a0a;">
@@ -646,6 +788,21 @@
       <div class="loading-progress-bar"></div>
     </div>
   </div>
+
+  <!-- Desktop Transparent Header (hidden on mobile) -->
+  <header class="landing-header">
+    <div class="landing-header-content">
+      <button id="landing-theme-toggle" class="landing-theme-toggle" aria-label="Toggle theme">
+        <span class="theme-icon">🌙</span>
+      </button>
+      <!-- PWA install button will be inserted here by pwa-register.js -->
+    </div>
+  </header>
+
+  <!-- Mobile Theme Toggle (hidden on desktop) -->
+  <button id="mobile-theme-toggle" class="mobile-theme-toggle" aria-label="Toggle theme">
+    <span class="theme-icon">🌙</span>
+  </button>
 
   <!-- Animated Background - The cool grid effect with floating shapes -->
   <div class="background-animation">
@@ -794,23 +951,48 @@
     // Initialize PWA
     initPWA();
 
+    // Theme toggle functionality
+    function updateThemeIcon(theme) {
+      const icon = theme === 'dark' ? '🌙' : '☀️';
+      document.querySelectorAll('.theme-icon').forEach(el => {
+        el.textContent = icon;
+      });
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('fvu-theme', newTheme);
+      updateThemeIcon(newTheme);
+    }
+
+    // Set initial theme icon
+    const currentTheme = localStorage.getItem('fvu-theme') || 'dark';
+    updateThemeIcon(currentTheme);
+
+    // Add event listeners to both theme toggle buttons
+    document.getElementById('landing-theme-toggle')?.addEventListener('click', toggleTheme);
+    document.getElementById('mobile-theme-toggle')?.addEventListener('click', toggleTheme);
+
     // Add 3D tilt effect on card hover (optional enhancement)
     document.querySelectorAll('.form-card').forEach(card => {
       card.addEventListener('mousemove', (e) => {
         const rect = card.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        
+
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
-        
+
         const rotateX = (y - centerY) / 10;
         const rotateY = (centerX - x) / 10;
-        
-        card.querySelector('.card-3d').style.transform = 
+
+        card.querySelector('.card-3d').style.transform =
           `rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
       });
-      
+
       card.addEventListener('mouseleave', () => {
         card.querySelector('.card-3d').style.transform = '';
       });

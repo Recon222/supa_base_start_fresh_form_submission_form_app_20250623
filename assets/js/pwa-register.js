@@ -189,10 +189,16 @@ function createInstallButton() {
     }
   });
 
-  // Try to insert into header
-  const headerRight = document.querySelector('.header-right');
-  if (headerRight) {
-    headerRight.insertBefore(button, headerRight.firstChild);
+  // Try to insert into landing header first (index.html)
+  const landingHeaderContent = document.querySelector('.landing-header-content');
+  if (landingHeaderContent) {
+    landingHeaderContent.appendChild(button);
+  } else {
+    // Fallback: Try to insert into form page header
+    const headerRight = document.querySelector('.header-right');
+    if (headerRight) {
+      headerRight.insertBefore(button, headerRight.firstChild);
+    }
   }
 
   return button;
