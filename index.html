@@ -471,56 +471,90 @@
 
     /* Mobile devices - logos side by side, title underneath */
     @media (max-width: 768px) {
-      /* Fixed logo + scrolling cards layout */
+      /*
+       * MOBILE LAYOUT STRATEGY:
+       * - Use CSS Grid with explicit row sizing
+       * - Logo section = auto (content height)
+       * - Cards section = 1fr (remaining space, scrollable)
+       * - Must override forms.css min-height with !important
+       */
+
+      /* Prevent body from causing scroll */
+      html, body {
+        height: 100%;
+        overflow: hidden; /* Only on mobile index page - PWA forms override this */
+      }
+
+      /* Hero takes exactly viewport height */
       .hero-section {
-        height: 100dvh;
-        height: 100vh; /* Fallback for older browsers */
-        display: flex;
-        flex-direction: column;
-        padding: 0;
+        position: fixed !important; /* Take out of flow completely */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 100dvh !important;
+        height: 100vh !important;
+        min-height: auto !important; /* Override forms.css min-height */
+        max-height: 100dvh !important;
+        max-height: 100vh !important;
+        display: grid !important;
+        grid-template-rows: 1fr; /* Single row, container fills it */
+        padding: 0 !important;
+        padding-top: env(safe-area-inset-top) !important; /* iOS notch */
+        overflow: hidden !important;
       }
 
+      /* Container fills hero and uses grid */
       .hero-section .container {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        padding: 0;
-        max-width: 100%;
+        display: grid !important;
+        grid-template-rows: 1fr;
+        height: 100%;
+        max-height: 100%;
+        padding: 0 !important;
+        max-width: 100% !important;
+        overflow: hidden;
       }
 
+      /* Hero content uses grid for logo/cards split */
       .hero-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden; /* Contain scroll here, NOT on body */
-        margin-top: 0 !important; /* Override inline style */
-        padding: 1rem;
-        padding-bottom: 0;
+        display: grid !important;
+        grid-template-rows: auto 1fr; /* Logo section auto, cards fill rest */
+        height: 100%;
+        max-height: 100%;
+        overflow: hidden !important;
+        margin-top: 0 !important;
+        padding: 1rem !important;
+        padding-bottom: 0 !important;
+        gap: 0.5rem;
       }
 
-      /* Hide subtitle on mobile */
+      /* Hide subtitle on mobile - it's inside hero-content but not in grid */
       .hero-content > .text-muted {
-        display: none;
+        display: none !important;
       }
 
+      /* Logo header section - fixed size, never scrolls */
       .logo-header {
-        flex-shrink: 0; /* Never compress the logo section */
-        display: flex;
+        grid-row: 1;
+        flex-shrink: 0;
+        display: flex !important;
         flex-direction: column;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0 !important;
+        padding-bottom: 0.5rem;
       }
 
       /* Enable logos-row as flex container on mobile */
       .logos-row {
-        display: flex;
+        display: flex !important;
         justify-content: center;
         align-items: center;
         gap: 2rem;
-        order: -1; /* Ensure logos row appears first (above title) */
+        order: -1; /* Logos above title */
       }
 
-      /* Reset order for mobile - handled by logos-row order */
+      /* Reset order for mobile */
       .logos-row .header-logo:first-child,
       .logos-row .header-logo:last-child {
         order: unset;
@@ -535,20 +569,33 @@
         order: unset;
         font-size: 1.75rem !important;
         text-align: center;
+        margin: 0 !important;
       }
 
-      /* Scrollable cards container */
+      /* Scrollable cards container - takes remaining space */
       .form-cards {
-        flex: 1;
-        overflow-y: auto;
+        grid-row: 2;
+        display: flex !important;
+        flex-direction: column;
+        gap: 1rem;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none; /* Firefox */
         -ms-overflow-style: none; /* IE/Edge */
-        padding-bottom: 2rem; /* Space at bottom for last card */
+        padding: 0.5rem !important;
+        padding-bottom: calc(2rem + env(safe-area-inset-bottom)) !important; /* Space for last card + safe area */
+        margin: 0 !important;
+        min-height: 0; /* Critical for grid overflow */
       }
 
       .form-cards::-webkit-scrollbar {
         display: none; /* Chrome/Safari */
+      }
+
+      /* Cards should not use grid on mobile - stack vertically */
+      .form-cards .form-card {
+        flex-shrink: 0;
       }
     }
 
