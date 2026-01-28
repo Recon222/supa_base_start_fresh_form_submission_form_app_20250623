@@ -149,8 +149,18 @@ export function canInstall() {
 function showInstallButton() {
   // Don't show if already installed
   if (isInstalled()) {
+    console.log('[PWA] App already installed - not showing install button');
     return;
   }
+
+  // Ensure DOM is fully loaded before trying to insert button
+  if (document.readyState === 'loading') {
+    console.log('[PWA] DOM not ready - deferring install button creation');
+    document.addEventListener('DOMContentLoaded', () => showInstallButton());
+    return;
+  }
+
+  console.log('[PWA] Creating/showing install button');
 
   // Check if install button exists
   let installBtn = document.getElementById('pwa-install-btn');
@@ -160,7 +170,12 @@ function showInstallButton() {
     installBtn = createInstallButton();
   }
 
-  installBtn.style.display = 'flex';
+  if (installBtn) {
+    installBtn.style.display = 'flex';
+    console.log('[PWA] Install button displayed');
+  } else {
+    console.warn('[PWA] Failed to create install button - target container not found');
+  }
 }
 
 /**
@@ -204,16 +219,21 @@ function createInstallButton() {
   // Try to insert into landing header first (index.html)
   const landingHeaderContent = document.querySelector('.landing-header-content');
   if (landingHeaderContent) {
+    console.log('[PWA] Inserting install button into landing header');
     landingHeaderContent.insertBefore(button, landingHeaderContent.firstChild);
-  } else {
-    // Fallback: Try to insert into form page header
-    const headerRight = document.querySelector('.header-right');
-    if (headerRight) {
-      headerRight.insertBefore(button, headerRight.firstChild);
-    }
+    return button;
   }
 
-  return button;
+  // Fallback: Try to insert into form page header
+  const headerRight = document.querySelector('.header-right');
+  if (headerRight) {
+    console.log('[PWA] Inserting install button into form header');
+    headerRight.insertBefore(button, headerRight.firstChild);
+    return button;
+  }
+
+  console.error('[PWA] No valid container found for install button (.landing-header-content or .header-right)');
+  return null;
 }
 
 /**
