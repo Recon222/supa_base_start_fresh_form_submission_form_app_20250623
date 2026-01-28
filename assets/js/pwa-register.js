@@ -5,6 +5,8 @@
  * @module pwa-register
  */
 
+import { CONFIG } from './config.js';
+
 // Guard against double initialization
 let pwaInitialized = false;
 
@@ -27,13 +29,19 @@ export function registerServiceWorker() {
     return;
   }
 
+  console.log('[PWA] Initializing service worker registration');
+  console.log('[PWA] SW Path:', CONFIG.PWA.SW_PATH);
+  console.log('[PWA] SW Scope:', CONFIG.PWA.SW_SCOPE);
+  console.log('[PWA] Current location:', window.location.pathname);
+
   window.addEventListener('load', async () => {
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
+      const registration = await navigator.serviceWorker.register(CONFIG.PWA.SW_PATH, {
+        scope: CONFIG.PWA.SW_SCOPE
       });
 
-      console.log('[PWA] Service Worker registered with scope:', registration.scope);
+      console.log('[PWA] Service Worker registered successfully');
+      console.log('[PWA] Registration scope:', registration.scope);
 
       // Check for updates on page load
       registration.update();
@@ -68,14 +76,18 @@ export function registerServiceWorker() {
  * Capture the prompt for later use
  */
 export function setupInstallPrompt() {
+  console.log('[PWA] Setting up install prompt listener');
+
   window.addEventListener('beforeinstallprompt', (event) => {
+    console.log('[PWA] beforeinstallprompt event fired!');
+
     // Prevent the mini-infobar from appearing on mobile
     event.preventDefault();
 
     // Store the event for later use
     deferredInstallPrompt = event;
 
-    console.log('[PWA] Install prompt available');
+    console.log('[PWA] Install prompt available - showing install button');
 
     // Show custom install button
     showInstallButton();
