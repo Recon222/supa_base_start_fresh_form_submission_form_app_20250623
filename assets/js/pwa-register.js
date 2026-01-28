@@ -224,9 +224,9 @@ function showUpdateNotification(registration = null, version = '') {
   banner.id = 'pwa-update-banner';
   banner.style.cssText = `
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: env(safe-area-inset-top, 0);
+    left: env(safe-area-inset-left, 0);
+    right: env(safe-area-inset-right, 0);
     background: #1B3A6B;
     color: white;
     padding: 0.75rem 1rem;
@@ -349,9 +349,9 @@ function showIOSPrompt() {
   prompt.id = 'ios-install-prompt';
   prompt.style.cssText = `
     position: fixed;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0));
+    left: calc(20px + env(safe-area-inset-left, 0));
+    right: calc(20px + env(safe-area-inset-right, 0));
     background: white;
     color: #333;
     padding: 1rem;

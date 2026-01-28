@@ -187,7 +187,7 @@ export function showToast(message, type = 'info', duration = 3000) {
     className: `toast-message toast-${type}`,
     style: `
       position: fixed;
-      bottom: 80px;
+      bottom: calc(80px + env(safe-area-inset-bottom, 0));
       left: 50%;
       transform: translateX(-50%);
       padding: 1rem 2rem;
