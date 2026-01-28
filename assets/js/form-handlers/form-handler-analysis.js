@@ -331,7 +331,6 @@ export class AnalysisFormHandler extends FormHandler {
     const caseFields = [];
     if (data.occNumber) caseFields.push(`Occurrence: ${data.occNumber}`);
     if (data.offenceTypeDisplay) caseFields.push(`Offence: ${data.offenceTypeDisplay}`);
-    if (data.jobRequired) caseFields.push(`Priority: ${data.jobRequired}`);
     if (caseFields.length > 0) {
       sections.push('=== CASE ===\n' + caseFields.join('\n'));
     }
@@ -395,11 +394,6 @@ export class AnalysisFormHandler extends FormHandler {
     // Section 7: Request Details
     if (data.requestDetails) {
       sections.push('=== REQUEST ===\n' + data.requestDetails);
-    }
-
-    // Section 8: Additional Information
-    if (data.additionalInfo) {
-      sections.push('=== ADDITIONAL ===\n' + data.additionalInfo);
     }
 
     return sections.join('\n\n');
