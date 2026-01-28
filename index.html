@@ -430,6 +430,14 @@
       padding-top: 0 !important;
     }
 
+    /* Landing page - fit exactly to viewport, push content toward top */
+    .hero-section {
+      min-height: 100vh !important;
+      max-height: 100vh !important;
+      padding-top: 1rem !important;
+      padding-bottom: 5rem !important;
+    }
+
     /* Desktop: logos on sides, title in middle (all in one row) */
     .logo-header {
       display: grid;
@@ -556,7 +564,7 @@
   <!-- Main Content -->
   <main class="hero-section">
     <div class="container">
-      <div class="hero-content">
+      <div class="hero-content" style="margin-top: 6rem;">
         <!-- Logo Header Section -->
         <div class="logo-header">
           <div class="logos-row">
