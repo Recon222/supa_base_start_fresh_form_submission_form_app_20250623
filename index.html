@@ -425,6 +425,11 @@
 
   <!-- Responsive CSS for logos -->
   <style>
+    /* Landing page has no header - remove body padding from header.css */
+    body {
+      padding-top: 0 !important;
+    }
+
     /* Desktop: logos on sides, title in middle (all in one row) */
     .logo-header {
       display: grid;
@@ -452,8 +457,8 @@
     }
 
     .header-logo {
-      width: 200px;
-      height: 200px;
+      width: 240px;
+      height: 240px;
       flex-shrink: 0;
     }
 
@@ -464,8 +469,8 @@
       }
 
       .header-logo {
-        width: 160px;
-        height: 160px;
+        width: 240px;
+        height: 240px;
       }
     }
 
