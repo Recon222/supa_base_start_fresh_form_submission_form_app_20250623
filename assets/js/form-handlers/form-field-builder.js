@@ -685,7 +685,7 @@ export class FormFieldBuilder {
 
     // Row 1: Business Name + Address
     section.appendChild(this.createFormRow(
-      this.createTextField('businessName', 0, 'Business Name', true, '', 'Name of the business/location'),
+      this.createTextField('businessName', 0, 'Business Name', false, '', 'Leave blank if none'),
       this.createTextField('locationAddress', 0, 'Location Address', true, '', 'Full street address')
     ));
 
