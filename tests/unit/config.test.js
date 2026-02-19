@@ -178,9 +178,9 @@ describe('CONFIG', () => {
       expect(Array.isArray(CONFIG.MEDIA_TYPE_OPTIONS)).toBe(true);
     });
 
-    it('should have a default empty value option', () => {
-      const emptyOption = CONFIG.MEDIA_TYPE_OPTIONS.find(opt => opt.value === '');
-      expect(emptyOption).toBeDefined();
+    it('should have a default placeholder option', () => {
+      const placeholderOption = CONFIG.MEDIA_TYPE_OPTIONS.find(opt => opt.value === '_placeholder_');
+      expect(placeholderOption).toBeDefined();
     });
 
     it('should have USB option', () => {
@@ -220,9 +220,9 @@ describe('CONFIG', () => {
       expect(Array.isArray(CONFIG.CITY_OPTIONS)).toBe(true);
     });
 
-    it('should have a default empty value option', () => {
-      const emptyOption = CONFIG.CITY_OPTIONS.find(opt => opt.value === '');
-      expect(emptyOption).toBeDefined();
+    it('should have a default placeholder option', () => {
+      const placeholderOption = CONFIG.CITY_OPTIONS.find(opt => opt.value === '_placeholder_');
+      expect(placeholderOption).toBeDefined();
     });
 
     it('should have Brampton option', () => {
