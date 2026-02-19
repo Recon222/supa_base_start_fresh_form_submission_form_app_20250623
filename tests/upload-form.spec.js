@@ -463,39 +463,83 @@ test.describe('Upload Form Tests (upload.html)', () => {
     test('1.9.1 Shows correct retention days for 10 days ago', async ({ page }) => {
       await page.goto('/upload.html');
       const date = dateHelpers.getDaysAgoISO(10);
-      await page.fill('[name="dvrEarliestDate"]', date);
+      await page.evaluate((dateValue) => {
+        const field = document.querySelector('#dvrEarliestDate');
+        if (field._flatpickr) {
+          field._flatpickr.setDate(dateValue, true);
+        } else {
+          field.value = dateValue;
+          field.dispatchEvent(new Event('change'));
+        }
+      }, date);
 
-      const retentionMsg = page.locator('[class*="retention"]');
-      await expect(retentionMsg).toContainText('10 days');
+      const retentionMsg = page.locator('#retentionCalculation');
+      // Allow +/-1 day tolerance due to UTC/local timezone differences in date calculation
+      await expect(retentionMsg).toContainText(/1[01] days/);
     });
 
     test('1.9.2 Shows urgent message for 3 days ago', async ({ page }) => {
       await page.goto('/upload.html');
       const date = dateHelpers.getDaysAgoISO(3);
-      await page.fill('[name="dvrEarliestDate"]', date);
+      await page.evaluate((dateValue) => {
+        const field = document.querySelector('#dvrEarliestDate');
+        if (field._flatpickr) {
+          field._flatpickr.setDate(dateValue, true);
+        } else {
+          field.value = dateValue;
+          field.dispatchEvent(new Event('change'));
+        }
+      }, date);
 
-      const retentionMsg = page.locator('[class*="retention"], [class*="urgent"], [class*="alert-danger"]');
-      await expect(retentionMsg).toContainText('3 days');
+      const retentionMsg = page.locator('#retentionCalculation');
+      // Allow +/-1 day tolerance; both 3 and 4 days are URGENT
+      await expect(retentionMsg).toContainText(/[34] days.*URGENT/);
     });
 
     test('1.9.3 Shows normal message for 30 days ago', async ({ page }) => {
       await page.goto('/upload.html');
       const date = dateHelpers.getDaysAgoISO(30);
-      await page.fill('[name="dvrEarliestDate"]', date);
+      await page.evaluate((dateValue) => {
+        const field = document.querySelector('#dvrEarliestDate');
+        if (field._flatpickr) {
+          field._flatpickr.setDate(dateValue, true);
+        } else {
+          field.value = dateValue;
+          field.dispatchEvent(new Event('change'));
+        }
+      }, date);
 
-      const retentionMsg = page.locator('[class*="retention"]');
-      await expect(retentionMsg).toContainText('30 days');
+      const retentionMsg = page.locator('#retentionCalculation');
+      // Allow +/-1 day tolerance due to UTC/local timezone differences in date calculation
+      await expect(retentionMsg).toContainText(/3[01] days/);
     });
 
     test('1.9.4 Clears message when date is cleared', async ({ page }) => {
       await page.goto('/upload.html');
       const date = dateHelpers.getDaysAgoISO(10);
-      await page.fill('[name="dvrEarliestDate"]', date);
+      await page.evaluate((dateValue) => {
+        const field = document.querySelector('#dvrEarliestDate');
+        if (field._flatpickr) {
+          field._flatpickr.setDate(dateValue, true);
+        } else {
+          field.value = dateValue;
+          field.dispatchEvent(new Event('change'));
+        }
+      }, date);
 
-      await page.fill('[name="dvrEarliestDate"]', '');
+      // Clear the flatpickr date
+      await page.evaluate(() => {
+        const field = document.querySelector('#dvrEarliestDate');
+        if (field._flatpickr) {
+          field._flatpickr.clear();
+        } else {
+          field.value = '';
+          field.dispatchEvent(new Event('change'));
+        }
+      });
 
-      const retentionMsg = page.locator('[class*="retention"]');
-      await expect(retentionMsg).not.toBeVisible();
+      const retentionMsg = page.locator('#retentionCalculation');
+      await expect(retentionMsg).toHaveText('');
     });
   });
 

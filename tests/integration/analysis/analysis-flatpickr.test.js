@@ -54,12 +54,12 @@ describe('Analysis Form Flatpickr Integration', () => {
         expect(input).toBeTruthy();
       });
 
-      it('should create recordingDate with type="date"', () => {
+      it('should create recordingDate with type="text" for Flatpickr compatibility', () => {
         const section = FormFieldBuilder.createVideoSourceSection();
         container.appendChild(section);
 
         const input = section.querySelector('#recordingDate');
-        expect(input.getAttribute('type')).toBe('date');
+        expect(input.getAttribute('type')).toBe('text');
       });
 
       it('should create recordingDate with correct name for form submission', () => {
@@ -390,14 +390,14 @@ describe('Analysis Form Flatpickr Integration', () => {
    * Tests for date field behavior on mobile devices.
    */
   describe('Mobile Responsiveness', () => {
-    it('should have input that works with native date picker on mobile', () => {
+    it('should have input that works with Flatpickr on mobile', () => {
       const section = FormFieldBuilder.createVideoSourceSection();
       container.appendChild(section);
 
       const input = section.querySelector('#recordingDate');
 
-      // type="date" enables native picker on mobile
-      expect(input.getAttribute('type')).toBe('date');
+      // type="text" for Flatpickr compatibility (Flatpickr handles mobile interaction)
+      expect(input.getAttribute('type')).toBe('text');
     });
 
     it('should not have disabled attribute that would prevent mobile interaction', () => {
@@ -423,7 +423,7 @@ describe('Analysis Form Flatpickr Integration', () => {
  *
  * DOM Structure Requirements:
  * - Input with id="recordingDate" and name="recordingDate"
- * - type="date" for native fallback
+ * - type="text" for Flatpickr compatibility
  * - class="form-control" for Bootstrap styling
  * - .invalid-feedback sibling for validation messages
  * - Inside .form-group container

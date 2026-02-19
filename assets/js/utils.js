@@ -148,7 +148,7 @@ export function createElement(tag, attrs = {}, content = null) {
       if (typeof value === 'string' && value) {
         element.setAttribute('for', value);
       }
-    } else {
+    } else if (value !== null && value !== undefined) {
       element.setAttribute(key, value);
     }
   });

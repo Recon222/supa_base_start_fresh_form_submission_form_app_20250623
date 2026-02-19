@@ -370,7 +370,8 @@ export class FormHandler {
 
   validateSingleField(field) {
     const isRequired = field.hasAttribute('required');
-    const error = validateField(field.value, field.name, isRequired);
+    // Pass the field element itself to validateField so it can check for Flatpickr
+    const error = validateField(field, field.name, isRequired);
 
     this.showFieldValidation(field, error);
 
@@ -406,7 +407,9 @@ export class FormHandler {
       }
 
       // Only show valid state for required fields with values
-      if (field.hasAttribute('required') && field.value.trim()) {
+      // Check Flatpickr instance if present
+      const fieldValue = field._flatpickr ? field._flatpickr.input.value : field.value;
+      if (field.hasAttribute('required') && fieldValue.trim()) {
         field.classList.add('is-valid');
 
         // Also apply valid state to Flatpickr's visible alternate input
@@ -483,7 +486,8 @@ export class FormHandler {
     // Validate all fields
     this.form.querySelectorAll('.form-control').forEach(field => {
       const isRequired = field.hasAttribute('required');
-      const error = validateField(field.value, field.name, isRequired);
+      // Pass the field element itself to validateField so it can check for Flatpickr
+      const error = validateField(field, field.name, isRequired);
 
       if (error) {
         errors[field.name] = error;
@@ -544,6 +548,18 @@ export class FormHandler {
     for (const [key, value] of formData.entries()) {
       data[key] = value;
     }
+
+    // Check for Flatpickr instances and ensure we get their values
+    // FormData may not capture Flatpickr values if they're updated asynchronously
+    this.form.querySelectorAll('.form-control').forEach(field => {
+      if (field._flatpickr && field.name) {
+        // Read from Flatpickr's hidden input to get the actual formatted value
+        const flatpickrValue = field._flatpickr.input.value;
+        if (flatpickrValue) {
+          data[field.name] = flatpickrValue;
+        }
+      }
+    });
 
     // Add form type
     data.formType = this.formType;

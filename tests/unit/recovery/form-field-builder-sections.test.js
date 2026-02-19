@@ -219,7 +219,7 @@ describe('FormFieldBuilder Recovery Section Methods', () => {
         const input = container.querySelector('#businessName');
         expect(input).toBeTruthy();
         expect(input.getAttribute('name')).toBe('businessName');
-        expect(input.hasAttribute('required')).toBe(true);
+        expect(input.hasAttribute('required')).toBe(false);
       });
 
       it('should create locationAddress field', () => {

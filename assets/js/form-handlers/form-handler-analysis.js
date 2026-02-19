@@ -197,7 +197,8 @@ export class AnalysisFormHandler extends FormHandler {
 
         // Trigger validation on change
         onChange: (selectedDates, dateStr) => {
-          this.validateSingleField(occDateField);
+          // Small timeout to ensure Flatpickr has updated the hidden input before validation
+          setTimeout(() => this.validateSingleField(occDateField), 10);
         }
       });
     }
@@ -211,7 +212,8 @@ export class AnalysisFormHandler extends FormHandler {
 
         // Trigger validation on change
         onChange: (selectedDates, dateStr) => {
-          this.validateSingleField(recordingDateField);
+          // Small timeout to ensure Flatpickr has updated the hidden input before validation
+          setTimeout(() => this.validateSingleField(recordingDateField), 10);
         }
       });
     }

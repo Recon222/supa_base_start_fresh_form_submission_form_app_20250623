@@ -265,7 +265,8 @@ export class UploadFormHandler extends FormHandler {
         ...CONFIG.FLATPICKR_CONFIG.DATE,
         maxDate: 'today', // Prevent future dates
         onChange: (selectedDates, dateStr) => {
-          this.validateSingleField(occDateField);
+          // Small timeout to ensure Flatpickr has updated the hidden input before validation
+          setTimeout(() => this.validateSingleField(occDateField), 10);
         }
       });
     }
@@ -287,15 +288,18 @@ export class UploadFormHandler extends FormHandler {
 
     const startTimeId = index === 0 ? 'videoStartTime' : `videoStartTime_${index}`;
     const endTimeId = index === 0 ? 'videoEndTime' : `videoEndTime_${index}`;
+    const dvrDateId = index === 0 ? 'dvrEarliestDate' : `dvrEarliestDate_${index}`;
 
     const startTimeField = container.querySelector(`#${startTimeId}`);
     const endTimeField = container.querySelector(`#${endTimeId}`);
+    const dvrDateField = container.querySelector(`#${dvrDateId}`);
 
     if (startTimeField) {
       this.flatpickrInstances[startTimeId] = window.flatpickr(startTimeField, {
         ...CONFIG.FLATPICKR_CONFIG.DATETIME,
         onChange: (selectedDates, dateStr) => {
-          this.validateSingleField(startTimeField);
+          // Small timeout to ensure Flatpickr has updated the hidden input before validation
+          setTimeout(() => this.validateSingleField(startTimeField), 10);
         }
       });
     }
@@ -304,7 +308,22 @@ export class UploadFormHandler extends FormHandler {
       this.flatpickrInstances[endTimeId] = window.flatpickr(endTimeField, {
         ...CONFIG.FLATPICKR_CONFIG.DATETIME,
         onChange: (selectedDates, dateStr) => {
-          this.validateSingleField(endTimeField);
+          // Small timeout to ensure Flatpickr has updated the hidden input before validation
+          setTimeout(() => this.validateSingleField(endTimeField), 10);
+        }
+      });
+    }
+
+    // Earliest Recorded Date on DVR (date-only, past dates only)
+    if (dvrDateField) {
+      this.flatpickrInstances[dvrDateId] = window.flatpickr(dvrDateField, {
+        ...CONFIG.FLATPICKR_CONFIG.DATE,
+        maxDate: 'today',
+        onChange: (selectedDates, dateStr) => {
+          setTimeout(() => {
+            this.handleRetentionChange({ target: dvrDateField }, index);
+            this.validateSingleField(dvrDateField);
+          }, 10);
         }
       });
     }
@@ -463,6 +482,7 @@ export class UploadFormHandler extends FormHandler {
     // Destroy Flatpickr instances for this group
     const startTimeId = index === 0 ? 'videoStartTime' : `videoStartTime_${index}`;
     const endTimeId = index === 0 ? 'videoEndTime' : `videoEndTime_${index}`;
+    const dvrDateId = index === 0 ? 'dvrEarliestDate' : `dvrEarliestDate_${index}`;
 
     if (this.flatpickrInstances[startTimeId]) {
       this.flatpickrInstances[startTimeId].destroy();
@@ -471,6 +491,10 @@ export class UploadFormHandler extends FormHandler {
     if (this.flatpickrInstances[endTimeId]) {
       this.flatpickrInstances[endTimeId].destroy();
       delete this.flatpickrInstances[endTimeId];
+    }
+    if (this.flatpickrInstances[dvrDateId]) {
+      this.flatpickrInstances[dvrDateId].destroy();
+      delete this.flatpickrInstances[dvrDateId];
     }
 
     // Animate out

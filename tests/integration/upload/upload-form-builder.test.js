@@ -86,7 +86,7 @@ describe('Upload Form Builder', () => {
         const input = container.querySelector('#occDate');
         expect(input).toBeTruthy();
         expect(input.getAttribute('name')).toBe('occDate');
-        expect(input.getAttribute('type')).toBe('date');
+        expect(input.getAttribute('type')).toBe('text');
         expect(input.hasAttribute('required')).toBe(true);
       });
 

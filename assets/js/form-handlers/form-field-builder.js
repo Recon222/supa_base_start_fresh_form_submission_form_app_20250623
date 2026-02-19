@@ -316,8 +316,10 @@ export class FormFieldBuilder {
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
 
+    // Use type="text" for Flatpickr compatibility
+    // Flatpickr will be initialized by the form handler after DOM insertion
     const input = createElement('input', {
-      type: 'date',
+      type: 'text',
       className: 'form-control',
       id: fieldId,
       name: fieldName
@@ -325,11 +327,6 @@ export class FormFieldBuilder {
 
     if (required) {
       input.setAttribute('required', 'required');
-    }
-
-    // Apply max date if specified (for past date validation)
-    if (options.maxDate === 'today') {
-      input.setAttribute('max', new Date().toISOString().split('T')[0]);
     }
 
     group.appendChild(labelEl);
@@ -461,8 +458,10 @@ export class FormFieldBuilder {
     });
     label.innerHTML = 'Date of Occurrence <span class="required">*</span>';
 
+    // Use type="text" for Flatpickr compatibility
+    // Flatpickr will be initialized by the form handler after DOM insertion
     const input = createElement('input', {
-      type: 'date',
+      type: 'text',
       className: 'form-control',
       id: 'occDate',
       name: 'occDate',
@@ -829,7 +828,9 @@ export class FormFieldBuilder {
   }
 
   /**
-   * Create a time field (datetime-local input)
+   * Create a time field with Flatpickr (24-hour format)
+   * Uses type="text" for Flatpickr compatibility - Flatpickr will be initialized
+   * by the form handler after DOM insertion.
    */
   static createTimeField(baseName, index, label, required) {
     const fieldName = index === 0 ? baseName : `${baseName}_${index}`;
@@ -843,13 +844,18 @@ export class FormFieldBuilder {
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
 
+    // Use type="text" for Flatpickr compatibility
+    // Flatpickr will be initialized by the form handler after DOM insertion
     const input = createElement('input', {
-      type: 'datetime-local',
+      type: 'text',
       className: 'form-control',
       id: fieldId,
-      name: fieldName,
-      required: required ? 'required' : null
+      name: fieldName
     });
+
+    if (required) {
+      input.setAttribute('required', 'required');
+    }
 
     const small = createElement('small', { className: 'form-text' },
       baseName.includes('Start') ? 'When the relevant video begins' : 'When the relevant video ends'
@@ -975,8 +981,10 @@ export class FormFieldBuilder {
       className: 'form-label'
     }, 'Earliest Recorded Date on DVR');
 
+    // Use type="text" for Flatpickr compatibility
+    // Flatpickr will be initialized by the form handler after DOM insertion
     const input = createElement('input', {
-      type: 'date',
+      type: 'text',
       className: 'form-control',
       id: fieldId,
       name: fieldName
@@ -1003,6 +1011,8 @@ export class FormFieldBuilder {
 
   /**
    * Create extraction time field for recovery form
+   * Uses type="text" for Flatpickr compatibility - Flatpickr will be initialized
+   * by the form handler after DOM insertion.
    */
   static createExtractionTimeField(baseName, index, label, required) {
     const fieldName = index === 0 ? baseName : `${baseName}_${index}`;
@@ -1016,13 +1026,18 @@ export class FormFieldBuilder {
     });
     labelEl.innerHTML = label + (required ? ' <span class="required">*</span>' : '');
 
+    // Use type="text" for Flatpickr compatibility
+    // Flatpickr will be initialized by the form handler after DOM insertion
     const input = createElement('input', {
-      type: 'datetime-local',
+      type: 'text',
       className: 'form-control',
       id: fieldId,
-      name: fieldName,
-      required: required ? 'required' : null
+      name: fieldName
     });
+
+    if (required) {
+      input.setAttribute('required', 'required');
+    }
 
     const small = createElement('small', { className: 'form-text' },
       baseName.includes('Start') ? 'Start of video period to extract' : 'End of video period to extract'
@@ -1268,8 +1283,10 @@ export class FormFieldBuilder {
       className: 'form-label'
     }, 'DVR Retention');
 
+    // Use type="text" for Flatpickr compatibility
+    // Flatpickr will be initialized by the form handler after DOM insertion
     const input = createElement('input', {
-      type: 'date',
+      type: 'text',
       className: 'form-control',
       id: fieldId,
       name: fieldName

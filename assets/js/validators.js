@@ -7,12 +7,32 @@ import { CONFIG } from './config.js';
 
 /**
  * Validate a single field value
- * @param {string} value - The value to validate
+ * @param {string|HTMLElement} valueOrElement - The value to validate OR the field element
  * @param {string} fieldName - The field name for specific rules
  * @param {boolean} required - Whether the field is required
  * @returns {string|null} Error message or null if valid
  */
-export function validateField(value, fieldName, required = false) {
+export function validateField(valueOrElement, fieldName, required = false) {
+  // If a field element is passed, extract the value
+  // Check for Flatpickr instance first (handles altInput: true correctly)
+  let value;
+  if (valueOrElement && typeof valueOrElement === 'object' && valueOrElement.nodeType === 1) {
+    // It's an HTMLElement
+    const fieldElement = valueOrElement;
+
+    // Check if this field has a Flatpickr instance attached
+    if (fieldElement._flatpickr) {
+      // Read from Flatpickr's internal input (the hidden input that stores the actual value)
+      value = fieldElement._flatpickr.input.value;
+    } else {
+      // Regular field without Flatpickr
+      value = fieldElement.value;
+    }
+  } else {
+    // It's a string value (backward compatibility)
+    value = valueOrElement;
+  }
+
   // Trim the value
   const trimmedValue = value?.trim() || '';
 
@@ -270,7 +290,14 @@ export function calculateFormCompletion(form) {
   let filledCount = 0;
 
   requiredFields.forEach(field => {
-    const value = field.value?.trim();
+    // Get value - check for Flatpickr instance first
+    let value;
+    if (field._flatpickr) {
+      // Read from Flatpickr's hidden input
+      value = field._flatpickr.input.value?.trim();
+    } else {
+      value = field.value?.trim();
+    }
 
     // Special handling for radio buttons
     if (field.type === 'radio') {
@@ -283,11 +310,11 @@ export function calculateFormCompletion(form) {
       filledCount++;
     }
   });
-  
-  const percentage = requiredFields.length > 0 
+
+  const percentage = requiredFields.length > 0
     ? Math.round((filledCount / requiredFields.length) * 100)
     : 0;
-  
+
   return {
     isComplete: filledCount === requiredFields.length,
     percentage

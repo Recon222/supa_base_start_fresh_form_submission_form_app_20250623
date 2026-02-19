@@ -540,12 +540,12 @@ describe('FormFieldBuilder - Analysis Form Sections', () => {
         expect(input.getAttribute('name')).toBe('recordingDate');
       });
 
-      it('should create recordingDate as date input type', () => {
+      it('should create recordingDate as text input type for Flatpickr', () => {
         const section = FormFieldBuilder.createVideoSourceSection();
         container.appendChild(section);
 
         const input = section.querySelector('#recordingDate');
-        expect(input.getAttribute('type')).toBe('date');
+        expect(input.getAttribute('type')).toBe('text');
       });
 
       it('should create recordingDate WITHOUT required attribute (optional field)', () => {

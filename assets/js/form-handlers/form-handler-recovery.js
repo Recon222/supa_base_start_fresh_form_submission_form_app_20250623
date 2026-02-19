@@ -446,11 +446,14 @@ export class RecoveryFormHandler extends FormHandler {
         this.flatpickrInstances[startTimeId] = window.flatpickr(startTimeField, {
           ...CONFIG.FLATPICKR_CONFIG.DATETIME,
           onChange: (selectedDates, dateStr) => {
-            this.validateSingleField(startTimeField);
-            // Revalidate end time if it has a value
-            if (endTimeField && endTimeField.value) {
-              this.validateTimeRange(endTimeField);
-            }
+            // Small timeout to ensure Flatpickr has updated the hidden input before validation
+            setTimeout(() => {
+              this.validateSingleField(startTimeField);
+              // Revalidate end time if it has a value
+              if (endTimeField && endTimeField.value) {
+                this.validateTimeRange(endTimeField);
+              }
+            }, 10);
           }
         });
       }
@@ -459,8 +462,11 @@ export class RecoveryFormHandler extends FormHandler {
         this.flatpickrInstances[endTimeId] = window.flatpickr(endTimeField, {
           ...CONFIG.FLATPICKR_CONFIG.DATETIME,
           onChange: (selectedDates, dateStr) => {
-            this.validateSingleField(endTimeField);
-            this.validateTimeRange(endTimeField);
+            // Small timeout to ensure Flatpickr has updated the hidden input before validation
+            setTimeout(() => {
+              this.validateSingleField(endTimeField);
+              this.validateTimeRange(endTimeField);
+            }, 10);
           }
         });
       }
@@ -474,8 +480,11 @@ export class RecoveryFormHandler extends FormHandler {
         ...CONFIG.FLATPICKR_CONFIG.DATE,
         maxDate: 'today',
         onChange: (selectedDates, dateStr) => {
-          this.handleRetentionChange({ target: retentionField }, dvrIndex);
-          this.validateSingleField(retentionField);
+          // Small timeout to ensure Flatpickr has updated the hidden input before validation
+          setTimeout(() => {
+            this.handleRetentionChange({ target: retentionField }, dvrIndex);
+            this.validateSingleField(retentionField);
+          }, 10);
         }
       });
     }

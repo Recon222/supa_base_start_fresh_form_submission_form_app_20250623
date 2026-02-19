@@ -85,8 +85,18 @@ export async function fillUploadForm(page, data) {
   // File details
   if (data.fileDetails) await page.fill('[name="fileDetails"]', data.fileDetails);
 
-  // DVR earliest retention (if present)
-  if (data.dvrEarliestDate) await page.fill('[name="dvrEarliestDate"]', data.dvrEarliestDate);
+  // DVR earliest retention (if present) - uses Flatpickr, so set via JS API
+  if (data.dvrEarliestDate) {
+    await page.evaluate((dateValue) => {
+      const field = document.querySelector('#dvrEarliestDate');
+      if (field._flatpickr) {
+        field._flatpickr.setDate(dateValue, true);
+      } else {
+        field.value = dateValue;
+        field.dispatchEvent(new Event('change'));
+      }
+    }, data.dvrEarliestDate);
+  }
 }
 
 /**
