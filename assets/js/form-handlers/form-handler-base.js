@@ -624,8 +624,10 @@ export class FormHandler {
 
         showToast(`${CONFIG.MESSAGES.SUBMISSION_SUCCESS}. ID: ${result.submissionId || result.ticketNumber}`, 'success');
 
-        // Clear the form after successful submission
-        this.clearFormAfterSubmission();
+        // Redirect to home screen after a short delay so the user can see the success message
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
       } else {
         showToast(result.message || CONFIG.MESSAGES.SUBMISSION_ERROR, 'error');
       }
@@ -726,12 +728,15 @@ export class FormHandler {
     this.form.querySelectorAll('.form-control').forEach(field => {
       if (field.type === 'checkbox' || field.type === 'radio') {
         field.checked = false;
+      } else if (field._flatpickr) {
+        // Use Flatpickr's own clear() so both the hidden input and visible altInput are cleared
+        field._flatpickr.clear();
       } else {
         field.value = '';
       }
       field.classList.remove('is-valid', 'is-invalid');
 
-      // Also clear from Flatpickr's visible alternate input if present
+      // Also clear validation classes from Flatpickr's visible alternate input if present
       const flatpickrAltInput = field._flatpickr?.altInput;
       if (flatpickrAltInput) {
         flatpickrAltInput.classList.remove('is-valid', 'is-invalid');
@@ -761,9 +766,6 @@ export class FormHandler {
 
     // Scroll to top of form
     window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    // Show success message
-    showToast('Form cleared', 'info');
   }
 
   saveDraftAuto() {

@@ -6,6 +6,14 @@
   <style>
     html, body { background-color: #0a0a0a; min-height: 100%; }
   </style>
+
+  <!-- CRITICAL: Must run before body renders - adds class so loading screen
+       stays display:none when navigating back from a form page. Zero flash. -->
+  <script>
+    if (!sessionStorage.getItem('fvu_loading_shown')) {
+      document.documentElement.classList.add('fvu-show-splash');
+    }
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Forensic Video Unit Request System - Peel Regional Police">
   <title>Forensic Video Unit - Request System</title>
@@ -89,16 +97,23 @@
        ===================================================== -->
   <style>
     /* Loading Screen - Cinematic Authority Design */
+    /* Hidden by default; shown only when <html> has fvu-show-splash class,
+       which is added by the early <head> script on first app launch only. */
     .loading-screen {
       position: fixed;
       inset: 0;
       z-index: 9999;
       background: #0a0a0a;
-      display: flex;
+      display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+    }
+
+    /* First launch: show the splash screen */
+    .fvu-show-splash .loading-screen {
+      display: flex;
     }
 
     /* Subtle radial gradient for depth */
@@ -931,31 +946,22 @@
   <!-- Loading Screen Handler - Must be non-module for immediate execution -->
   <script>
     (function() {
-      const loadingScreen = document.getElementById('loadingScreen');
       const SESSION_KEY = 'fvu_loading_shown';
 
-      // Check if loading screen was already shown this session
-      if (sessionStorage.getItem(SESSION_KEY)) {
-        // Skip loading screen on navigation (home button clicks)
-        if (loadingScreen) {
-          loadingScreen.remove();
-        }
-        return;
-      }
+      // CSS already hides the loading screen on return navigation (no fvu-show-splash class).
+      // On first launch the class is present, so we just need to mark it shown and
+      // schedule the dismiss animation.
+      if (sessionStorage.getItem(SESSION_KEY)) return;
 
-      // First load (app launch) - mark as shown and display loading screen
       sessionStorage.setItem(SESSION_KEY, 'true');
 
-      // Dismiss loading screen after 3 seconds (matches progress bar animation)
+      const loadingScreen = document.getElementById('loadingScreen');
       const LOADING_DURATION = 3000;
       const FADE_DURATION = 800;
 
       setTimeout(() => {
         if (loadingScreen) {
-          // Trigger the exit animations
           loadingScreen.classList.add('fade-out');
-
-          // Remove from DOM after exit animation completes
           setTimeout(() => {
             loadingScreen.classList.add('hidden');
           }, FADE_DURATION);
