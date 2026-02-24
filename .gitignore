@@ -40,3 +40,13 @@ deploy/
 # Package lock (optional - some teams prefer to commit this)
 # package-lock.json
 .claude/settings.local.json
+.junie/
+
+# Claude Code local-only folders (machine-specific, not for sharing)
+.claude/worktrees/
+.playwright-mcp/
+
+# Stray screenshot / test artifacts (generated files, not source)
+*.png
+*.backup
+test_results.txt
